@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+	<!--		
+		Fields format declarations for protocol PROT1
+	-->
+
+<group>
+
+	<fieldFormat id="2" 		type="NUM" 							lg="19" 					desc="PAN" />
+
+	<fieldFormat id="3" 		type="NUM" 							lg="6" 	lgVariable="false" 	desc="Processing code" />
+
+	<fieldFormat id="4" 		type="NUM" 							lg="12" lgVariable="false" 	desc="Amount" />
+
+	<fieldFormat id="7" 		type="NUM" 							lg="10" lgVariable="false" 	desc="Date time (MMJJhhmmss)" />
+	
+	<fieldFormat id="9" 		type="NUM" 							lg="8" 	lgVariable="false" 	desc="Conversion Rate, Transaction" />
+	
+	<fieldFormat id="11" 		type="NUM" 							lg="6" 	lgVariable="false" 	desc="STAN" />
+	
+	<fieldFormat id="12" 		type="DATE" pattern="HHmmss" 									desc="Transaction time" />
+
+	<fieldFormat id="13" 		type="DATE" pattern="MMdd"	 									desc="Transaction date" />
+	
+	<fieldFormat id="14" 		type="DATE" pattern="yyMM"	 									desc="Card expiration" />
+	
+	<fieldFormat id="35" 		type="BINARY" 								 					desc="Track 2 Data" />
+
+	<fieldFormat id="38" 		type="ALPHA+NUM+SPACES" 			lg="6"	lgVariable="false"	desc="Authorization number" />
+
+	<fieldFormat id="39" 		type="ALPHA+NUM+SPACES" 			lg="2"	lgVariable="false"	desc="Response code" />
+
+	<fieldFormat id="41" 		type="ALPHA+NUM+SPACES+SPECIAL" 	lg="8"	lgVariable="false"	desc="Terminal ID" />
+
+	<fieldFormat id="42" 		type="ALPHA+NUM+SPACES+SPECIAL" 	lg="15"	lgVariable="false"	desc="Merchant id" />	
+	
+</group>

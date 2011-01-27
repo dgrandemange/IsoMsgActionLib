@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project basedir="." default="dist" name="libISOMsgAction">
+
+	<loadproperties srcfile="build.properties" />
+
+	<property name="mainSources" value="src/main" />
+	<property name="buildDir" value="tmp/build" />
+	<property name="distDir" value="tmp/dist" />
+	<property name="tmpWorkDir" value="tmp/work" />
+	<property name="libDir" value="lib" />
+	<property name="libDevDir" value="lib-dev" />
+	
+	<splash showduration="1000" />
+
+	<!-- preparation du classpath  -->
+	<fileset id="dependencies.classpath" dir="${libDir}" includes="${project.dependencies.includes}" />
+
+	<pathconvert refid="dependencies.classpath" property="dependencies" targetos="windows">
+		<chainedmapper>
+			<flattenmapper/>
+			<packagemapper from="*.jar" to="${libDir}/*.jar" />
+		</chainedmapper>
+	</pathconvert>	
+	
+	<target name="prepare-build-dir">
+		<mkdir dir="${buildDir}" />
+	</target>
+
+	<target depends="clean, prepare-build-dir" name="compile">
+
+		<echo>os.name = ${os.name}</echo>
+		<echo>java.home = ${java.home}</echo>
+		<echo>java.vendor = ${java.vendor}</echo>
+		<echo>java.version = ${java.version}</echo>
+		<echo>Config javac : sources ${javac.source.version} compilées vers une cible ${javac.target.version}</echo>
+
+		<javac source="${javac.source.version}" target="${javac.target.version}" debug="true" destdir="${buildDir}" srcdir="${mainSources}" excludes="${project.src.excludes}" includes="${project.src.includes}">
+			<classpath>
+				<fileset dir="${libDir}">
+					<include name="**/*.jar" />
+					<include name="**/*.zip" />
+				</fileset>
+				<fileset dir="${libDevDir}">
+					<include name="**/*.jar" />
+					<include name="**/*.zip" />
+				</fileset>
+			</classpath>
+		</javac>
+
+	</target>	
+		
+	<target depends="clean-dist" name="prepare-dist-dir">
+		<mkdir dir="${distDir}" />
+		<mkdir dir="${distDir}/${ant.project.name}" />
+		<mkdir dir="${distDir}/${ant.project.name}/lib" />		
+	</target>
+
+	<target description="Clean all distribution files" name="clean-dist">
+		<delete failonerror="false" includeemptydirs="true">
+			<fileset dir="${distDir}" />
+		</delete>
+	</target>
+
+	<target name="showAbortMessage" if="do.abort">
+		<input message="Ben alors ?! Faut réfléchir Mac Fly !"/>
+	</target>
+	
+	<target name="userConfirmation">
+		<input message="IMPORTANT :  TODO ?" validargs="o,n" addproperty="do.updated" />
+
+		<condition property="do.abort">
+			<equals arg1="n" arg2="${do.updated}" />
+		</condition>
+		
+		<antcall target="showAbortMessage"/>
+		
+		<fail if="do.abort">TODO Message à caractère informatif TODO</fail>
+	</target>
+
+	<target name="prepare-work-dir">
+		<mkdir dir="${tmpWorkDir}" />
+	</target>	
+	
+	<target depends="compile, prepare-work-dir, prepare-dist-dir" name="dist">
+		
+		<!-- Copie des librairies définies comme dépendances (cf. build.properties) -->
+		<copy todir="${distDir}/${ant.project.name}/lib">
+			<fileset refid="dependencies.classpath" />
+		</copy>	
+		
+		<!-- Génération de la librairie -->
+		<jar jarfile="${distDir}/${ant.project.name}/${ant.project.name}.jar">			
+			<fileset casesensitive="no" dir="${buildDir}"/>
+			<fileset casesensitive="no" dir="${mainSources}" includes="${project.jar.includes}" excludes="${project.jar.excludes}" />			
+		</jar>
+		
+		<!-- Génération de l'archive de distribution -->
+		<zip zipfile="${distDir}/${ant.project.name}_${appversion}.zip">
+			<fileset casesensitive="no" dir="${distDir}/${ant.project.name}">
+				<exclude name="**/contenu.txt" />
+			</fileset>
+		</zip>
+
+	</target>
+
+	<target description="Creation Javadoc API" name="javadoc">
+		<mkdir dir="javadoc/api" />
+		<javadoc author="true" bottom="&lt;i&gt;Copyright ©Orange Business Services Tous droits reserves&lt;/i&gt;" destdir="javadoc/api" doctitle="API ${ant.project.name}" packagenames="org.jpos.jposext.isomsgaction.*" sourcepath="${mainSources}" use="true" version="true" windowtitle="API ${ant.project.name}" />
+	</target>
+
+	<target description="Creation Javadoc Tests" name="javadoc-test">
+		<mkdir dir="javadoc/tests" />
+		<javadoc author="true" bottom="&lt;i&gt;Copyright ©Orange Business Services Tous droits reserves&lt;/i&gt;" destdir="javadoc/tests" doctitle="API ${ant.project.name}" packagenames="com.setib.*" sourcepath="src/test" use="true" version="true" windowtitle="API ${ant.project.name}" />
+	</target>
+
+	<target description="Clean all construction files" name="clean">
+		<delete failonerror="false" includeemptydirs="true">
+			<fileset dir="${buildDir}">
+				<include name="**" />
+			</fileset>
+		</delete>
+		<delete failonerror="false" includeemptydirs="true">
+			<fileset dir="${tmpWorkDir}">
+				<include name="**" />
+			</fileset>
+		</delete>		
+	</target>
+
+	<target depends="clean, clean-dist" description="Clean all distrib and construction files" name="clean-all" />
+
+</project>

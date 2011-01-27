@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<iso-action id="ANY_TO_Reversal" 
+			desc="request message to cancellation message transfromation actions">
+
+	<!--
+		Availables message (index sorted) :
+		==================================
+		* 0 (dest message) : empty cancellation message to create and populate
+		* 1 (source message n°1) : existing request message
+	-->
+
+	<!-- 
+			0 : Message Type 
+	-->
+	<set id="0" value="0420" />
+
+	<!-- 
+			2 : Primary Account Number 
+	-->
+	<stringCopy id="2" sourceId="2" />
+
+	<!-- 
+			3 : Processing Code 
+	-->
+	<stringCopy id="3" sourceId="3" />
+
+	<!-- 
+			4 : Amount, Transaction 
+	-->
+	<stringCopy id="4" sourceId="4" />
+
+	<!--
+			11 : Systems Trace Audit Number 
+	-->
+	<stringCopy id="11" sourceId="11" />
+
+	<!-- 
+		12 : Time, Local Transaction
+	-->
+	<setDate id="12" format="HHmmss" />
+
+	<!--
+		13 : Date, Local Transaction
+	-->
+	<setDate id="13" format="MMdd" />
+		
+	<!-- 
+			32 : A définir par SVS
+	-->
+	<stringCopy id="32" sourceId="32" />
+
+	<!-- 
+			35 : Piste ISO 2 
+	-->
+	<ifPresent id="35">
+		<stringCopy id="35" sourceId="35" />
+	</ifPresent>
+
+	<!-- 
+			41 : Invoice number
+	-->
+	<set id="41" ctxBeanPath="ctx(invoiceNumber)" />
+	
+	<!-- 
+			42 : Store division number
+	-->
+	<set id="42" ctxBeanPath="ctx(theStore).number" />
+
+	<!-- 
+			49 : Currency Code, Transaction 
+	-->
+	<stringCopy id="49" sourceId="49" />
+
+</iso-action>

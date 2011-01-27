@@ -1,0 +1,1416 @@
+== Introduction ==
+
+This library intends to provide some [http://www.jpos.org/ JPos] iso messages handling facilities.
+
+Common uses are :
+* creating an iso message from scratch,
+* creating an iso message from datas already provided by one or several iso messages, or by a context object (called action execution context),
+* checking an iso message validity
+
+May one view the JPos ISOMsg class design as nearly a ''Model-View-Controller'' (with ''model'' as the iso message structure along its components values, and ''view'' as the ISOMsg packaging facilities), he should see this library as something addressing only the ''model'' part. ISOMsg packaging aspects are not addressed nor used at all here. 
+
+== Iso message actions : concepts and basic implementations ==
+
+An iso message action is simply said an action one wants to operate on an iso message.
+There are several actions implemented among :
+* setting a value from a constant,
+* copying a value from a message into another message in a particular field,
+* testing a field value against fixed constants or regexp in order to engage further actions,
+* check a field against a previously declared field format,
+* and so on ...
+
+All iso message actions implement the following interface which is the common interface used for iso message(s) handling.
+
+<pre>
+package org.jpos.jposext.isomsgaction.service;
+
+import java.util.Map;
+
+import org.jpos.iso.ISOException;
+import org.jpos.iso.ISOMsg;
+
+/**
+ * Main iso msg action interface
+ * 
+ * @author dgrandemange
+ * 
+ */
+public interface IISOMsgAction {
+
+	/**
+	 * @param msg Array of messages to use during action processing
+	 * @param ctx Context that may be read during action processing
+	 * @throws ISOException
+	 */
+	public void process(ISOMsg[] msg, Map<String, Object> ctx)
+			throws ISOException;
+
+	/**
+	 * @param msg Message to use during action processing
+	 * @param ctx Context that may be read during action processing
+	 * @throws ISOException
+	 */
+	public void process(ISOMsg msg, Map<String, Object> ctx)
+			throws ISOException;
+}
+</pre>
+
+Now, let's take a look at interface main's method 
+ public void process(ISOMsg[] msg, Map<String, Object> ctx)
+Two parameters here : 
+* ''msg'' is an array of one or several messages to handle. Messages of this array may be updated during action processing. 
+* ''ctx'' stands for a context (a map of objects) that may be used during the message(s) handling process. We may call it the action execution context. Context may also be updated in the process.
+In most cases, one mainly operates on one single message of the array (destination/target/output message), while using other messages and context as potential sources of data.
+Of course, nothing prevents to operates on all messages, even on the context (actually this is the case for the validation action, because it needs a way to store any validation errors that may occurs).
+
+Let's write a first implementation that sets a card number in a previously created iso message, using the context as source of data.
+
+Implementation could be :
+<pre>
+package isomsgaction.sample1;
+import java.util.Map;
+
+import org.jpos.iso.ISOException;
+import org.jpos.iso.ISOMsg;
+
+import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
+
+
+public class MyISOAction implements IISOMsgAction {
+
+	public static final String ACTIONCTX_ATTR_CARDNUMBER = "CARDNUMBER";
+
+	@Override
+	public void process(ISOMsg[] msg, Map<String, Object> ctx)
+			throws ISOException {
+		String cardNumber = (String) ctx.get(ACTIONCTX_ATTR_CARDNUMBER);
+		ISOMsg targetMsg = msg[0];
+		targetMsg.set(2, cardNumber);
+	}
+
+	@Override
+	public void process(ISOMsg msg, Map<String, Object> ctx)
+			throws ISOException {
+		process(new ISOMsg[] {msg}, ctx);
+	}
+
+}
+</pre>
+
+Client code could be :
+<pre>
+package isomsgaction.sample1;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.jpos.iso.ISOException;
+import org.jpos.iso.ISOMsg;
+
+public class Client {
+
+	/**
+	 * @param args
+	 * @throws ISOException 
+	 */
+	public static void main(String[] args) throws ISOException {
+		ISOMsg destMsg = new ISOMsg(); 
+		MyISOAction action = new MyISOAction();
+		Map<String, Object> ctx = new HashMap<String, Object>();
+		populateContext(ctx);
+		action.process(destMsg, ctx);
+		destMsg.dump(System.out, "");
+	}
+
+	public static void populateContext(Map<String, Object> ctx) {
+		ctx.put(MyISOAction.ACTIONCTX_ATTR_CARDNUMBER, "1234123412341234");
+	}
+
+}
+</pre>
+
+After execution, console should output :
+ <isomsg>
+   <field id="2" value="1234123412341234"/>
+ </isomsg>
+ 
+If we want to do the same operation, but using the card number wrapped in a second message provided in the array, the implementation could be :
+<pre>
+package isomsgaction.sample2;
+import java.util.Map;
+
+import org.jpos.iso.ISOException;
+import org.jpos.iso.ISOMsg;
+
+import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
+
+
+public class MyISOAction implements IISOMsgAction {
+
+	public static final String ACTIONCTX_ATTR_CARDNUMBER = "CARDNUMBER";
+
+	@Override
+	public void process(ISOMsg[] msg, Map<String, Object> ctx)
+			throws ISOException {
+		ISOMsg targetMsg = msg[0];
+		ISOMsg sourceMsg = msg[1];
+		
+		String cardNumber = sourceMsg.getString(2);		
+		targetMsg.set(2, cardNumber);
+	}
+
+	@Override
+	public void process(ISOMsg msg, Map<String, Object> ctx)
+			throws ISOException {
+		throw new ISOException("We need two messages here");
+	}
+
+}
+</pre>
+
+Client code could be :
+<pre>
+package isomsgaction.sample2;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.jpos.iso.ISOException;
+import org.jpos.iso.ISOMsg;
+
+public class Client {
+
+	/**
+	 * @param args
+	 * @throws ISOException 
+	 */
+	public static void main(String[] args) throws ISOException {
+		ISOMsg destMsg = new ISOMsg();		
+		MyISOAction action = new MyISOAction();
+		Map<String, Object> ctx = new HashMap<String, Object>();
+		ISOMsg sourceMsg = new ISOMsg();
+		populateSourceMessage(sourceMsg);
+		action.process(new ISOMsg[] {destMsg, sourceMsg}, ctx);
+		destMsg.dump(System.out, "");
+	}
+
+	public static void populateSourceMessage(ISOMsg sourceMsg) throws ISOException {
+		sourceMsg.set(2, "1234123412341234");
+	}
+
+}
+</pre>
+
+After execution, console should output :
+ <isomsg>
+   <field id="2" value="1234123412341234"/>
+ </isomsg>
+ 
+Now, one may have a slightly idea of the useful actions that can be implemented to operate on one or several messages.
+The library provides commons implementations packaged in ''org.jpos.jposext.isomsgaction.service.support''.
+
+Still, before going any further let's see some base implementations that may reveal useful.
+
+First, let's take a look at org.jpos.jposext.isomsgaction.service.support.ISOMsgAbstractAction :
+<pre>
+package org.jpos.jposext.isomsgaction.service.support;
+
+import java.util.Map;
+
+import org.jpos.iso.ISOException;
+import org.jpos.iso.ISOMsg;
+
+import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
+
+/**
+ * A basic abstract iso msg action that provides some standard properties
+ * 
+ * @author dgrandemange
+ *
+ */
+public abstract class ISOMsgAbstractAction implements IISOMsgAction {
+
+	/**
+	 * Index of message (in messages array) to use a the source message
+	 */
+	private int srcMsgIndex;
+
+	/**
+	 * Index of message (in messages array) to use a the dest message
+	 */
+	private int msgIndex;
+
+	/**
+	 * Dest field identifier path<BR/>
+	 */
+	private String idPath;
+
+	/**
+	 * Source field identifier path<BR/>
+	 */
+	private String srcIdPath;
+
+	@Override
+	public void process(ISOMsg msg, Map<String, Object> ctx)
+			throws ISOException {
+		process(new ISOMsg[] { msg }, ctx);
+	}
+
+	public int getSrcMsgIndex() {
+		return srcMsgIndex;
+	}
+
+	public void setSrcMsgIndex(int srcMsgIndex) {
+		this.srcMsgIndex = srcMsgIndex;
+	}
+
+	public String getIdPath() {
+		return idPath;
+	}
+
+	public void setIdPath(String idPath) {
+		this.idPath = idPath;
+	}
+
+	public String getSrcIdPath() {
+		return srcIdPath;
+	}
+
+	public void setSrcIdPath(String srcIdPath) {
+		this.srcIdPath = srcIdPath;
+	}
+
+	public int getMsgIndex() {
+		return msgIndex;
+	}
+
+	public void setMsgIndex(int msgIndex) {
+		this.msgIndex = msgIndex;
+	}
+
+}
+</pre>
+
+This abstract class answer to the common need that is : there is a target message with a field one wants to operate on, and for that, one wants to use a field from another message (a source message). 
+This class wraps the index of the message to use as the destination message, a destination field path, the index of the message to use as a source message, and a source field path.
+About ''field path'' : as a field can be wrapped in a sub field of a root message, i introduce the notion of path which is the full path of a field from the root message through the hierarchy of subfields. For instance, if a message has a field 44 that is a subfield, and if we want to point to field 2 in this field 44, field path will be "44.2" . Shall one wants to adress a field like the card number, whose index is 2 in ISO-8583-1, the field path would simply be "2".
+
+Let's see a common use of this base class in child class action org.jpos.jposext.isomsgaction.service.support.ISOMsgActionStrValCopy :
+<pre>
+package org.jpos.jposext.isomsgaction.service.support;
+
+import java.util.Map;
+
+import org.jpos.iso.ISOException;
+import org.jpos.iso.ISOMsg;
+
+import org.jpos.jposext.isomsgaction.helper.ISOMsgHelper;
+import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
+
+/**
+ * 
+ * Value copy action from a source field in a source message to a dest field
+ * in a dest message<BR/>
+ * 
+ * @author dgrandemange
+ * 
+ */
+public class ISOMsgActionStrValCopy extends ISOMsgAbstractAction implements
+		IISOMsgAction {
+
+	private boolean concat;
+	
+	public ISOMsgActionStrValCopy() {
+		super();
+	}
+
+	@Override
+	public void process(ISOMsg[] msg, Map<String, Object> ctx)
+			throws ISOException {
+		// Récupération de la valeur du champ source ...
+		String strVal = ISOMsgHelper.getStringValue(msg[getSrcMsgIndex()],
+				getSrcIdPath());
+		// Récupération de la valeur du champ actuel
+		String strCurrentVal = ISOMsgHelper.getStringValue(msg[getMsgIndex()],
+				getIdPath());
+		
+		// ... et positionnement de la valeur du champ cible
+		// écrasement du champ cible si et seulement si concat = false ou non positionné
+		if (concat){
+				ISOMsgHelper.setValue(msg[getMsgIndex()], getIdPath(), (strCurrentVal==null ? "" : strCurrentVal)+ (strVal==null ? "" :strVal ));
+		}
+		else{
+			ISOMsgHelper.setValue(msg[getMsgIndex()], getIdPath(), (strVal==null ? "" :strVal ));
+		}
+
+	}
+
+	public boolean isConcat() {
+		return concat;
+	}
+
+	public void setConcat(boolean concat) {
+		this.concat = concat;
+	}
+
+}
+</pre>
+
+One need is we sometimes require actions to operate only on certain conditions depending on the value of a field in a message. 
+In order to do so, a special abstract action org.jpos.jposext.isomsgaction.service.support.ISOMsgAbstractIfAction exists.
+
+<pre>
+package org.jpos.jposext.isomsgaction.service.support;
+
+import java.util.Map;
+
+import org.jpos.iso.ISOException;
+import org.jpos.iso.ISOMsg;
+
+import org.jpos.jposext.isomsgaction.exception.ParentMsgDoesNotExistException;
+import org.jpos.jposext.isomsgaction.helper.CmpInfoWrapper;
+import org.jpos.jposext.isomsgaction.helper.ISOMsgHelper;
+import org.jpos.jposext.isomsgaction.service.IFulfillCondition;
+import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
+
+/**
+ * Base class for all actions that needs to test a condition
+ * 
+ * @author dgrandemange
+ * 
+ */
+public abstract class ISOMsgAbstractIfAction extends ISOMsgCompositeAction
+		implements IFulfillCondition {
+
+	private IISOMsgAction elseAction;
+
+	private boolean applyNotOperator = false;
+
+	public ISOMsgAbstractIfAction() {
+		super();
+	}
+
+	@Override
+	public void process(ISOMsg[] msg, Map<String, Object> ctx)
+			throws ISOException {
+		ISOMsg cmpParentMsg = null;
+		int id = -1;
+
+		try {
+			CmpInfoWrapper cmpInfos = ISOMsgHelper.findParentMsg(
+					msg[getSrcMsgIndex()], getIdPath(), getIdPath());
+			cmpParentMsg = cmpInfos.getCmpParentMsg();
+			String sid = cmpInfos.getId();
+			id = Integer.parseInt(sid);
+		} catch (ParentMsgDoesNotExistException e) {
+		}
+		
+		boolean conditionFulfilled = isConditionFulfilled(cmpParentMsg, id);
+
+		if (applyNotOperator ? (!conditionFulfilled) : conditionFulfilled) {
+			for (IISOMsgAction child : getChilds()) {
+				child.process(msg, ctx);
+			}
+		} else {
+			if (null != elseAction) {
+				elseAction.process(msg, ctx);
+			}
+		}
+	}
+
+	public IISOMsgAction getElseAction() {
+		return elseAction;
+	}
+
+	public void setElseAction(IISOMsgAction elseAction) {
+		this.elseAction = elseAction;
+	}
+
+	public boolean isApplyNotOperator() {
+		return applyNotOperator;
+	}
+
+	public void setApplyNotOperator(boolean applyNotOperator) {
+		this.applyNotOperator = applyNotOperator;
+	}
+
+}
+</pre>
+
+It itself is a child of an abstract composite action (following a [http://en.wikipedia.org/wiki/Composite_pattern composite design pattern]) so that it can condition the execution of, not only one, but many actions.
+Any child of ISOMsgAbstractIfAction have just to implement the method
+
+ public boolean isConditionFulfilled(ISOMsg msg, int id);  
+ 
+For instance, let's take a look at implementation org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesRegExp, it simply checks if a field value matches a regexp :
+<pre>
+package org.jpos.jposext.isomsgaction.service.support;
+
+import org.jpos.iso.ISOMsg;
+
+/**
+ * 
+ * Message field value testing action : value is checked against a specified regexp pattern<BR/>
+ * 
+ * @author dgrandemange
+ * 
+ */
+public class ISOMsgActionIfMatchesRegExp extends
+		ISOMsgAbstractIfAction {
+	
+	public ISOMsgActionIfMatchesRegExp() {
+		super();
+	}
+
+	/**
+	 * Expression régulière à matcher
+	 */
+	private String regexp;	
+	
+	public boolean isConditionFulfilled(ISOMsg msg, int id) {
+		if ((null == msg) || (!(msg.hasField(id)))) {
+			return false;
+		}
+		
+		String currentValue = msg.getString(id);
+		return currentValue.matches(regexp);
+	}
+
+	public String getRegexp() {
+		return regexp;
+	}
+
+	public void setRegexp(String regexp) {
+		this.regexp = regexp;
+	}
+
+}
+</pre>
+
+Now, in a more pragmatical way, what one often needs when processing iso messages is a way to operate several actions not a solely one.
+We already see that a composite action was specially created for the conditional action, but it can be used as a single entry point action wrapping many child actions.
+Still, the boring part is the declaration of all these many actions we want a single message being operated with.
+To easy this part, the library provides a way to configure those via XML.
+
+== Using XML to configure iso message actions ==
+
+
+Here follows the dummy XML configuration used for unit testing the XML digester implementation. It lists all the available actions currently implemented with their way of use.
+One may take a further look directly in file ''src/test/dummy-config/actions-config.xml'' for XML comments.
+
+<pre>
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+	Dummy configuration file used as input for iso msg action factory XML digester unit tests.
+	
+	The iso msg action factory XML digester takes one configuration file as input. 
+	It requires the root element to be the "iso-actions" element.
+	
+	Under the root element, one or more "iso-action" childs may be declared.
+	Each "iso-action" child must be identified with a unique id.
+	A client code may provide one of theses ids when attempting to retrieve an iso-action from the 
+	iso msg action factory.
+	
+	An "iso-action" child can be seen as a set of various sequential iso actions.
+		
+	 
+	This file also demonstrates the various iso action elements with their relevant attributes and use.
+-->
+
+<iso-actions>
+
+	<!--
+		One first iso actions set identified by "ISO_ACTIONS_SET_1"
+	-->
+	<iso-action id="ISO_ACTIONS_SET_1"
+		desc="One first iso actions set demonstrating some actions use">
+
+		<!-- 
+			"set" element :
+			it sets a message field using a string value
+		-->
+		<set id="0" value="106" />
+
+		<!--
+			Another use of the "set" element :
+			In this case, it sets a field value from a property wrapped by
+			the action execution context.
+			The ctxBeanPath attribute provide the path through execution 
+			context to the relevant property from which we want 
+			to retrieve the value for copy.
+			This path use the notation used by class PropertyUtils from 
+			Jakarta Commons BeanUtils API.
+			See also section 8.5 of 
+			"Apache Jakarta and Beyond-A Java programmer's introduction" 
+			book.
+		-->
+		<set id="1" ctxBeanPath="ctx(onePropertyPath)" />
+
+		<!-- 
+			"ifMatchesList" element :
+			Here, the condition can be read as 
+				IF field of id 2 in !!source!! message match one of the strings 
+				   {'tata', 'tete', 'titi', 'toto'}
+				THEN
+					set field in !!dest!! message with value "tutu"
+				ELSE
+					remove field 2 from !!dest!! message
+				END IF
+			
+			An optional attribute "ignoreCase" can be used.
+			
+			Generally speaking, all conditionnal actions allow the inclusion 
+			of an "else" element in case condition is not fulfilled.
+			More over, as the conditionnal actions follow a composite design, 
+			you can specify several levels of conditions. (Beware of cyclomatic complexity.) 
+		-->
+		<ifMatchesList id="2" matchlist="tata tete titi toto">
+			<set id="2" value="tutu"/>
+			<else>
+				<removeField id="2" />
+			</else>
+		</ifMatchesList>
+
+		<ifMatchesList id="3" matchlist="baba bebe bibi bobo" ignoreCase="true">
+			<set id="3" ctxBeanPath="ctx(anotherPropertyPath)"/>			
+		</ifMatchesList>
+
+		<!-- 
+			"ifMatchesRegExp" element :
+			Here, condition is fulfilled if the field in source message 
+			matches the regular expression provided by the "pattern" attribute 
+		-->
+		<ifMatchesRegExp id="4" pattern="^([tT][aeiouy]){2}$">
+			<set id="4" value="toto" />					
+		</ifMatchesRegExp>
+
+		<!-- 
+			"ifPresent" element :
+			Here, condition is fulfilled if the field is present in the source 
+			message
+		-->
+		<ifPresent id="5">
+			<set id="5" value="defaultValue" />
+		</ifPresent>
+
+	</iso-action>
+
+
+
+	<!--
+		Another iso actions set identified by "ISO_ACTIONS_SET_2"
+	-->
+	<iso-action id="ISO_ACTIONS_SET_2"
+		desc="Another iso actions set">
+
+		<!-- 
+			"setDate" element :
+			It sets a field in the dest message with current date formatted 
+			along with the format specified in the "format" attribute 
+			(see javadoc for class java.text.SimpleDateFormat)
+		-->
+		<setDate id="6" format="MMyyyy" />
+
+		<!-- 
+			"setRandomNumber" element :
+			It sets a field in the dest message with a random number. 
+			Attribute "digits" provides the expected digits count.
+		-->
+		<setRandomNumber id="7" digits="6" />
+
+		<!-- 
+			"stringCopy" element :
+			It copies a field from the source message to another field in the destination message	 
+		-->
+		<stringCopy id="8" sourceId="7" />
+
+		<!--			
+			"removeField" element :
+			It removes a field from the destination message   
+		-->
+		<removeField id="10" />
+
+		<!--
+			"fieldCopyByRef" element :
+			It operates a byref copy of a field from the source message 
+			to the same field in the dest message
+			As this is a byref copy, it is no use precising dest field. 
+		-->
+		<fieldCopyByRef id="11" sourceId="2" sourceMsg="1" />
+
+		<!--
+			"stringRegExpReplace" element :
+			It sets the dest field value in the dest message using a regular expression 
+			and a replace expression that are applied to the source field in source message 
+		-->
+		<stringRegExpReplace id="12" sourceId="11" pattern="(^.*$)" replace="$1" />
+
+		<!--
+			"createCmpField" element :
+			It creates a composite field.
+			This action is required when you want to set fields in a sub message of dest message.
+			Here literally : create field of id 13 as a sub field (ISOMessage),
+			and from this sub-field, create a field of id 1 as a sub field too.
+			Then only will you be able to set values to fields 13.1.2, 13.1.3, 13.1.4 and so on ...			
+		-->
+		<createCmpField id="13.1"/>
+
+		<!--
+			Positionnement de la valeur d'un champ d'un message à partir de la valeur 
+			d'un champ d'un autre message (d'index 1 dans le tableau des messages ISO disponibles).
+			
+			"stringCopy" element :
+			It set dest field in the dest message with the source field value from the source message 
+		-->
+		<stringCopy id="14" msg="0" sourceId="7" sourceMsg="1" />
+
+		<!--
+			"bshScript" element :
+			Executes a BSH script.
+			
+			Pre-defined vars are :
+			* 'messages' : (ISOMsg[]) messages array passed through the action process() method,
+			* 'context'  : (Map<String, Object>), action execution context passed through the action process() method
+			
+			In BSH script, an entrypoint() method is required. 
+			This is the one method that the action will effectively call regardless of any other declared methods.
+						 
+		-->
+		<bshScript includes="commonScript1Id, commonScript2" scriptId="unIdUniqueDeSCriptBSH">
+			<![CDATA[
+				// Here, two messages in array
+				// Our goal here is to update field 4 of first message in array (index 0) from
+				// - either the vlaue of field 1 of second message in array (index 1),
+				// - either the value of property 'defaultValue' in action execution context,
+				// Decision is made on the value of field 2 in the target message. See ?
+
+				entrypoint() {
+					org.jpos.iso.ISOMsg destMsg = messages[0];
+					org.jpos.iso.ISOMsg srcMsg = messages[1];
+	
+					String valChamp2MsgDest = destMsg.getString(2);
+	
+					if ("babebibobu".equals(valChamp2MsgDest)) {
+						destMsg.set(4, srcMsg.getString(1));
+					} else {
+						destMsg.set(4, context.get("defaultValue"));
+					}
+				}
+			]]>
+		</bshScript>
+
+		<!-- 
+			Here we see a use of the "applyNotOp" attribute 
+			that operates the boolean operation NOT to a condition.
+			This attribute is available among all conditional actions. 
+		-->
+		<ifPresent id="5" applyNotOp="true">
+			<set id="5" value="defaultValue" />
+		</ifPresent>
+
+		<!-- 
+			Here is a use of the "concat" attribute with the "stringCopy" element. 
+			In this case, the source value is concatened to the actual value of 
+			the dest field, thus not replacing it.
+		-->
+		<stringCopy id="15" msg="0" sourceId="7" sourceMsg="1" concat="true"/>
+
+		<!--
+			"stringPadding" element :
+			It pads the actual value of specified dest field in the dest message.
+			Here, we want to left pad field 14 value with char '0' 
+			with a total expected length of 10 chars. 
+		-->
+		<stringPadding id="14" msg="0" padChar="0" padDir="left" expLen="10" />
+
+		<!--
+			"merge" element :
+			Merge all fields from source message into dest message.
+			Source fields may replace already existing dest fields in dest message.  
+		-->
+		<merge msg="0" sourceMsg="1" />
+		
+		<!--  
+			"setDate" element :
+			set value to today + 1 day			 
+		-->
+		<setDate id="6" format="ddMMyyyy" addValue="1" addInterval="DAY" />
+		
+		<!--  
+			"setDate" element :
+			set value to today + 1 month			 
+		-->
+		<setDate id="6" format="ddMMyyyy" addValue="1" addInterval="MONTH" />
+
+		<!--  
+			"setDate" element :
+			set value to today + 1 year			 
+		-->
+		<setDate id="6" format="ddMMyyyy" addValue="1" addInterval="YEAR" />
+		
+		<!--  
+			"setDate" element :
+			set value to today + 1 hour			 
+		-->
+		<setDate id="6" format="ddMMyyyy hh:mm:ss" addValue="1" addInterval="HOUR" />
+		
+		<!--  
+			"setDate" element :
+			set value to today + 1 minute			 
+		-->
+		<setDate id="6" format="MMyyyy hh:mm:ss" addValue="1" addInterval="MINUTE" />
+
+		<!--  
+			"setDate" element :
+			set value to today + 10 seconds			 
+		-->
+		<setDate id="6" format="MMyyyy hh:mm:ss" addValue="10" addInterval="SECOND" />
+
+		<!--  
+			"set" element :
+			the dest field with the n("fixedLength" attribute value) first chars of the value attribute 
+		-->
+		<set id="14" value="C'EST SUPER LES FILTRES" fixedLength="12" />
+		
+		<!--  
+			"set" element :
+			the dest field with the n("fixedLength" attribute value) first chars of the value pointed by "ctxBeanPath" 
+		-->
+		<set id="14" ctxBeanPath="ctx(onePropertyPath)" fixedLength="18"/>
+
+		<!--
+			"validate" element :
+			It declares a validation context.
+			A validation is required when using field format declaration actions and field checking actions.
+			Checkings will operate on dest message.
+		-->
+		<validate>
+
+			<!-- 
+				First you must declare field formats
+				
+				Available attributes for filed format declaration :
+				===================================================
+				* "type" : DATE, REGEXP, or {ALPHA,NUM,SPECIAL,SPACES} combination delimited by '+'
+				         	
+				* "lgMin" : min length of field value
+						  non applicable for types DATE et REGEXP
+						  default=0
+						  
+				* "lg" : max length of field value
+				       if attribute "lgVariable" is 'true', then indicates expected fixed length   
+				       non applicable for types DATE et REGEXP
+				       defaut=0
+				       
+				* "lgVariable" : {true|false} indicates if field value length is variable or not
+								defaut=true
+								
+				* "pattern" : only relvant for types DATE et REGEXP
+				            if type is REGXEP -> regular expression to match
+				            if type is DATE -> date pattern to match (see javadoc for class java.text.SimpleDateFormat)	
+			-->		
+			<fieldFormat id="15" type="ALPHA+NUM+SPECIAL+SPACES" lgMin="6" lg="15" />
+			<fieldFormat id="16" type="ALPHA+NUM" lg="10" lgVariable="false" />
+			<fieldFormat id="17" type="DATE" pattern="dd/MM/yyyy:HH:mm:ss" />
+			<fieldFormat id="18" type="REGEXP" pattern="[0-9]{1,10}[.][0-9]{2}[A-Z]{3}" />			
+
+			<!-- 
+				Then only, you can check fields values along with their presence 
+			-->
+			<checkField id="15" />
+			<checkField id="16" presence="mandatory"/>
+			<checkField id="17" presence="optional"/>
+			<checkField id="18" presence="unexpected"/>
+
+		</validate>
+		
+		<!-- 
+			"group" element :
+			It declares a group of actions.
+			It can reveal useful to put some actions of same nature together, 
+			or to give some actions one parent action. 
+		-->
+		<group>
+			<set id="19" value="1" />			
+			<setDate id="20" format="MMyyyy" />
+		</group>
+		
+		<!--
+			"setResponseMTI" element :
+			In dest message, replace MTI by its corresponding response MTI. 
+			If a failure occurs in determining response MTI, 
+			the default response MTI provided by attribute "default" is used.			
+		-->
+		<setResponseMTI msg="3" default="9919" />
+		
+		<!-- 
+			"binaryCopy" element :
+			It operates a raw binary action from a source field in a source message to a dest field
+			in a dest message			
+		-->
+		<binaryCopy id="8" sourceId="7" />
+		
+	</iso-action>
+
+</iso-actions>
+</pre>
+
+
+The digestion of such a configuration results in a map of uniquely identifiable actions.
+Here is a sample code showing configuration digestion :
+<pre>
+package isomsgaction.digestion;
+
+import java.io.IOException;
+import java.util.Map;
+
+import org.apache.commons.digester.Digester;
+import org.xml.sax.SAXException;
+
+import org.jpos.jposext.isomsgaction.factory.service.support.IISOMSGActionFactoryServiceImpl;
+import org.jpos.jposext.isomsgaction.factory.service.support.ISOMsgActionsConfigDigesterFactoryImpl;
+import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
+
+public class Client {
+
+	/**
+	 * @param args
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	public static void main(String[] args) throws IOException, SAXException {
+		// Instanciates the digester implementation
+		ISOMsgActionsConfigDigesterFactoryImpl digesterFactory = new ISOMsgActionsConfigDigesterFactoryImpl();
+		Digester digester = digesterFactory.createDigester();
+
+		// Digests the XML config and get identified actions map in return
+		Map<String, IISOMsgAction> mapActions = (Map<String, IISOMsgAction>) digester
+				.parse(Client.class
+						.getResourceAsStream("/dummy/config/actions-config.xml"));
+
+		// Instanciates an action factory and inject actions map into it
+		IISOMSGActionFactoryServiceImpl actionFactory = new IISOMSGActionFactoryServiceImpl();
+		actionFactory.setMapActions(mapActions);
+
+		// One should then inject the action factory instance into any client
+		// instance that needs it.
+		// Client may then use this action factory like this :
+		//
+		// ISOMsg[] msgArray = ...;
+		// Map<String, Object> ctx = ...;
+		// IISOMsgAction action = actionFactory.create("action_ID_as_declared_in_XML_config");
+		// action.process(msgArray, ctx);
+	}
+
+}
+</pre>
+
+The returned actions map is then injected into an action factory which may be further used to retrieve identified actions.
+For instance, using JPos transaction manager, one can think of making this actions factory available to this transaction manager's participants. A participant may invoke its factory method when it needs to operate a pre-defined action on a (several) message(s) it is working with.
+
+== Writing your action configurations following a test driven approach ==
+
+When you know the structure of the messages that your application will have to deal with, and when you know the types of messages (payment, cancellation, reload, ...) your application will have to manage, you are quite ready to write your action configurations. 
+But, maybe you don't have yet the infrastructure to test those. And still, you don't want to work blindly.
+The library provides a unit testing facility, so that you can write your configurations, and check those quite simply.
+
+For one action configuration to write, good strategy is :
+* choose a directory that will contains your action configurations along their corresponding tests,
+* create an action configuration file with no actions in it at first, 
+* create a sub-directory (same as configuration id). It will be dedicated to your configuration test cases,
+* in this sub-directory, create as many ''test'n''' directory as you wish, one by test case : put in it files describing the context of your test case, and the expected results,  
+* run your test, 
+* watch results, 
+* complete your action configuration, 
+* run test, watch results, and so on, till your test returns OK 
+
+This sounds a little tricky ? Let's take a look at ''mappings-sample'' directory in the project sources :
+
+[[Image:libisomsgaction_mapping-samples.jpg|align=center]]
+
+There, you can see one file per identified action configuration (i.e. 0200_Check.xml, 0800_ECHO.xml, ANY_TO_Reversal.xml)). 
+Note that configuration filename should be the same as the configuration action id (modulo ''.xml'' extension).
+Also note that these configurations XML root element is not <pre><iso-actions></pre> but '<pre><iso-action id="..."></pre>. Let's say these are rather ''action sub-configurations'' though we may keep calling those ''action configurations'' in the rest of the document.
+
+ <?xml version="1.0" encoding="UTF-8"?>
+ 
+ <iso-action id="0800_ECHO" desc="Echo message creation from scratch">
+   
+   <!-- 0 : Message Type -->
+   <set id="0" value="0800" />
+   
+   <!-- 11 : Systems Trace Audit Number -->
+   <!-- Note: here we are using current time as STAN-->
+   <setDate id="11" format="HHmmss" />
+   
+   <!-- 12 : Time, Local Transaction -->
+   <setDate id="12" format="HHmmss" />
+   
+   <-- 13 : Date, Local Transaction -->
+   <setDate id="13" format="MMdd" />
+   
+   <!-- 70 : Network Management Info Code -->
+   <!-- Here, 301 stands for echo message -->
+   <set id="70" value="301" />
+   
+ </iso-action>
+
+Besides, you will notice one directory per action configuration. 
+Each directory may contain one or several tests (test1, test2, ...) depending on the number of test cases you want your action configuration being checked.
+
+In a test directory, you may create some of the following files depending on the nature of your action configuration:
+* ''isomgs.expected.properties'' : a property file that indicates expected values after action config has been processed. Note that assertions are made against message of index 0 in the iso messages array. So you better always consider the target message as the first element (index 0) in the message array when writing your action configuration.
+* ''isomsg.source.{1..n}.properties'' : you may have any iso source messages (beginning at index 1).Note that if your action configuration doesn't require any source messages, you won't need this kind of file in your test directory,
+* ''description.txt'' : may contains a short description of your test case,
+* ''errors.expected.properties'' : a property file that indicates expected validation errors, in case the action configuration operates validation actions,
+
+About ''isomsg.*.properties'' format : each line follows a ''key=value'' pattern where key is a field path and value is a string value.
+For instance, here is the content of ''isomgs.expected.properties'' for 0800_ECHO.test1 :
+
+ # MTI (Message Type)
+ 0=0800
+ 
+ # Stan
+ # NB : this field being dynamically set at runtime, we can check it against a fixed value, we need a manual check
+ 11=<check:should contain current time (format 'hhmmss')>
+ 
+ # Operation hour
+ # NB : this field being dynamically set at runtime, we can check it against a fixed value, we need a manual check
+ 12=<check:should contain current time (format 'hhmmss')>
+ 
+ # Operation date
+ # NB : this field being dynamically set at runtime, we can check it against a fixed value, we need a manual check
+ 13=<check:should contain current date (format 'mmdd')>
+ 
+ # Network Management Information Code (301=echo test)
+ 70=301
+
+As some expected values are not easily predictable, it is convenient to use a &lt;check:...&gt; marker. In the expected values showed above, some depends on runtime datetime. The marker must include a little description. If unit test is flagged interactive, it will then be asked to check each marked fields value manually.
+
+About ''errors.expected.properties'' format : let's take a look at the one declared for 0200_Check.test2
+
+ # Fields list that should present a presence error
+ # Fields should be delimited by a comma
+ FIELD_PRESENCE=49
+ 
+ # Fields list that should present an incorrect length
+ INVALID_LENGTH=
+ 
+ # Fields list that should present an incorrect data type
+ INVALID_TYPE=3
+Here, for each validation error type, you simply indicate the expected list of comma-separated fields that should raise such error.
+
+Sometimes your action configuration will reference a property previously set (at code level) in the action execution context. For instance, the &lt;set&gt; iso msg action can reference a property in the context and use it to set the field value.
+ <set id="41" ctxBeanPath="ctx(invoiceNumber)" />
+In this case, your test case needs a dummy action execution context that provides such ''invoiceNumber'' property.
+To do so, you can create a ''context.properties'' file in which you simply declare as many ''key=value'' pair as you wish :
+ # Dummy invoiceNumber
+ invoiceNumber=123456
+
+In case your &lt;set&gt; action references a complex properties, like this
+ <set id="42" ctxBeanPath="ctx(theStore).number" />
+
+where ''theStore'' is an action execution context property that points to a java bean of type ''isomsgaction.model.Store''
+<pre>
+package isomsgaction.model;
+
+/**
+ * @author dgrandemange
+ *
+ */
+public class Store {
+	
+	private int id;
+	
+	private String name;
+	
+	private String number;
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getNumber() {
+		return number;
+	}
+
+	public void setNumber(String number) {
+		this.number = number;
+	}
+			
+}
+</pre>
+
+you can create an XML file named ''theStore.xml'' in order to provide a dummy instance of Store :
+ <?xml version='1.0' ?>
+ 
+ <!--
+  Dummy store put into dummy action execution context as property
+  'theStore'
+  XML Elements should match the Store class attribute's names
+ -->
+ 
+ <store>
+  <id>1</id>
+  <name>Barney's</name>
+  <number>123456789012345</number>
+ <store>
+
+Then add a line into ''context.properties'' like this
+ theStore=<xmlbean:xmlpath=theStore.xml store=isomsgaction.model.Store>
+It must match the following pattern :
+''property_name''=&lt;xmlbean:xmlpath=''beanXmlFilePath'' ''xmlRootElement''=''beanType''&gt;
+having :
+* ''property name'' : the property key name as stored in the context,
+* ''beanXmlFilePath'' : relative path to the xml file defining the java bean instance,
+* ''xmlRootElement'' : the root element of the xml file above,
+* ''beanType'' : the full type of the java bean
+
+At this point, we can launch our test(s) .
+The library provide abstract class org.jpos.jposext.isomsgaction.testing.service.support.ISOMsgActionJunit3 which is the base class for our custom tests.
+It relies on JUnit so should run in any JUnit test runner.  
+
+Testing our three configurations could simply be done by writing the following class :
+<pre>
+package org.jpos.jposext.isomsgaction.testing.service.support;
+
+import org.jpos.jposext.isomsgaction.testing.annotation.TestIsoMapping;
+
+@TestIsoMapping(mappingsDir="mapping-samples",mappingId="*", interactive=false)
+public class TestISOMappings extends ISOMsgActionJunit3 {
+}
+</pre>
+
+Annotation org.jpos.jposext.isomsgaction.testing.annotation.TestIsoMapping expects 3 parameters:
+* ''mappingsDir'' (required) : path to the directory containing configurations and associated test cases definitions,
+* ''mappingId'' (optional, default="*") : configuration id(s) to test,
+* ''interactive'' (optional, default="false")'' : indicates if execution mode is interactive or not. If interactive mode is set to "true", and some tests require manual checks, these will be popped up for user confirmation.  
+
+Let's run it (Eclipse JUnit test runner) and watch results :
+
+[[Image:libisomsgaction_eclipse_test_runner.jpg|align=center]]
+
+[[Image:libisomsgaction_junit_results.jpg|align=center]]
+
+In case a test result does not fulfill the test expectations, the test simply fails, tracing the reason(s) of its failure.
+For instance, writing a bad ''0800_ECHO.xml'' (no field 70 set, field 0 set to "0900" instead of "0800") action configuration would result in :
+
+[[Image:libisomsgaction_junit_results_KO.jpg|align=center]]
+
+If interactive mode is set, and a test case require manual checks, such pop-up should show up :
+
+[[Image:libisomsgaction_manuel_checks_popup.jpg|align=center]]
+
+[[Image:libisomsgaction_junit_results_manualchecks_KO.jpg|align=center]]
+
+You can write several tests (one by configuration id), or a solely one that launch all configurations stored in the specified mapping directory.  
+You can also have several mapping directories which then implies at least one test each.
+
+And of course, your test(s) can be part of any other JUnit tests without any problems.
+
+== A little recipe ==
+
+Well, let's say you have to build a gateway that shall process payment requests from a card acceptor and route these to some acquirer.
+Wondering about your gateway concerns, you think of a server listening to requests messages from a card acceptor speaking protocol A, and routing to an acquirer speaking protocol B.
+And after receiving acquirer B response, the gateway should use it to generate and send a response to the acceptor. 
+
+So, at one time in the transaction flow, you receive an acceptor payment request message (MSG1). Maybe you want to check its validity.
+''=> you may need here a first action configuration dedicated to check the acceptor request; you decide to identify it by "0200_CHECK".''
+
+From there, you need to create a payment request message (MSG2) and send it to your acquirer.
+You know that MSG2 is slightly different from MSG1 but will surely be populated with some of MSG1 fields values.
+''=> you may need here a second action configuration; you decide to identify it by "ACCEPTOR_0200_REQ__TO__ACQUIRER_0200_REQ".''
+
+Then, later in the flow, after MSG2 has been created and sent to acquirer, you receive a response (MSG3).
+You have now to answer to your acceptor. To do so, you surely have to pick up data from both MSG1 and MSG3.
+''=> you may need here a third action configuration; you decide to identify it by "ACQUIRER_0210_RESP__TO__ACCEPTOR_0210_RESP".''
+
+As you may get ISO specifications from both acceptor and acquirer, you should know what messages are expected at both sides.
+So, you are ready to create your action configurations.
+
+Consider using a test driven approach to write these, using library unit testing facility.
+
+Once this is a done, and time has come to integrate your work to your JPos application, you may think of making your configurations available to the JPos components that need these (transaction participants, network message managers, ...).
+Consider using the default actions factory implementation provided by the library. 
+(See org.jpos.jposext.isomsgaction.factory.service.support.IISOMSGActionFactoryServiceImpl) 
+After digesting a global action configuration (that wraps all the ones you have previously worked on individually) and inject the digestion result in you actions factory instance, the factory can be referenced wherever you want.
+
+Here is a example of a transaction participant dedicated to prepare a reversal request for no response has been received from acquirer :
+<pre>
+package isomsgaction.sample3.participant;
+
+import java.io.Serializable;
+import java.util.HashMap;
+
+import org.jpos.core.Configurable;
+import org.jpos.core.Configuration;
+import org.jpos.core.ConfigurationException;
+import org.jpos.iso.ISOException;
+import org.jpos.iso.ISOMsg;
+import org.jpos.transaction.Context;
+import org.jpos.transaction.TransactionParticipant;
+
+import org.jpos.jposext.isomsgaction.factory.service.IISOMSGActionFactoryService;
+import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
+
+/**
+ *
+ * Use of IISOMSGActionFactoryService in a transaction participant
+ * It should have been previously injected
+ * 
+ * @author dgrandemange
+ * 
+ */
+public class PrepareReversalRequest implements TransactionParticipant, Configurable {
+
+	private Configuration cfg;
+
+	private IISOMSGActionFactoryService actionFactoryService;
+
+	@Override
+	public int prepare(long id, Serializable context) {
+		Context ctx = (Context) context;
+
+		// Get message to reverse 
+		ISOMsg reqToAcquirer = (ISOMsg) ctx.get("ISOMSG__REQUEST_SEND_TO_ACQUIRER");
+
+		// Init empty reversal message 
+		ISOMsg reversalReqMsg = new ISOMsg();
+
+		// Populate a reversal message using a dedicated iso message action
+		
+		// First, create an action execution context 
+		HashMap<String, Object> actionExecutionContext = new HashMap<String, Object>();
+		// Then retrieve the action configured to populate a reversal message from a source message
+		IISOMsgAction action = actionFactoryService.create("ANY_TO_Reversal");
+		try {
+			action
+					.process(new ISOMsg[] { reversalReqMsg, reqToAcquirer }, actionExecutionContext);
+		} catch (ISOException e) {
+			// TODO Something 
+			throw new RuntimeException(e);
+		}
+		
+		// Put reversal message into JPos transaction context
+		ctx.put("ISOMSG__REVERSAL_REQUEST_TO_SEND_TO_ACQUIRER", reversalReqMsg);
+		
+		return PREPARED | READONLY | NO_JOIN;
+	}
+
+	@Override
+	public void abort(long id, Serializable context) {
+	}
+
+	@Override
+	public void commit(long id, Serializable context) {
+	}
+
+	@Override
+	public void setConfiguration(Configuration cfg)
+			throws ConfigurationException {
+		this.cfg = cfg;
+	}
+
+	public IISOMSGActionFactoryService getActionFactoryService() {
+		return actionFactoryService;
+	}
+
+	public void setActionFactoryService(
+			IISOMSGActionFactoryService actionFactoryService) {
+		this.actionFactoryService = actionFactoryService;
+	}
+
+}
+
+</pre>
+
+Here is another example of a transaction participant dedicated to check an incoming request validity.
+When action is processed, the validation error list is retrieved from the action execution context. The list is then analyzed in order to determine the following participant group to process in transaction manager's flow.
+<pre>
+package isomsgaction.sample3.participant;
+
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.jpos.core.Configurable;
+import org.jpos.core.Configuration;
+import org.jpos.core.ConfigurationException;
+import org.jpos.iso.ISOException;
+import org.jpos.iso.ISOMsg;
+import org.jpos.transaction.Context;
+import org.jpos.transaction.GroupSelector;
+
+import org.jpos.jposext.isomsgaction.factory.service.IISOMSGActionFactoryService;
+import org.jpos.jposext.isomsgaction.model.validation.ValidationError;
+import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
+import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionCheckField;
+
+/**
+ * 
+ * @author dgrandemange
+ * 
+ */
+public class CheckMessageValidity implements GroupSelector, Configurable {
+
+	private Configuration cfg;
+
+	private IISOMSGActionFactoryService actionFactoryService;
+
+	@Override
+	public int prepare(long id, Serializable context) {
+		return PREPARED | READONLY | NO_JOIN;
+	}
+
+	@Override
+	public String select(long id, Serializable context) {
+		Context ctx = (Context) context;
+
+		ISOMsg m = (ISOMsg) ctx.get("ISOMSG__INCOMING_REQUEST");
+
+		IISOMsgAction checkMsgAction = actionFactoryService
+				.create("0200_CHECK");
+
+		Map<String, Object> ctxAction = new HashMap<String, Object>();
+		try {
+			checkMsgAction.process(new ISOMsg[] { null, m }, ctxAction);
+		} catch (ISOException e) {
+			throw new RuntimeException(e);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
+		List<ValidationError> erreursValidation = (List<ValidationError>) ctxAction
+				.get(ISOMsgActionCheckField.VALIDATION_ERRORS_LIST_ATTRNAME);
+
+
+		// Save validation error list in transaction's context 
+		// (in case you want to use it later in the transaction's flow)
+		ctx.put("0200_CHECK_VALIDATION_ERRORS",
+				erreursValidation);
+
+		String selectedGroup;
+
+		if (erreursValidation.size() > 0) {
+			selectedGroup = cfg.get("CHECK__KO");
+		} else {
+			selectedGroup = cfg.get("CHECK__OK");
+		}
+
+		return selectedGroup;
+	}
+
+	@Override
+	public void abort(long id, Serializable context) {
+	}
+
+	@Override
+	public void commit(long id, Serializable context) {
+	}
+
+	@Override
+	public void setConfiguration(Configuration cfg)
+			throws ConfigurationException {
+		this.cfg = cfg;
+	}
+
+	public IISOMSGActionFactoryService getActionFactoryService() {
+		return actionFactoryService;
+	}
+
+	public void setActionFactoryService(
+			IISOMSGActionFactoryService actionFactoryService) {
+		this.actionFactoryService = actionFactoryService;
+	}
+
+}
+</pre>
+
+== About global action configuration ==
+
+The actual digester implementation expects a global configuration file with root element <pre><iso-actions></pre> with some child elements <pre><iso-action id="..."></pre>
+You may consider using some sort of XML template like this one (See org.jpos.jposext.isomsgaction.template.isoaction-main-template.xml) :
+ <?xml version="1.0" encoding="UTF-8"?>
+ 
+ <iso-actions xmlns:xi="http://www.w3.org/2001/XInclude">
+ #INCLUSIONS_TOKEN#
+ </iso-actions>
+
+and replace #INCLUSIONS_TOKEN# by XML inclusion directives pointing to your individual configurations.(Note that &lt;xi:include&gt; needs a XML parser that supports [http://www.w3.org/TR/xinclude/ XInclude] specification. The current digester implementation depends on [http://commons.apache.org/digester/ commons-digester] 2.0.)
+
+You may proceed replacements automatically via Ant such like : 
+<pre>
+	<!--
+		Needs the following properties to be set :
+		* isoaction.config.deploy.dir : for instance, "modules/mygateway/cfg/isoaction/"
+		* isoaction.config.work.dir : for instance, "modules/mygateway/action-configs/"
+		* isoactionmsg.lib.location : path to the isomsgaction library jar
+	-->
+	<target name="deploy-action-configs">
+
+		<delete>
+			<fileset dir="${isoaction.config.deploy.dir}">
+				<include name="**/*.xml" />
+			</fileset>
+		</delete>
+
+		<fileset id="mapping.files" dir="${isoaction.config.work.dir}">
+			<include name="*.xml" />
+		</fileset>
+
+		<copy todir="${isoaction.config.deploy.dir}" flatten="true">
+			<fileset refid="mapping.files" />
+		</copy>
+
+		<pathconvert pathsep="${line.separator}" property="xinclude.mapping.files" refid="mapping.files">
+			<mapper>
+				<chainedmapper>
+					<flattenmapper />
+					<regexpmapper from="(^.*$)" to='&lt;xi:include href="cfg/isoaction/\1"/&gt;' />
+				</chainedmapper>
+			</mapper>
+		</pathconvert>
+
+		<copy todir="${isoaction.config.deploy.dir}/"> 
+			<zipfileset src="${isoactionmsg.lib.location}" includes="org/jpos/jposext/isomsgaction/template/isoaction-main-template.xml" />
+		</copy>
+		
+		<move file="${isoaction.config.deploy.dir}/org/jpos/jposext/isomsgaction/template/isoaction-main-template.xml" toFile="${isoaction.config.deploy.dir}/isoaction-main.xml" />
+		
+		<replace file="${isoaction.config.deploy.dir}/isoaction-main.xml" token="#INCLUSIONS_TOKEN#" value="${xinclude.mapping.files}" />
+
+		<fileset id="common.mapping.files" dir="${isoaction.config.work.dir}/common">
+			<include name="*.xml" />
+		</fileset>
+
+		<copy todir="${isoaction.config.deploy.dir}/common" flatten="true">
+			<fileset refid="common.mapping.files" />
+		</copy>
+
+	</target>
+</pre>
+
+The ''isoaction-main.xml'' file should eventually look like this :
+ <?xml version="1.0" encoding="UTF-8"?>
+ 
+ <iso-actions xmlns:xi="http://www.w3.org/2001/XInclude">
+  <xi:include href="cfg/isoaction/0200_Check.xml"/>
+  <xi:include href="cfg/isoaction/0800_ECHO.xml"/>
+  <xi:include href="cfg/isoaction/ANY_TO_Reversal.xml"/>
+ </iso-actions>
+
+Once this is done, your application may digest the resulting ''isoaction-main.xml'' during its initialization phase. See org.jpos.jposext.isomsgaction.factory.service.support.ISOMsgActionsConfigDigesterFactoryImplTest for digester usage.

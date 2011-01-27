@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<iso-action id="0200_Check"
+	desc="Check a message 0200 validity"
+	xmlns:xi="http://www.w3.org/2001/XInclude" >
+
+	<!--
+		Availables message (sorted by index) :
+		======================================
+		* 0 (dest message) : empty message (UNUSED HERE)
+		* 1 (source message n°1) : existing 0200 request message to check		
+		
+		Context info :
+		==============
+		* a list of validation errors will be put into the context   
+	-->
+
+	<!-- 
+		First we need to state we enter in a validation phase.
+		This is required in order to declare field formats and check operations  
+	-->
+	<validate>
+
+		<!-- 
+			Here, thanks to the xinclude specification, we can include XML files 
+			we may share between different action configurations.
+			For instance, here we import all field declarations related to protocol PROT1.
+			Surely, another action configuration like a 'check message 300' action config 
+			will also need it.
+		-->		 
+		<xi:include href="common/PROT1_FieldsFmtDecl.xml"/>				
+
+		<!--
+			Here we can add another field format 
+			Note: nothing prevent us to override a previously defined field format						
+		-->
+		<fieldFormat id="49" 	type="REGEXP" pattern="^978$" />
+
+		<!--
+			After format declarations, comes the check declarations.
+			
+			Such a declaration validate that a field's value conform to 
+			the previous format declared for this field.
+			
+			It also the place to precise the presence mode of the field.
+			By default, a check require the field mandatory. 
+		-->
+		
+		<!--
+			========================= 
+			BEGIN Mandatory fields 
+			========================= 
+		-->
+			<checkField id="2"/>
+			<checkField id="3"/>
+			<checkField id="4"/>
+			<checkField id="7"/>
+			<checkField id="11"/>
+			<checkField id="12"/>
+			<checkField id="13"/>
+			<checkField id="42"/>
+			<checkField id="49"/>
+			
+		<!-- 
+			========================= 
+			END   Mandatory fields 
+			========================= 
+		-->
+
+		<!-- 
+			========================= 
+			BEGIN Optional fields 
+			========================= 
+		-->
+			<checkField id="35"	presence="optional"/>
+		<!--
+			========================= 
+			END   Optional fields 
+			========================= 
+		-->
+	</validate>
+	
+</iso-action>
