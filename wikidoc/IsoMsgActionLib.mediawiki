@@ -499,9 +499,9 @@ Here follows the dummy XML configuration used for unit testing the XML digester 
 One may take a further look directly in file ''src/test/dummy-config/actions-config.xml'' for XML comments.
 
 <pre>
-<?xml version="1.0" encoding="ISO-8859-1"?>
-
-<!--
+&lt;?xml version="1.0" encoding="ISO-8859-1"?&gt;
+&nbsp;
+&lt;!--
 	Dummy configuration file used as input for iso msg action factory XML digester unit tests.
 	
 	The iso msg action factory XML digester takes one configuration file as input. 
@@ -513,26 +513,24 @@ One may take a further look directly in file ''src/test/dummy-config/actions-con
 	iso msg action factory.
 	
 	An "iso-action" child can be seen as a set of various sequential iso actions.
-		
-	 
 	This file also demonstrates the various iso action elements with their relevant attributes and use.
--->
-
-<iso-actions>
-
-	<!--
+&minus;-&gt;
+&nbsp;
+&lt;iso-actions&gt;
+&nbsp;
+	&lt;!--
 		One first iso actions set identified by "ISO_ACTIONS_SET_1"
-	-->
-	<iso-action id="ISO_ACTIONS_SET_1"
-		desc="One first iso actions set demonstrating some actions use">
-
-		<!-- 
+	--&gt;
+	&lt;iso-action id="ISO_ACTIONS_SET_1"
+		desc="One first iso actions set demonstrating some actions use"&gt;
+&nbsp;
+		&lt;!-- 
 			"set" element :
 			it sets a message field using a string value
-		-->
-		<set id="0" value="106" />
-
-		<!--
+		--&gt;
+		&lt;set id="0" value="106" /&gt;
+&nbsp;
+		&lt;!--
 			Another use of the "set" element :
 			In this case, it sets a field value from a property wrapped by
 			the action execution context.
@@ -544,10 +542,10 @@ One may take a further look directly in file ''src/test/dummy-config/actions-con
 			See also section 8.5 of 
 			"Apache Jakarta and Beyond-A Java programmer's introduction" 
 			book.
-		-->
-		<set id="1" ctxBeanPath="ctx(onePropertyPath)" />
-
-		<!-- 
+		--&gt;
+		&lt;set id="1" ctxBeanPath="ctx(onePropertyPath)" /&gt;
+&nbsp;
+		&lt;!-- 
 			"ifMatchesList" element :
 			Here, the condition can be read as 
 				IF field of id 2 in !!source!! message match one of the strings 
@@ -557,305 +555,303 @@ One may take a further look directly in file ''src/test/dummy-config/actions-con
 				ELSE
 					remove field 2 from !!dest!! message
 				END IF
-			
+&nbsp;			
 			An optional attribute "ignoreCase" can be used.
-			
+&nbsp;			
 			Generally speaking, all conditionnal actions allow the inclusion 
 			of an "else" element in case condition is not fulfilled.
 			More over, as the conditionnal actions follow a composite design, 
 			you can specify several levels of conditions. (Beware of cyclomatic complexity.) 
-		-->
-		<ifMatchesList id="2" matchlist="tata tete titi toto">
-			<set id="2" value="tutu"/>
-			<else>
-				<removeField id="2" />
-			</else>
-		</ifMatchesList>
-
-		<ifMatchesList id="3" matchlist="baba bebe bibi bobo" ignoreCase="true">
-			<set id="3" ctxBeanPath="ctx(anotherPropertyPath)"/>			
-		</ifMatchesList>
-
-		<!-- 
+		--&gt;
+		&lt;ifMatchesList id="2" matchlist="tata tete titi toto"&gt;
+			&lt;set id="2" value="tutu"/&gt;
+			&lt;else&gt;
+				&lt;removeField id="2" /&gt;
+			&lt;/else&gt;
+		&lt;/ifMatchesList&gt;
+&nbsp;
+		&lt;ifMatchesList id="3" matchlist="baba bebe bibi bobo" ignoreCase="true"&gt;
+			&lt;set id="3" ctxBeanPath="ctx(anotherPropertyPath)"/&gt;			
+		&lt;/ifMatchesList&gt;
+&nbsp;
+		&lt;!-- 
 			"ifMatchesRegExp" element :
 			Here, condition is fulfilled if the field in source message 
 			matches the regular expression provided by the "pattern" attribute 
-		-->
-		<ifMatchesRegExp id="4" pattern="^([tT][aeiouy]){2}$">
-			<set id="4" value="toto" />					
-		</ifMatchesRegExp>
-
-		<!-- 
+		--&gt;
+		&lt;ifMatchesRegExp id="4" pattern="^([tT][aeiouy]){2}$"&gt;
+			&lt;set id="4" value="toto" /&gt;					
+		&lt;/ifMatchesRegExp&gt;
+&nbsp;
+		&lt;!-- 
 			"ifPresent" element :
 			Here, condition is fulfilled if the field is present in the source 
 			message
-		-->
-		<ifPresent id="5">
-			<set id="5" value="defaultValue" />
-		</ifPresent>
-
-	</iso-action>
-
-
-
-	<!--
+		--&gt;
+		&lt;ifPresent id="5"&gt;
+			&lt;set id="5" value="defaultValue" /&gt;
+		&lt;/ifPresent&gt;
+&nbsp;
+	&lt;/iso-action&gt;
+&nbsp;
+&nbsp;
+&nbsp;
+	&lt;!--
 		Another iso actions set identified by "ISO_ACTIONS_SET_2"
-	-->
-	<iso-action id="ISO_ACTIONS_SET_2"
-		desc="Another iso actions set">
-
-		<!-- 
+	--&gt;
+	&lt;iso-action id="ISO_ACTIONS_SET_2"
+		desc="Another iso actions set"&gt;
+&nbsp;
+		&lt;!-- 
 			"setDate" element :
 			It sets a field in the dest message with current date formatted 
 			along with the format specified in the "format" attribute 
 			(see javadoc for class java.text.SimpleDateFormat)
-		-->
-		<setDate id="6" format="MMyyyy" />
-
-		<!-- 
+		--&gt;
+		&lt;setDate id="6" format="MMyyyy" /&gt;
+&nbsp;
+		&lt;!-- 
 			"setRandomNumber" element :
 			It sets a field in the dest message with a random number. 
 			Attribute "digits" provides the expected digits count.
-		-->
-		<setRandomNumber id="7" digits="6" />
-
-		<!-- 
+		--&gt;
+		&lt;setRandomNumber id="7" digits="6" /&gt;
+&nbsp;
+		&lt;!-- 
 			"stringCopy" element :
 			It copies a field from the source message to another field in the destination message	 
-		-->
-		<stringCopy id="8" sourceId="7" />
-
-		<!--			
+		--&gt;
+		&lt;stringCopy id="8" sourceId="7" /&gt;
+&nbsp;
+		&lt;!--			
 			"removeField" element :
 			It removes a field from the destination message   
-		-->
-		<removeField id="10" />
-
-		<!--
+		--&gt;
+		&lt;removeField id="10" /&gt;
+&nbsp;
+		&lt;!--
 			"fieldCopyByRef" element :
 			It operates a byref copy of a field from the source message 
 			to the same field in the dest message
 			As this is a byref copy, it is no use precising dest field. 
-		-->
-		<fieldCopyByRef id="11" sourceId="2" sourceMsg="1" />
-
-		<!--
+		--&gt;
+		&lt;fieldCopyByRef id="11" sourceId="2" sourceMsg="1" /&gt;
+&nbsp;
+		&lt;!--
 			"stringRegExpReplace" element :
 			It sets the dest field value in the dest message using a regular expression 
 			and a replace expression that are applied to the source field in source message 
-		-->
-		<stringRegExpReplace id="12" sourceId="11" pattern="(^.*$)" replace="$1" />
-
-		<!--
+		--&gt;
+		&lt;stringRegExpReplace id="12" sourceId="11" pattern="(^.*$)" replace="$1" /&gt;
+&nbsp;
+		&lt;!--
 			"createCmpField" element :
 			It creates a composite field.
 			This action is required when you want to set fields in a sub message of dest message.
 			Here literally : create field of id 13 as a sub field (ISOMessage),
 			and from this sub-field, create a field of id 1 as a sub field too.
 			Then only will you be able to set values to fields 13.1.2, 13.1.3, 13.1.4 and so on ...			
-		-->
-		<createCmpField id="13.1"/>
-
-		<!--
+		--&gt;
+		&lt;createCmpField id="13.1"/&gt;
+&nbsp;
+		&lt;!--
 			Positionnement de la valeur d'un champ d'un message à partir de la valeur 
 			d'un champ d'un autre message (d'index 1 dans le tableau des messages ISO disponibles).
-			
+&nbsp;
 			"stringCopy" element :
 			It set dest field in the dest message with the source field value from the source message 
-		-->
-		<stringCopy id="14" msg="0" sourceId="7" sourceMsg="1" />
-
-		<!--
+		--&gt;
+		&lt;stringCopy id="14" msg="0" sourceId="7" sourceMsg="1" /&gt;
+&nbsp;
+		&lt;!--
 			"bshScript" element :
 			Executes a BSH script.
-			
+&nbsp;
 			Pre-defined vars are :
 			* 'messages' : (ISOMsg[]) messages array passed through the action process() method,
-			* 'context'  : (Map<String, Object>), action execution context passed through the action process() method
-			
+			* 'context'  : (Map&lt;String, Object&gt;), action execution context passed through the action process() method
+&nbsp;			
 			In BSH script, an entrypoint() method is required. 
 			This is the one method that the action will effectively call regardless of any other declared methods.
-						 
-		-->
-		<bshScript includes="commonScript1Id, commonScript2" scriptId="unIdUniqueDeSCriptBSH">
-			<![CDATA[
+&nbsp;						 
+		--&gt;
+		&lt;bshScript includes="commonScript1Id, commonScript2" scriptId="unIdUniqueDeSCriptBSH"&gt;
+			&lt;![CDATA[
 				// Here, two messages in array
 				// Our goal here is to update field 4 of first message in array (index 0) from
 				// - either the vlaue of field 1 of second message in array (index 1),
 				// - either the value of property 'defaultValue' in action execution context,
 				// Decision is made on the value of field 2 in the target message. See ?
-
+&nbsp;
 				entrypoint() {
 					org.jpos.iso.ISOMsg destMsg = messages[0];
 					org.jpos.iso.ISOMsg srcMsg = messages[1];
-	
+&nbsp;
 					String valChamp2MsgDest = destMsg.getString(2);
-	
+&nbsp;	
 					if ("babebibobu".equals(valChamp2MsgDest)) {
 						destMsg.set(4, srcMsg.getString(1));
 					} else {
 						destMsg.set(4, context.get("defaultValue"));
 					}
 				}
-			]]>
-		</bshScript>
-
-		<!-- 
+			]]&gt;
+		&lt;/bshScript&gt;
+&nbsp;
+		&lt;!-- 
 			Here we see a use of the "applyNotOp" attribute 
 			that operates the boolean operation NOT to a condition.
 			This attribute is available among all conditional actions. 
-		-->
-		<ifPresent id="5" applyNotOp="true">
-			<set id="5" value="defaultValue" />
-		</ifPresent>
-
-		<!-- 
+		--&gt;
+		&lt;ifPresent id="5" applyNotOp="true"&gt;
+			&lt;set id="5" value="defaultValue" /&gt;
+		&lt;/ifPresent&gt;
+&nbsp;
+		&lt;!-- 
 			Here is a use of the "concat" attribute with the "stringCopy" element. 
 			In this case, the source value is concatened to the actual value of 
 			the dest field, thus not replacing it.
-		-->
-		<stringCopy id="15" msg="0" sourceId="7" sourceMsg="1" concat="true"/>
-
-		<!--
+		--&gt;
+		&lt;stringCopy id="15" msg="0" sourceId="7" sourceMsg="1" concat="true"/&gt;
+&nbsp;
+		&lt;!--
 			"stringPadding" element :
 			It pads the actual value of specified dest field in the dest message.
 			Here, we want to left pad field 14 value with char '0' 
 			with a total expected length of 10 chars. 
-		-->
-		<stringPadding id="14" msg="0" padChar="0" padDir="left" expLen="10" />
-
-		<!--
+		--&gt;
+		&lt;stringPadding id="14" msg="0" padChar="0" padDir="left" expLen="10" /&gt;
+&nbsp;
+		&lt;!--
 			"merge" element :
 			Merge all fields from source message into dest message.
 			Source fields may replace already existing dest fields in dest message.  
-		-->
-		<merge msg="0" sourceMsg="1" />
-		
-		<!--  
+		--&gt;
+		&lt;merge msg="0" sourceMsg="1" /&gt;
+&nbsp;
+		&lt;!--  
 			"setDate" element :
 			set value to today + 1 day			 
-		-->
-		<setDate id="6" format="ddMMyyyy" addValue="1" addInterval="DAY" />
-		
-		<!--  
+		--&gt;
+		&lt;setDate id="6" format="ddMMyyyy" addValue="1" addInterval="DAY" /&gt;
+&nbsp;
+		&lt;!--  
 			"setDate" element :
 			set value to today + 1 month			 
-		-->
-		<setDate id="6" format="ddMMyyyy" addValue="1" addInterval="MONTH" />
-
-		<!--  
+		--&gt;
+		&lt;setDate id="6" format="ddMMyyyy" addValue="1" addInterval="MONTH" /&gt;
+&nbsp;
+		&lt;!--  
 			"setDate" element :
 			set value to today + 1 year			 
-		-->
-		<setDate id="6" format="ddMMyyyy" addValue="1" addInterval="YEAR" />
-		
-		<!--  
+		--&gt;
+		&lt;setDate id="6" format="ddMMyyyy" addValue="1" addInterval="YEAR" /&gt;
+&nbsp;
+		&lt;!--  
 			"setDate" element :
 			set value to today + 1 hour			 
-		-->
-		<setDate id="6" format="ddMMyyyy hh:mm:ss" addValue="1" addInterval="HOUR" />
-		
-		<!--  
+		--&gt;
+		&lt;setDate id="6" format="ddMMyyyy hh:mm:ss" addValue="1" addInterval="HOUR" /&gt;
+&nbsp;
+		&lt;!--  
 			"setDate" element :
 			set value to today + 1 minute			 
-		-->
-		<setDate id="6" format="MMyyyy hh:mm:ss" addValue="1" addInterval="MINUTE" />
-
-		<!--  
+		--&gt;
+		&lt;setDate id="6" format="MMyyyy hh:mm:ss" addValue="1" addInterval="MINUTE" /&gt;
+&nbsp;
+		&lt;!--  
 			"setDate" element :
 			set value to today + 10 seconds			 
-		-->
-		<setDate id="6" format="MMyyyy hh:mm:ss" addValue="10" addInterval="SECOND" />
-
-		<!--  
+		--&gt;
+		&lt;setDate id="6" format="MMyyyy hh:mm:ss" addValue="10" addInterval="SECOND" /&gt;
+&nbsp;
+		&lt;!--  
 			"set" element :
 			the dest field with the n("fixedLength" attribute value) first chars of the value attribute 
-		-->
-		<set id="14" value="C'EST SUPER LES FILTRES" fixedLength="12" />
-		
-		<!--  
+		--&gt;
+		&lt;set id="14" value="C'EST SUPER LES FILTRES" fixedLength="12" /&gt;
+&nbsp;
+		&lt;!--  
 			"set" element :
 			the dest field with the n("fixedLength" attribute value) first chars of the value pointed by "ctxBeanPath" 
-		-->
-		<set id="14" ctxBeanPath="ctx(onePropertyPath)" fixedLength="18"/>
-
-		<!--
+		--&gt;
+		&lt;set id="14" ctxBeanPath="ctx(onePropertyPath)" fixedLength="18"/&gt;
+&nbsp;
+		&lt;!--
 			"validate" element :
 			It declares a validation context.
 			A validation is required when using field format declaration actions and field checking actions.
 			Checkings will operate on dest message.
-		-->
-		<validate>
-
-			<!-- 
+		--&gt;
+		&lt;validate&gt;
+&nbsp;
+			&lt;!-- 
 				First you must declare field formats
-				
-				Available attributes for filed format declaration :
-				===================================================
+&nbsp;
+				Available attributes for field format declaration :
 				* "type" : DATE, REGEXP, or {ALPHA,NUM,SPECIAL,SPACES} combination delimited by '+'
-				         	
+&nbsp;
 				* "lgMin" : min length of field value
 						  non applicable for types DATE et REGEXP
 						  default=0
-						  
+&nbsp;
 				* "lg" : max length of field value
 				       if attribute "lgVariable" is 'true', then indicates expected fixed length   
 				       non applicable for types DATE et REGEXP
 				       defaut=0
-				       
+&nbsp;
 				* "lgVariable" : {true|false} indicates if field value length is variable or not
 								defaut=true
-								
+&nbsp;
 				* "pattern" : only relvant for types DATE et REGEXP
-				            if type is REGXEP -> regular expression to match
-				            if type is DATE -> date pattern to match (see javadoc for class java.text.SimpleDateFormat)	
-			-->		
-			<fieldFormat id="15" type="ALPHA+NUM+SPECIAL+SPACES" lgMin="6" lg="15" />
-			<fieldFormat id="16" type="ALPHA+NUM" lg="10" lgVariable="false" />
-			<fieldFormat id="17" type="DATE" pattern="dd/MM/yyyy:HH:mm:ss" />
-			<fieldFormat id="18" type="REGEXP" pattern="[0-9]{1,10}[.][0-9]{2}[A-Z]{3}" />			
-
-			<!-- 
+				            if type is REGXEP -&gt; regular expression to match
+				            if type is DATE -&gt; date pattern to match (see javadoc for class java.text.SimpleDateFormat)	
+			--&gt;		
+			&lt;fieldFormat id="15" type="ALPHA+NUM+SPECIAL+SPACES" lgMin="6" lg="15" /&gt;
+			&lt;fieldFormat id="16" type="ALPHA+NUM" lg="10" lgVariable="false" /&gt;
+			&lt;fieldFormat id="17" type="DATE" pattern="dd/MM/yyyy:HH:mm:ss" /&gt;
+			&lt;fieldFormat id="18" type="REGEXP" pattern="[0-9]{1,10}[.][0-9]{2}[A-Z]{3}" /&gt;			
+&nbsp;
+			&lt;!-- 
 				Then only, you can check fields values along with their presence 
-			-->
-			<checkField id="15" />
-			<checkField id="16" presence="mandatory"/>
-			<checkField id="17" presence="optional"/>
-			<checkField id="18" presence="unexpected"/>
-
-		</validate>
-		
-		<!-- 
+			--&gt;
+			&lt;checkField id="15" /&gt;
+			&lt;checkField id="16" presence="mandatory"/&gt;
+			&lt;checkField id="17" presence="optional"/&gt;
+			&lt;checkField id="18" presence="unexpected"/&gt;
+&nbsp;
+		&lt;/validate&gt;
+&nbsp;
+		&lt;!-- 
 			"group" element :
 			It declares a group of actions.
 			It can reveal useful to put some actions of same nature together, 
 			or to give some actions one parent action. 
-		-->
-		<group>
-			<set id="19" value="1" />			
-			<setDate id="20" format="MMyyyy" />
-		</group>
-		
-		<!--
+		--&gt;
+		&lt;group&gt;
+			&lt;set id="19" value="1" /&gt;			
+			&lt;setDate id="20" format="MMyyyy" /&gt;
+		&lt;/group&gt;
+&nbsp;
+		&lt;!--
 			"setResponseMTI" element :
 			In dest message, replace MTI by its corresponding response MTI. 
 			If a failure occurs in determining response MTI, 
 			the default response MTI provided by attribute "default" is used.			
-		-->
-		<setResponseMTI msg="3" default="9919" />
-		
-		<!-- 
+		--&gt;
+		&lt;setResponseMTI msg="3" default="9919" /&gt;
+&nbsp;
+		&lt;!-- 
 			"binaryCopy" element :
 			It operates a raw binary action from a source field in a source message to a dest field
 			in a dest message			
-		-->
-		<binaryCopy id="8" sourceId="7" />
-		
-	</iso-action>
-
-</iso-actions>
+		--&gt;
+		&lt;binaryCopy id="8" sourceId="7" /&gt;
+&nbsp;
+	&lt;/iso-action&gt;
+&nbsp;
+&lt;/iso-actions&gt;
 </pre>
-
 
 The digestion of such a configuration results in a map of uniquely identifiable actions.
 Here is a sample code showing configuration digestion :
@@ -937,21 +933,21 @@ Also note that these configurations XML root element is not <pre><iso-actions></
  
  <iso-action id="0800_ECHO" desc="Echo message creation from scratch">
    
-   <!-- 0 : Message Type -->
+   &lt;!-- 0 : Message Type --&gt;
    <set id="0" value="0800" />
    
-   <!-- 11 : Systems Trace Audit Number -->
-   <!-- Note: here we are using current time as STAN-->
+   &lt;!-- 11 : Systems Trace Audit Number --&gt;
+   &lt;!-- Note: here we are using current time as STAN--&gt;
    <setDate id="11" format="HHmmss" />
    
-   <!-- 12 : Time, Local Transaction -->
+   &lt;!-- 12 : Time, Local Transaction --&gt;
    <setDate id="12" format="HHmmss" />
    
-   <-- 13 : Date, Local Transaction -->
+   <-- 13 : Date, Local Transaction --&gt;
    <setDate id="13" format="MMdd" />
    
-   <!-- 70 : Network Management Info Code -->
-   <!-- Here, 301 stands for echo message -->
+   &lt;!-- 70 : Network Management Info Code --&gt;
+   &lt;!-- Here, 301 stands for echo message --&gt;
    <set id="70" value="301" />
    
  </iso-action>
@@ -1057,11 +1053,11 @@ public class Store {
 you can create an XML file named ''theStore.xml'' in order to provide a dummy instance of Store :
  <?xml version='1.0' ?>
  
- <!--
+ &lt;!--
   Dummy store put into dummy action execution context as property
   'theStore'
   XML Elements should match the Store class attribute's names
- -->
+ --&gt;
  
  <store>
   <id>1</id>
@@ -1354,12 +1350,12 @@ and replace #INCLUSIONS_TOKEN# by XML inclusion directives pointing to your indi
 
 You may proceed replacements automatically via Ant such like : 
 <pre>
-	<!--
+	&lt;!--
 		Needs the following properties to be set :
 		* isoaction.config.deploy.dir : for instance, "modules/mygateway/cfg/isoaction/"
 		* isoaction.config.work.dir : for instance, "modules/mygateway/action-configs/"
 		* isoactionmsg.lib.location : path to the isomsgaction library jar
-	-->
+	--&gt;
 	<target name="deploy-action-configs">
 
 		<delete>
