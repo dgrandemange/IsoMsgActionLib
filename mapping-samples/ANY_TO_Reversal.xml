@@ -54,7 +54,7 @@
 			35 : Piste ISO 2 
 	-->
 	<ifPresent id="35">
-		<stringCopy id="35" sourceId="35" />
+		<binaryCopy id="35" sourceId="35" />
 	</ifPresent>
 
 	<!-- 

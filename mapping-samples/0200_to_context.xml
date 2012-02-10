@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<iso-action id="0200_to_context"
+	desc="Populate context from message 0200"
+	xmlns:xi="http://www.w3.org/2001/XInclude" >
+
+	<!--
+		Availables message (sorted by index) :
+		======================================
+		* 0 (dest message) : empty message (UNUSED HERE)
+		* 1 (source message n°1) : existing 0200 request message used to populate the context		
+		
+		Context info :
+		==============
+		* context will be updated according to the &lt;updateContext&gt; actions   
+	-->
+
+	<!-- 
+		PAN 
+	-->
+	<updateContext ctxBeanPath="ctx(pan)" sourceId="2"  />
+
+	<!-- 
+		AMOUNT 
+	-->	
+	<updateContext ctxBeanPath="ctx(amount)" sourceId="4"  />
+
+	<!-- 
+		ISO TRACK 2 
+	-->
+	<updateContext ctxBeanPath="ctx(track2)" sourceId="35"  />
+
+	<!--
+		 Store number
+	-->
+	<updateContext ctxBeanPath="ctx(theStore).number" sourceId="42"  />
+
+</iso-action>
