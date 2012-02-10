@@ -6,6 +6,7 @@ import java.util.Calendar;
 
 import junit.framework.TestCase;
 
+import org.jpos.iso.ISOBinaryField;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 
@@ -140,4 +141,18 @@ public class ISOMsgActionSetStrDateTest extends TestCase {
 		assertEquals(expectedDate, msg.getString(4));
 	}
 
+	public void testSimple_Binary() throws ISOException, ParseException {
+		String pattern = "ddMMyyyy";		
+		SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+		String expectedDate = sdf.format(Calendar.getInstance().getTime());
+		
+		action.setIdPath("4");		
+		action.setPattern(pattern);
+		action.setBinary(true);
+		action.process(msg, null);
+		
+		assertEquals(expectedDate, msg.getString(4));
+		assertTrue(msg.getComponent(4) instanceof ISOBinaryField);
+	}	
+	
 }

@@ -4,6 +4,7 @@ import java.math.BigInteger;
 
 import junit.framework.TestCase;
 
+import org.jpos.iso.ISOBinaryField;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 
@@ -73,4 +74,24 @@ public class ISOMsgActionSetRandomNumberTest extends TestCase {
 		}
 	}
 
+	public void testGenerationRandom1_Binary() throws ISOException {
+		action.setIdPath("3");
+		action.setNbDigits(6);
+		action.setBinary(true);
+		String lastGenNum = null;
+		for (int i = 0; i <= 100; i++) {
+			action.process(msg, null);
+
+			String genNum = msg.getString(3);
+			assertTrue(msg.getComponent(3) instanceof ISOBinaryField);
+			assertNotSame(lastGenNum, genNum);			
+			assertEquals(6, genNum.length());
+			BigInteger bigInteger = new BigInteger(genNum);
+			assertTrue(bigInteger.intValue() >= 0);
+			assertTrue(bigInteger.intValue() <= 999999);
+			
+			lastGenNum = genNum;
+		}
+	}	
+	
 }

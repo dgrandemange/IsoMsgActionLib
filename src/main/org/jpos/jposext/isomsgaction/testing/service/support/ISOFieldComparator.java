@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import org.jpos.iso.ISOField;
-
 import org.jpos.jposext.isomsgaction.testing.model.ComparisonContext;
 
 public class ISOFieldComparator implements Comparator<ISOField> {
@@ -24,28 +23,27 @@ public class ISOFieldComparator implements Comparator<ISOField> {
 
 		if (null != field0) {
 			if (null == field1) {
-				comparisonContext.getResList().add(
-						String.format("Field %s : Expected=%s, Current=NULL",
-								path, new String(field0.getBytes())));
+				comparisonContext.addDiff(path, String.format(
+						"Field %s : Expected=%s, Current=NULL", path,
+						new String(field0.getBytes())));
 				return -1;
 			}
 		} else {
 			if (null == field1) {
 				return 0;
 			} else {
-				comparisonContext.getResList().add(
-						String.format("Field %s : Expected=NULL, Current=%s",
-								path, new String(field1.getBytes())));
+				comparisonContext.addDiff(path, String.format(
+						"Field %s : Expected=NULL, Current=%s", path,
+						new String(field1.getBytes())));
 				return -1;
 			}
 		}
 
 		boolean same = Arrays.equals(field0.getBytes(), field1.getBytes());
 		if (!same) {
-			comparisonContext.getResList().add(
-					String.format("Field %s : Expected=%s, Current=%s", path,
-							new String(field0.getBytes()), new String(field1
-									.getBytes())));
+			comparisonContext.addDiff(path, String.format(
+					"Field %s : Expected=%s, Current=%s", path, new String(
+							field0.getBytes()), new String(field1.getBytes())));
 		}
 		return same ? 0 : -1;
 	}

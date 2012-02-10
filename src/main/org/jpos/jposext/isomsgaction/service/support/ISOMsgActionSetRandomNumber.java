@@ -37,7 +37,7 @@ public class ISOMsgActionSetRandomNumber extends ISOMsgAbstractAction implements
 		for (int i = 0; i < nbDigits; i++) {
 			res.append(randomizer.nextInt(10));
 		}
-		ISOMsgHelper.setValue(msg[getMsgIndex()], getIdPath(), res.toString());
+		ISOMsgHelper.setValue(msg[getMsgIndex()], getIdPath(), res.toString(), isBinary());
 	}
 
 	public int getNbDigits() {

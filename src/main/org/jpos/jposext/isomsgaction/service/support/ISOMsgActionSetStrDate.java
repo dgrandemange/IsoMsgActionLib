@@ -54,7 +54,7 @@ public class ISOMsgActionSetStrDate extends ISOMsgAbstractAction implements
 		}
 		
 		String fmttedDate = sdf.format(calendrier.getTime());
-		ISOMsgHelper.setValue(msg[getMsgIndex()], getIdPath(), fmttedDate);
+		ISOMsgHelper.setValue(msg[getMsgIndex()], getIdPath(), fmttedDate, isBinary());
 	}
 
 	public String getPattern() {

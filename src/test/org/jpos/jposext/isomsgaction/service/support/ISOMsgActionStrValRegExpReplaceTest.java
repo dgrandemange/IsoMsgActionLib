@@ -2,6 +2,7 @@ package org.jpos.jposext.isomsgaction.service.support;
 
 import junit.framework.TestCase;
 
+import org.jpos.iso.ISOBinaryField;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 
@@ -26,7 +27,9 @@ public class ISOMsgActionStrValRegExpReplaceTest extends TestCase {
 				new String[] { "1", "valeur1_source" },
 				new String[] { "2", "valeur2_source" },
 				new String[] { "3", "valeur3_source" },
-				new String[] { "4", "valeur4_source" } });
+				new String[] { "4", "valeur4_source" },
+				new String[] { "6", "AE0F3B" }
+				});
 
 		submsg1 = new ISOMsg(5);
 		ISOMsgTestHelper.populateMsg(submsg1, new String[][] {
@@ -71,6 +74,17 @@ public class ISOMsgActionStrValRegExpReplaceTest extends TestCase {
 		action.setRegexpReplace("v$1");
 		action.process(new ISOMsg[] {msg, msg2}, null);
 		assertEquals("v2_source", msg.getString(3));
+	}	
+	
+	public void testRemplacementInterneChampSimple_Binary() throws ISOException {
+		action.setIdPath("7");
+		action.setSrcIdPath("6");
+		action.setRegexpPattern("^AE0F(.*)$");
+		action.setRegexpReplace("FFFF$1");
+		action.setBinary(true);
+		action.process(msg, null);
+		assertEquals("FFFF3B", msg.getString(7));
+		assertTrue(msg.getComponent(7) instanceof ISOBinaryField);
 	}	
 	
 }

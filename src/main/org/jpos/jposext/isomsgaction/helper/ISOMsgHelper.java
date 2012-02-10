@@ -2,10 +2,12 @@ package org.jpos.jposext.isomsgaction.helper;
 
 import java.util.StringTokenizer;
 
+import org.jpos.iso.ISOBinaryField;
 import org.jpos.iso.ISOComponent;
 import org.jpos.iso.ISOException;
+import org.jpos.iso.ISOField;
 import org.jpos.iso.ISOMsg;
-
+import org.jpos.iso.ISOUtil;
 import org.jpos.jposext.isomsgaction.exception.ISOMsgActionException;
 import org.jpos.jposext.isomsgaction.exception.ParentMsgDoesNotExistException;
 
@@ -36,8 +38,22 @@ public class ISOMsgHelper {
 			String idPathDelimiter) {
 		CmpInfoWrapper cmpInfos = findParentMsg(msg, idPath, idPath,
 				idPathDelimiter);
-		return (cmpInfos.getCmpParentMsg()).getComponent(Integer
-				.parseInt(cmpInfos.getId()));
+
+		String sId = cmpInfos.getId();
+		int finalId = getIntIdFromStringId(sId);
+
+		return (cmpInfos.getCmpParentMsg()).getComponent(finalId);
+	}
+
+	protected static int getIntIdFromStringId(String sId) {
+		int finalId;
+		if (sId.indexOf("0x") == 0) {
+			sId = sId.substring(2);
+			finalId = Integer.valueOf(sId, 16);
+		} else {
+			finalId = Integer.valueOf(sId);
+		}
+		return finalId;
 	}
 
 	public static ISOComponent getComponent(ISOMsg msg, String idPath) {
@@ -57,8 +73,16 @@ public class ISOMsgHelper {
 			String idPathDelimiter) {
 		CmpInfoWrapper cmpInfos = findParentMsg(msg, idPath, idPath,
 				idPathDelimiter);
-		return (cmpInfos.getCmpParentMsg()).getString(Integer.parseInt(cmpInfos
-				.getId()));
+		// int cmpId = Integer.parseInt(cmpInfos.getId());
+		int cmpId = getIntIdFromStringId(cmpInfos.getId());
+		ISOComponent isoCmp = cmpInfos.getCmpParentMsg().getComponent(cmpId);
+		if (isoCmp instanceof ISOField) {
+			return (cmpInfos.getCmpParentMsg()).getString(cmpId);
+		} else if (isoCmp instanceof ISOBinaryField) {
+			return ((ISOBinaryField) isoCmp).toString();
+		} else {
+			return (cmpInfos.getCmpParentMsg()).getString(cmpId);
+		}
 	}
 
 	public static String getStringValue(ISOMsg msg, String idPath) {
@@ -107,11 +131,12 @@ public class ISOMsgHelper {
 		CmpInfoWrapper cmpInfos = findParentMsg(msg, idPath, idPath,
 				idPathDelimiter);
 		ISOMsg cmpParentMsg = cmpInfos.getCmpParentMsg();
-		String id = cmpInfos.getId();
+		String sId = cmpInfos.getId();
+		// int finalId = Integer.parseInt(sId);
+		int finalId = getIntIdFromStringId(sId);
 		if ((null == condition)
-				|| (condition.isConditionFulfilled(cmpParentMsg, Integer
-						.parseInt(id)))) {
-			cmpParentMsg.set(id, valueToSet);
+				|| (condition.isConditionFulfilled(cmpParentMsg, finalId))) {
+			cmpParentMsg.set(finalId, valueToSet);
 		}
 	}
 
@@ -149,11 +174,12 @@ public class ISOMsgHelper {
 		CmpInfoWrapper cmpInfos = findParentMsg(msg, idPath, idPath,
 				idPathDelimiter);
 		ISOMsg cmpParentMsg = cmpInfos.getCmpParentMsg();
-		String id = cmpInfos.getId();
+		String sId = cmpInfos.getId();
+		//int finalId = Integer.parseInt(sId);
+		int finalId = getIntIdFromStringId(sId);
 		if ((null == condition)
-				|| (condition.isConditionFulfilled(cmpParentMsg, Integer
-						.parseInt(id)))) {
-			cmpParentMsg.set(id, bytesToSet);
+				|| (condition.isConditionFulfilled(cmpParentMsg, finalId))) {
+			cmpParentMsg.set(sId, bytesToSet);
 		}
 	}
 
@@ -172,6 +198,28 @@ public class ISOMsgHelper {
 		setValue(msg, idPath, DEFAULT_ID_PATH_DELIMITER, bytesToSet, condition);
 	}
 
+	public static void setValue(ISOMsg isoMsg, String idPath,
+			String finalValue, IFulfillCondition iFulfillCondition,
+			boolean binary) throws ISOException {
+		if (binary) {
+			setValue(isoMsg, idPath, DEFAULT_ID_PATH_DELIMITER, ISOUtil
+					.hex2byte(finalValue), iFulfillCondition);
+		} else {
+			setValue(isoMsg, idPath, DEFAULT_ID_PATH_DELIMITER, finalValue,
+					iFulfillCondition);
+		}
+	}
+
+	public static void setValue(ISOMsg msg, String idPath, String string,
+			boolean binary) throws ISOException {
+		if (binary) {
+			setValue(msg, idPath, DEFAULT_ID_PATH_DELIMITER, ISOUtil
+					.hex2byte(string));
+		} else {
+			setValue(msg, idPath, DEFAULT_ID_PATH_DELIMITER, string);
+		}
+	}
+
 	/**
 	 * @param msg
 	 *            ISO message from which to retrieve a field
@@ -185,7 +233,8 @@ public class ISOMsgHelper {
 			String idPathDelimiter) throws ISOException {
 		CmpInfoWrapper cmpInfos = findParentMsg(msg, idPath, idPath,
 				idPathDelimiter);
-		(cmpInfos.getCmpParentMsg()).unset(Integer.parseInt(cmpInfos.getId()));
+		int finalId = getIntIdFromStringId(cmpInfos.getId());
+		(cmpInfos.getCmpParentMsg()).unset(finalId);
 	}
 
 	public static void unsetValue(ISOMsg msg, String idPath)
@@ -216,7 +265,9 @@ public class ISOMsgHelper {
 					fullIdPath));
 		}
 
-		ISOComponent isoCmp = msg.getComponent(Integer.parseInt(token));
+		int finalId = getIntIdFromStringId(token);
+
+		ISOComponent isoCmp = msg.getComponent(finalId);
 
 		if (tokenizer.hasMoreTokens()) {
 			if (!(isoCmp instanceof ISOMsg)) {

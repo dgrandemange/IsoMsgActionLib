@@ -4,21 +4,24 @@
  */
 package org.jpos.jposext.isomsgaction.factory.service.support;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.apache.commons.betwixt.io.BeanReader;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.Rule;
-import org.xml.sax.Attributes;
-
+import org.jpos.iso.ISOUtil;
 import org.jpos.jposext.isomsgaction.factory.service.DigesterFactory;
 import org.jpos.jposext.isomsgaction.model.DateFieldEnum;
 import org.jpos.jposext.isomsgaction.model.PadDirectionEnum;
+import org.jpos.jposext.isomsgaction.model.validation.DataType;
 import org.jpos.jposext.isomsgaction.model.validation.PresenceModeEnum;
 import org.jpos.jposext.isomsgaction.model.validation.ValidationRule;
-import org.jpos.jposext.isomsgaction.model.validation.DataType;
 import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgAbstractAction;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgAbstractIfAction;
@@ -33,6 +36,7 @@ import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesRegExp
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfPresent;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionMergeMsg;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionRemoveField;
+import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionSetBinary;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionSetRandomNumber;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionSetResponseMTI;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionSetStrDate;
@@ -40,8 +44,11 @@ import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionSetStringValue;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionStrValCopy;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionStrValPadding;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionStrValRegExpReplace;
+import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionUpdateExecutionContext;
+import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionUserCustomized;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionValidate;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgCompositeAction;
+import org.xml.sax.Attributes;
 
 public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 
@@ -639,6 +646,102 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 
 		});		
 		
+		digester.addObjectCreate("*/updateContext", ISOMsgActionUpdateExecutionContext.class);
+		digester.addRule("*/updateContext", new Rule() {
+
+			@Override
+			public void begin(String namespace, String name, Attributes attr)
+					throws Exception {
+				ISOMsgCompositeAction parentAction = (ISOMsgCompositeAction) digester
+						.peek(1);
+				ISOMsgActionUpdateExecutionContext action = (ISOMsgActionUpdateExecutionContext) digester
+						.peek(0);
+
+				populateCommonActionProperties(action, attr);
+
+				action.setValueBeanPath(attr.getValue("ctxBeanPath"));
+
+				String sfixedLength = attr.getValue("fixedLength");
+				int fixedLength = -1;
+				if (null != sfixedLength) {
+					try {
+						fixedLength = Integer.parseInt(sfixedLength);
+					} catch (Exception e) {
+					}
+				}
+				action.setFixedLength(fixedLength);
+
+				parentAction.add(action);
+			}
+
+		});		
+		
+		digester.addObjectCreate("*/customAction", ISOMsgActionUserCustomized.class);
+		digester.addRule("*/customAction", new Rule() {
+
+			@Override
+			public void begin(String namespace, String name, Attributes attr)
+					throws Exception {
+				ISOMsgCompositeAction parentAction = (ISOMsgCompositeAction) digester
+						.peek(1);
+				ISOMsgActionUserCustomized action = (ISOMsgActionUserCustomized) digester
+						.peek(0);				
+				
+				String customISOActionClazzName = attr.getValue("class");
+				action.setIsoActionClazzName(customISOActionClazzName);
+				
+				parentAction.add(action);
+			}
+			
+			@Override
+			public void body(String namespace, String name, String text)
+					throws Exception {
+				ISOMsgActionUserCustomized action = (ISOMsgActionUserCustomized) digester
+						.peek(0);
+
+				BeanReader beanReader = new BeanReader();
+
+				beanReader.getXMLIntrospector().getConfiguration()
+						.setAttributesForPrimitives(false);
+				beanReader.getBindingConfiguration().setMapIDs(false);
+
+				beanReader.registerBeanClass("customISOAction", Class.forName(action.getIsoActionClazzName()));
+
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				PrintWriter writer = new PrintWriter(bos);
+				writer.write("<customISOAction>");
+				writer.write(text);
+				writer.write("</customISOAction>");
+				writer.flush();				
+				writer.close();
+				
+				ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+				
+				Object obj = (Object) beanReader.parse(bis);				
+				action.setIsoAction((IISOMsgAction) obj);
+			}
+		});			
+		
+		digester.addObjectCreate("*/setBinary", ISOMsgActionSetBinary.class);
+		digester.addRule("*/setBinary", new Rule() {
+
+			@Override
+			public void begin(String namespace, String name, Attributes attr)
+					throws Exception {
+				ISOMsgCompositeAction parentAction = (ISOMsgCompositeAction) digester
+						.peek(1);
+				ISOMsgActionSetBinary action = (ISOMsgActionSetBinary) digester
+						.peek(0);
+
+				populateCommonActionProperties(action, attr);
+				String hexValue = attr.getValue("value");
+				byte[] bytes = ISOUtil.hex2byte(hexValue);
+				action.setBytes(bytes);
+				parentAction.add(action);
+			}
+
+		});		
+		
 		return digester;
 	}
 
@@ -680,6 +783,14 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 			sourceMsgIndex = Integer.parseInt(ssourceMsgIndex);
 		}
 		action.setSrcMsgIndex(sourceMsgIndex);
+		
+		boolean binary = false;
+		String sBinary = attr.getValue("binary");
+		if (null != sBinary) {
+			binary = "true".equalsIgnoreCase(sBinary);
+		}
+		action.setBinary(binary);
+		
 	}
 
 	private void populateCommonIfActionProperties(

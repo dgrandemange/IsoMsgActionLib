@@ -6,6 +6,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.jpos.iso.ISOBinaryField;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 
@@ -82,6 +83,18 @@ public class ISOMsgActionSetStringValueTest extends TestCase {
 		action.setFixedLength(2);
 		action.process(msg, null);
 		assertEquals("to", msg.getString(4));
+	}	
+
+	public void testSimpleBinary() throws ISOException, ParseException {
+		String value = "1F0A";		
+		
+		action.setIdPath("4");		
+		action.setValue(value);
+		action.setBinary(true);
+		action.process(msg, null);
+		
+		assertEquals("1F0A", msg.getString(4));
+		assertTrue(msg.getComponent(4) instanceof ISOBinaryField);
 	}	
 	
 }

@@ -5,7 +5,6 @@ import java.util.Map.Entry;
 
 import org.jpos.iso.ISOComponent;
 import org.jpos.iso.ISOMsg;
-
 import org.jpos.jposext.isomsgaction.testing.model.ComparisonContext;
 
 public class ISOMsgComparator implements Comparator<ISOMsg> {
@@ -14,38 +13,33 @@ public class ISOMsgComparator implements Comparator<ISOMsg> {
 
 	private ComparisonContext comparisonContext;
 
-	public ISOMsgComparator(ComparisonContext comparisonContext, String path) {
+	private boolean skipBitmapComparison;
+	
+	public ISOMsgComparator(ComparisonContext comparisonContext, String path, boolean skipBitmapComparison) {
 		super();
 		this.comparisonContext = comparisonContext;
 		this.path = path;
+		this.skipBitmapComparison = skipBitmapComparison;
 	}
 
 	@Override
 	public int compare(ISOMsg isomsg0, ISOMsg isomsg1) {
 		int res = 0;
-
+				
 		if (null != isomsg0) {
 			if (null == isomsg1) {
-				comparisonContext
-						.getResList()
-						.add(
-								String
-										.format(
-												"Composite field %s : Expected=[SET], Current=NULL",
-												path));
+				comparisonContext.addDiff(path, String.format(
+						"Composite field %s : Expected=[SET], Current=NULL",
+						path));
 				return -1;
 			}
 		} else {
 			if (null == isomsg1) {
 				return 0;
 			} else {
-				comparisonContext
-						.getResList()
-						.add(
-								String
-										.format(
-												"Composite field %s : Expected=NULL, Current=[SET]",
-												path));
+				comparisonContext.addDiff(path, String.format(
+						"Composite field %s : Expected=NULL, Current=[SET]",
+						path));
 				return -1;
 			}
 		}
@@ -59,7 +53,7 @@ public class ISOMsgComparator implements Comparator<ISOMsg> {
 			ISOComponent child1 = isomsg1.getComponent(entry.getKey());
 
 			ISOComponentComparator isoCmpComparator = new ISOComponentComparator(
-					comparisonContext, path, entry.getKey().toString());
+					comparisonContext, path, entry.getKey().toString(), skipBitmapComparison);
 			int compare = isoCmpComparator.compare(child0, child1);
 			allOk = allOk && (compare == 0);
 		}
@@ -69,20 +63,18 @@ public class ISOMsgComparator implements Comparator<ISOMsg> {
 		for (Object obj : isomsg1.getChildren().entrySet()) {
 			Entry<Integer, ISOComponent> entry = (Entry<Integer, ISOComponent>) obj;
 			if (!(isomsg0.hasField(entry.getKey()))) {
+				
 				String idPath = String.format("%s%s%s", path,
 						("".equals(path) ? "" : "."), entry.getKey());
+				
 				if (comparisonContext.getMapManualChecks().containsKey(idPath)) {
 					// OK
 				} else {
-					comparisonContext
-							.getResList()
-							.add(
-									String
-											.format(
-													"Composite field %s : subfield %s is not expected",
-													path, entry.getKey()));
+					comparisonContext.addDiff(idPath, String.format(
+							"Composite field %s : subfield %s is not expected",
+							path, entry.getKey()));
 					allOk = false;
-				}				
+				}
 			}
 		}
 

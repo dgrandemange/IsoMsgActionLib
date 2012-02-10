@@ -12,7 +12,7 @@ import org.jpos.jposext.isomsgaction.model.SimpleContextWrapper;
 import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
 
 /**
- * Action de positionnement d'un champ d'un message avec une valeur chaîne<BR/>
+ * Sets a message field with a string value<BR/>
  * 
  * Set value action : in dest message, dest field is valued with a specified string value.<BR/>
  * It is also possible to use a property of action execution context. In this case, the full path of the property key should be specified.
@@ -69,7 +69,7 @@ public class ISOMsgActionSetStringValue extends ISOMsgAbstractAction implements
 				}
 			}
 			ISOMsgHelper.setValue(msg[getMsgIndex()], getIdPath(), finalValue,
-					(IFulfillCondition) null);
+					(IFulfillCondition) null, isBinary());
 		}
 	}
 

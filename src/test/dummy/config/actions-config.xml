@@ -330,7 +330,42 @@
 			in a dest message			
 		-->
 		<binaryCopy id="8" sourceId="7" />
-		
+
+		<!-- 
+			"updateContext" element :
+			It operates a copy from a source message field value to an attribute of the execution context
+			The fixedLength attribute is optional
+		-->
+		<updateContext ctxBeanPath="ctx(anotherPropertyPath)" sourceId="7" fixedLength="20" />
+
+		<!-- 
+			"customAction" action element :
+			It delegates to a user customized iso action
+			This user customized iso action properties can be populated 
+			by wrapping properties into a CDATA section as shown below.  
+		-->
+		<customAction class="dummy.CustomizedISOAction">
+		<![CDATA[
+			<propTypeInt>12345</propTypeInt>
+			<propTypeString>a dummy string</propTypeString>
+			]]>
+		</customAction>		
+
+		<!-- 
+			"setBinary" element :
+			it sets a message field using a binary value.
+			Value is passed as an hex string.
+		-->
+		<setBinary id="123" value="00FFA0" />
+
+		<!-- 
+			"set" element :
+			As seen before, it sets a message field using a value.
+			Optional attribute binary indicates if dest field should 
+			be valued as a binary field.
+		-->		
+		<set id="456" value="EEDD99" binary="true" />
+
 	</iso-action>
 
 </iso-actions>

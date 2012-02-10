@@ -24,7 +24,9 @@ public class ISOMsgActionStrValPaddingTest extends TestCase {
 				new String[] { "1", "valeur1_source" },
 				new String[] { "2", "valeur2_source" },
 				new String[] { "3", "valeur3_source" },
-				new String[] { "4", "valeur4_source" } });	
+				new String[] { "4", "valeur4_source" },
+				new String[] { "5", "AAFF" }
+				});	
 	}
 
 	public void testPaddingGauche() throws ISOException {
@@ -55,12 +57,23 @@ public class ISOMsgActionStrValPaddingTest extends TestCase {
 	}		
 
 	public void testPaddingChampInexistant() throws ISOException {
-		action.setIdPath("5");
+		action.setIdPath("6");
 		action.setExpLen(10);
 		action.setPadChar("#");
 		action.setPadDir(PadDirectionEnum.RIGHT);
 		action.process(new ISOMsg[] {msg}, null);
-		assertEquals("##########", msg.getString(5));
+		assertEquals("##########", msg.getString(6));
 	}		
+
+	public void testPaddingGauche_Binary() throws ISOException {
+		action.setIdPath("5");
+		action.setExpLen(8);
+		action.setPadChar("0");
+		action.setBinary(true);
+		action.setPadDir(PadDirectionEnum.LEFT);
+		action.process(new ISOMsg[] {msg}, null);
+		assertEquals("0000AAFF", msg.getString(5));
+	}
+	
 	
 }

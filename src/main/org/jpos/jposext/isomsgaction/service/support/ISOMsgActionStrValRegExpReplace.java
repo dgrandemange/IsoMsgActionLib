@@ -47,7 +47,7 @@ public class ISOMsgActionStrValRegExpReplace extends ISOMsgAbstractAction
 
 		// ... et positionnement de la valeur du champ cible
 		ISOMsgHelper
-				.setValue(msg[getMsgIndex()], getIdPath(), strReplacedValue);
+				.setValue(msg[getMsgIndex()], getIdPath(), strReplacedValue, isBinary());
 	}
 
 	public String getRegexpPattern() {

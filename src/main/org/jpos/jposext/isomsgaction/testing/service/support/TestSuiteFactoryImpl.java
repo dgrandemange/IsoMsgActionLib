@@ -2,9 +2,11 @@ package org.jpos.jposext.isomsgaction.testing.service.support;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,8 +28,9 @@ import org.apache.commons.betwixt.io.BeanReader;
 import org.apache.commons.digester.Digester;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
+import org.jpos.iso.ISOPackager;
 import org.jpos.iso.ISOUtil;
-
+import org.jpos.iso.packager.XMLPackager;
 import org.jpos.jposext.isomsgaction.factory.service.support.ISOMsgActionsConfigDigesterFactoryImpl;
 import org.jpos.jposext.isomsgaction.helper.ISOMsgHelper;
 import org.jpos.jposext.isomsgaction.model.validation.ValidationErrorTypeEnum;
@@ -35,6 +38,8 @@ import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
 import org.jpos.jposext.isomsgaction.testing.service.ITestSuiteFactory;
 
 public class TestSuiteFactoryImpl implements ITestSuiteFactory {
+
+	private static final String CHECK_REGEXP = "^<check:(.*)>.*$";
 
 	private static final String DEFAULT_MAPPINGS_DIR = "mappings";
 
@@ -44,6 +49,8 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 
 	private String mappingsDirPath = DEFAULT_MAPPINGS_DIR;
 
+	private ISOPackager xmlPackager;
+
 	public TestSuiteFactoryImpl() {
 		super();
 	}
@@ -51,6 +58,11 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 	public TestSuiteFactoryImpl(String mappingsDirPath) {
 		super();
 		this.mappingsDirPath = mappingsDirPath;
+		try {
+			xmlPackager = new XMLPackager();
+		} catch (ISOException e) {
+			// Safe to ignore
+		}
 	}
 
 	public TestSuite core(String mappingId) {
@@ -85,9 +97,11 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 
 			ISOMsgActionsConfigDigesterFactoryImpl digesterFactory = new ISOMsgActionsConfigDigesterFactoryImpl();
 			StringBuffer strBuf = new StringBuffer();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					getClass().getResourceAsStream(
-							"/org/jpos/jposext/isomsgaction/template/isoaction-main-template.xml")));
+			BufferedReader reader = new BufferedReader(
+					new InputStreamReader(
+							getClass()
+									.getResourceAsStream(
+											"/org/jpos/jposext/isomsgaction/template/isoaction-main-template.xml")));
 
 			StringBuffer inclusionsBuf = new StringBuffer();
 			for (File mappingCfgFile : mappingCfgFiles) {
@@ -146,7 +160,7 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 
 						// Constitution des messages ISO sources
 						// et injection dans le test de mapping
-						final String sourceMsgRegExp = "^isomsg\\.source\\.([0-9]{1,9})\\.properties$";
+						final String sourceMsgRegExp = "^isomsg\\.source\\.([0-9]{1,9})\\.(properties|xml)$";
 						File[] sourceMsgDefsFiles = testSetDir
 								.listFiles(new FileFilter() {
 
@@ -169,12 +183,42 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 							int indexMsg = Integer.parseInt(sourceMsgDefsFile
 									.getName().replaceFirst(sourceMsgRegExp,
 											"$1"));
-							Properties props = new Properties();
-							props.load(new FileInputStream(sourceMsgDefsFile));
-							ISOMsg currentSourceMsg = getISOMsgFromProps(props,
-									mappingTest);
-							mapSrcMsg.put(new Integer(indexMsg),
-									currentSourceMsg);
+							String msgFileExt = sourceMsgDefsFile.getName()
+									.replaceFirst(sourceMsgRegExp, "$2");
+
+							ISOMsg currentSourceMsg = null;
+
+							if ("properties".equalsIgnoreCase(msgFileExt)) {
+								Properties props = new Properties();
+								props.load(new FileInputStream(
+										sourceMsgDefsFile));
+								currentSourceMsg = getISOMsgFromProps(props,
+										mappingTest);
+							} else if ("xml".equalsIgnoreCase(msgFileExt)) {
+								BufferedReader xmlMsgReader = null;
+								try {
+									currentSourceMsg = new ISOMsg();
+									ByteArrayOutputStream bos = new ByteArrayOutputStream();
+									xmlMsgReader = new BufferedReader(
+											new FileReader(sourceMsgDefsFile));
+									String xmlLine = "";
+									while (null != xmlLine) {
+										bos.write(xmlLine.getBytes());
+										xmlLine = xmlMsgReader.readLine();
+									}
+									currentSourceMsg.setPackager(xmlPackager);
+									currentSourceMsg.unpack(bos.toByteArray());
+								} catch (Exception e) {
+									if (null != xmlMsgReader) {
+										xmlMsgReader.close();
+									}
+								}
+							}
+
+							if (null != currentSourceMsg) {
+								mapSrcMsg.put(new Integer(indexMsg),
+										currentSourceMsg);
+							}
 						}
 
 						for (ISOMsg srcIsoMsg : mapSrcMsg.values()) {
@@ -206,28 +250,127 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 									(Map) contextProps));
 						}
 
-						// Constitution du message ISO attendu
+						// Constitution du contexte ATTENDU de mapping
 						// et injection dans le test de mapping
-						Properties expectedMsgProps = new Properties();
-						File[] expectedMsgDefsFiles = testSetDir
+						Properties expectedContextProps = new Properties();
+						File[] mappingExpectedContextDefsFiles = testSetDir
 								.listFiles(new FileFilter() {
 
 									@Override
 									public boolean accept(File file) {
 										boolean res = false;
 										if (file.isFile()) {
-											res = "isomsg.expected.properties"
+											res = "context.expected.properties"
 													.equals(file.getName());
 										}
 										return res;
 									}
 								});
 
+						for (File mappingExpectedContextDefsFile : mappingExpectedContextDefsFiles) {
+							expectedContextProps.load(new FileInputStream(
+									mappingExpectedContextDefsFile));
+							resolveContextMappedBeans(testSetDir,
+									expectedContextProps);
+							HashMap<String, Object> expectedContextMap = new HashMap<String, Object>(
+									(Map) expectedContextProps);
+							HashMap<String, Object> finalExpectedContextMap = new HashMap<String, Object>();
+
+							List<String> binaryAttrs = new ArrayList<String>();
+							Pattern patternHexa = Pattern
+									.compile("^<hexa:(.*)>.*$");
+							Pattern patternCheck = Pattern
+									.compile(CHECK_REGEXP);
+							for (Entry<String, Object> entry : expectedContextMap
+									.entrySet()) {
+								String entryKey = (String) entry.getKey();
+								String entryValue = (String) entry.getValue();
+
+								boolean matches;
+
+								Matcher hexaMatcher = patternHexa
+										.matcher(entryValue);
+								matches = hexaMatcher.matches();
+								if (matches) {
+									String hexWithSpace = hexaMatcher
+											.replaceFirst("$1");
+									String hexNoSpace = hexWithSpace.replace(
+											" ", "");
+									entry.setValue(hexNoSpace);
+									binaryAttrs.add(entryKey);
+								}
+
+								Matcher checkMatcher = patternCheck
+										.matcher(entryValue);
+								matches = checkMatcher.matches();
+								if (matches) {
+									manageManualChecks(entryValue, "context entry [" + entryKey+"]", mappingTest, CHECK_REGEXP);
+								} else {
+									finalExpectedContextMap.put(entryKey,
+											entryValue);
+								}
+
+							}
+
+							mappingTest
+									.setExpectedContext(finalExpectedContextMap);
+							mappingTest
+									.setExpectedContextBinaryAttrs(binaryAttrs);
+						}
+
+						// Constitution du message ISO attendu
+						// et injection dans le test de mapping
+						final String expectedMsgRegExp = "^isomsg\\.expected\\.(properties|xml)$";
+						File[] expectedMsgDefsFiles = testSetDir
+								.listFiles(new FileFilter() {
+
+									@Override
+									public boolean accept(File file) {
+										boolean res = false;
+
+										if (file.isFile()) {
+
+											res = (file.getName()
+													.matches(expectedMsgRegExp));
+										}
+
+										return res;
+									}
+								});
+
 						for (File expectedMsgDefsFile : expectedMsgDefsFiles) {
-							expectedMsgProps.load(new FileInputStream(
-									expectedMsgDefsFile));
-							ISOMsg expectedMsg = getISOMsgFromProps(
-									expectedMsgProps, mappingTest);
+							String msgFileExt = expectedMsgDefsFile.getName()
+									.replaceFirst(expectedMsgRegExp, "$1");
+
+							ISOMsg expectedMsg = null;
+
+							if ("properties".equalsIgnoreCase(msgFileExt)) {
+								Properties expectedMsgProps = new Properties();
+								expectedMsgProps.load(new FileInputStream(
+										expectedMsgDefsFile));
+								expectedMsg = getISOMsgFromProps(
+										expectedMsgProps, mappingTest);
+							} else if ("xml".equalsIgnoreCase(msgFileExt)) {
+								BufferedReader xmlMsgReader = null;
+								try {
+									expectedMsg = new ISOMsg();
+									ByteArrayOutputStream bos = new ByteArrayOutputStream();
+									xmlMsgReader = new BufferedReader(
+											new FileReader(expectedMsgDefsFile));
+									String xmlLine = "";
+									while (null != xmlLine) {
+										bos.write(xmlLine.getBytes());
+										xmlLine = xmlMsgReader.readLine();
+									}
+									expectedMsg.setPackager(xmlPackager);
+									expectedMsg.unpack(bos.toByteArray());
+								} catch (Exception e) {
+									if (null != xmlMsgReader) {
+										xmlMsgReader.close();
+									}
+								}
+							}
+
 							mappingTest.setExpectedISOMsg(expectedMsg);
 						}
 
@@ -396,7 +539,7 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 				boolean setted = false;
 
 				String entryValue = (String) entry.getValue();
-				Pattern pattern = Pattern.compile("^<hexa:(.*)>$");
+				Pattern pattern = Pattern.compile("^<hexa:(.*)>.*$");
 				Matcher m = pattern.matcher(entryValue);
 				boolean matches = m.matches();
 				if (matches) {
@@ -425,35 +568,38 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 	protected void setFieldValue(ISOMsg msg, int id, String value,
 			String idPath, MappingTest mappingTest) {
 		try {
-			String checkRegExp = "^<check:(.*)>.*$";
+			String checkRegExp = CHECK_REGEXP;
 
 			if (value.matches(checkRegExp)) {
-				if (interactive) {
-					if (null == manualCheck) {
-						Object[] options = { "Yes", "No" };
-						int n = JOptionPane
-								.showOptionDialog(
-										null,
-										"Some tests require manual checks.\n"
-												+ "Do you want a pop reminder per test to check ?",
-										"Manual checks",
-										JOptionPane.YES_NO_OPTION,
-										JOptionPane.QUESTION_MESSAGE, null,
-										options, options[1]);
-						manualCheck = new Boolean(n == 0 ? true : false);
-					}
-				}
-				mappingTest
-						.setShowManualCheckReminder((null == manualCheck) ? false
-								: manualCheck.booleanValue());
-				mappingTest.addManualCheck(idPath, value.replaceFirst(
-						checkRegExp, "$1"));
+				manageManualChecks(value, idPath, mappingTest, checkRegExp);
 			} else {
 				msg.set(id, value);
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	protected void manageManualChecks(String value, String idPath,
+			MappingTest mappingTest, String checkRegExp) {
+		if (interactive) {
+			if (null == manualCheck) {
+				Object[] options = { "Yes", "No" };
+				int n = JOptionPane
+						.showOptionDialog(
+								null,
+								"Some tests require manual checks.\n"
+										+ "Do you want a pop reminder per test to check ?",
+								"Manual checks", JOptionPane.YES_NO_OPTION,
+								JOptionPane.QUESTION_MESSAGE, null, options,
+								options[1]);
+				manualCheck = new Boolean(n == 0 ? true : false);
+			}
+		}
+		mappingTest.setShowManualCheckReminder((null == manualCheck) ? false
+				: manualCheck.booleanValue());
+		mappingTest.addManualCheck(idPath, value
+				.replaceFirst(checkRegExp, "$1"));
 	}
 
 	@Override

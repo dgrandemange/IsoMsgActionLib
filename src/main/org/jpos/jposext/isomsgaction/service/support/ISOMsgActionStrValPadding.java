@@ -40,7 +40,7 @@ public class ISOMsgActionStrValPadding extends ISOMsgAbstractAction {
 		}
 		
 		// ... et positionnement de la valeur du champ cible
-		ISOMsgHelper.setValue(msg[getMsgIndex()], getIdPath(), res);
+		ISOMsgHelper.setValue(msg[getMsgIndex()], getIdPath(), res, isBinary());
 	}
 
 	public String getPadChar() {

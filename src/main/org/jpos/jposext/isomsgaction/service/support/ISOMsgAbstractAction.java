@@ -34,6 +34,11 @@ public abstract class ISOMsgAbstractAction implements IISOMsgAction {
 	 * Source field identifier path<BR/>
 	 */
 	private String srcIdPath;
+	
+	/**
+	 * Binary dest field indicator 
+	 */
+	private boolean binary;
 
 	@Override
 	public void process(ISOMsg msg, Map<String, Object> ctx)
@@ -71,6 +76,14 @@ public abstract class ISOMsgAbstractAction implements IISOMsgAction {
 
 	public void setMsgIndex(int msgIndex) {
 		this.msgIndex = msgIndex;
+	}
+
+	public boolean isBinary() {
+		return binary;
+	}
+
+	public void setBinary(boolean binary) {
+		this.binary = binary;
 	}
 
 }

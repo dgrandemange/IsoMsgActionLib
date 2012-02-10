@@ -20,6 +20,7 @@ public class ISOMsgHelperTest extends TestCase {
 	private ISOField cmp4_1;
 	private ISOField cmp4_2;
 	private ISOField cmp4_3;
+	private ISOField cmp4_0x10;
 	private ISOMsg submsglvl2;
 	private ISOField cmp4_4_1;
 	private ISOField cmp4_4_2;
@@ -49,6 +50,9 @@ public class ISOMsgHelperTest extends TestCase {
 		
 		cmp4_3 = new ISOField(3,"4_3");
 		submsglvl1.set(cmp4_3);
+
+		cmp4_0x10 = new ISOField(16,"4_0x10");
+		submsglvl1.set(cmp4_0x10);		
 		
 		msg.set(submsglvl1);		
 		
@@ -74,6 +78,7 @@ public class ISOMsgHelperTest extends TestCase {
 		assertEquals(cmp4_1, ISOMsgHelper.getComponent(msg, "4.1"));
 		assertEquals(cmp4_2, ISOMsgHelper.getComponent(msg, "4.2"));
 		assertEquals(cmp4_3, ISOMsgHelper.getComponent(msg, "4.3"));
+		assertEquals(cmp4_0x10, ISOMsgHelper.getComponent(msg, "4.0x10"));
 
 		assertEquals(submsglvl2, ISOMsgHelper.getComponent(msg, "4.4"));
 		assertEquals(cmp4_4_1, ISOMsgHelper.getComponent(msg, "4.4.1"));
@@ -83,7 +88,7 @@ public class ISOMsgHelperTest extends TestCase {
 
 	public void testGetComponent_SpecialDelimChar() throws ISOException {
 		assertEquals(cmp1, ISOMsgHelper.getComponent(msg, "1", "-"));
-		assertEquals(cmp4_2, ISOMsgHelper.getComponent(msg, "4-2", "-"));
+		assertEquals(cmp4_2, ISOMsgHelper.getComponent(msg, "4-0x2", "-"));
 		assertEquals(cmp4_4_3, ISOMsgHelper.getComponent(msg, "4-4-3", "-"));		
 	}		
 	
@@ -93,7 +98,7 @@ public class ISOMsgHelperTest extends TestCase {
 		assertEquals(replacementCmp2, ISOMsgHelper.getComponent(msg, "2"));
 		
 		ISOField replacementCmp4_3 = new ISOField(3, "replaced");
-		ISOMsgHelper.setComponent(msg, "4.3", replacementCmp4_3);
+		ISOMsgHelper.setComponent(msg, "4.0x3", replacementCmp4_3);
 		assertEquals(replacementCmp4_3, ISOMsgHelper.getComponent(msg, "4.3"));
 		
 		ISOField replacementCmp4_4_1 = new ISOField(1, "replaced");
@@ -106,7 +111,7 @@ public class ISOMsgHelperTest extends TestCase {
 		
 		assertEquals(null, ISOMsgHelper.getStringValue(msg, "50"));
 		
-		assertEquals("4_2", ISOMsgHelper.getStringValue(msg, "4.2"));
+		assertEquals("4_2", ISOMsgHelper.getStringValue(msg, "4.0x2"));
 		
 		assertEquals(null, ISOMsgHelper.getStringValue(msg, "4.50"));
 		
@@ -125,7 +130,7 @@ public class ISOMsgHelperTest extends TestCase {
 		assertEquals(valueChamp50ToSet, msg.getValue(50));
 	
 		String valueChamp4_2ToSet = "replaced value champ 4_2 present";
-		ISOMsgHelper.setValue(msg, "4.2", valueChamp4_2ToSet);
+		ISOMsgHelper.setValue(msg, "4.0x2", valueChamp4_2ToSet);
 		assertEquals(valueChamp4_2ToSet, submsglvl1.getValue(2));
 
 		String valueChamp4_50ToSet = "replaced value champ 4_50 non present";
@@ -154,7 +159,7 @@ public class ISOMsgHelperTest extends TestCase {
 		assertNotSame(valueChamp3ToSet, msg.getValue(3));
 		assertEquals(cmp3.getValue(), msg.getValue(3));
 		
-		ISOMsgHelper.setValue(msg, "3", valueChamp3ToSet, new ISOMsgHelper.IFulfillCondition() {
+		ISOMsgHelper.setValue(msg, "0x3", valueChamp3ToSet, new ISOMsgHelper.IFulfillCondition() {
 
 			@Override
 			public boolean isConditionFulfilled(ISOMsg msg, int id) {
@@ -172,7 +177,7 @@ public class ISOMsgHelperTest extends TestCase {
 		assertFalse(msg.hasField(3));
 		assertTrue(msg.hasField(4));
 		
-		ISOMsgHelper.unsetValue(msg, "4.2");
+		ISOMsgHelper.unsetValue(msg, "4.0x2");
 		assertTrue(submsglvl1.hasField(1));
 		assertFalse(submsglvl1.hasField(2));
 		assertTrue(submsglvl1.hasField(3));

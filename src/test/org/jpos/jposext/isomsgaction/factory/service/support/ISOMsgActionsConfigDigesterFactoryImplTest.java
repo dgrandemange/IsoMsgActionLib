@@ -2,19 +2,18 @@ package org.jpos.jposext.isomsgaction.factory.service.support;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
 
 import org.apache.commons.digester.Digester;
-import org.xml.sax.SAXException;
-
 import org.jpos.jposext.isomsgaction.model.DateFieldEnum;
 import org.jpos.jposext.isomsgaction.model.PadDirectionEnum;
+import org.jpos.jposext.isomsgaction.model.validation.DataType;
 import org.jpos.jposext.isomsgaction.model.validation.PresenceModeEnum;
 import org.jpos.jposext.isomsgaction.model.validation.ValidationRule;
-import org.jpos.jposext.isomsgaction.model.validation.DataType;
 import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionBinaryCopy;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionBshScript;
@@ -27,6 +26,7 @@ import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesRegExp
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfPresent;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionMergeMsg;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionRemoveField;
+import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionSetBinary;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionSetRandomNumber;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionSetResponseMTI;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionSetStrDate;
@@ -34,8 +34,13 @@ import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionSetStringValue;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionStrValCopy;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionStrValPadding;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionStrValRegExpReplace;
+import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionUpdateExecutionContext;
+import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionUserCustomized;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionValidate;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgCompositeAction;
+import org.xml.sax.SAXException;
+
+import dummy.CustomizedISOAction;
 
 /**
  * Iso msg actions configuration digester factory test class
@@ -74,6 +79,7 @@ public class ISOMsgActionsConfigDigesterFactoryImplTest extends TestCase {
 				.getSrcMsgIndex());
 		assertEquals("106", action0100F_0.getValue());
 		assertNull(action0100F_0.getValueBeanPath());
+		assertFalse(action0100F_0.isBinary());
 
 		ISOMsgActionSetStringValue action0100F_1 = (ISOMsgActionSetStringValue) cmpAction0100F
 				.get(1);
@@ -384,6 +390,26 @@ public class ISOMsgActionsConfigDigesterFactoryImplTest extends TestCase {
 		assertNotNull(action0100F_31);
 		assertEquals("8", action0100F_31.getIdPath());
 		assertEquals("7", action0100F_31.getSrcIdPath());
+		
+		ISOMsgActionUpdateExecutionContext action0100F_32 = (ISOMsgActionUpdateExecutionContext) cmpAction0100D.get(25);
+		assertNotNull(action0100F_32);
+		assertEquals(1, action0100F_32.getSrcMsgIndex());
+		assertEquals("7", action0100F_32.getSrcIdPath());
+		assertEquals(20, action0100F_32.getFixedLength());
+		
+		ISOMsgActionUserCustomized action0100F_33 = (ISOMsgActionUserCustomized) cmpAction0100D.get(26);
+		assertTrue(action0100F_33.getIsoAction() instanceof CustomizedISOAction);
+		CustomizedISOAction customizedAction = (CustomizedISOAction) action0100F_33.getIsoAction();
+		assertEquals(12345, customizedAction.getPropTypeInt());
+		assertEquals("a dummy string", customizedAction.getPropTypeString());
+		
+		ISOMsgActionSetBinary action0100F_34 = (ISOMsgActionSetBinary) cmpAction0100D.get(27);
+		assertEquals("123", action0100F_34.getIdPath());
+		assertTrue(Arrays.equals(new byte[] {0x00, (byte) 0xFF, (byte) 0xA0}, action0100F_34.getBytes()));
+		
+		ISOMsgActionSetStringValue action0100F_35 = (ISOMsgActionSetStringValue) cmpAction0100D.get(28);
+		assertTrue(action0100F_35.isBinary());
+
 	}
 
 }

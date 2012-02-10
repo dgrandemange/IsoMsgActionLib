@@ -2,6 +2,7 @@ package org.jpos.jposext.isomsgaction.service.support;
 
 import junit.framework.TestCase;
 
+import org.jpos.iso.ISOBinaryField;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 
@@ -27,7 +28,8 @@ public class ISOMsgActionStrValCopyTest extends TestCase {
 				new String[] { "2", "valeur2_source" },
 				new String[] { "3", "valeur3_source" },
 				new String[] { "4", "valeur4_source" },
-				new String[] { "5", "" }});
+				new String[] { "5", "" },
+				new String[] { "6", "0123" }});
 
 		submsg1 = new ISOMsg(5);
 		ISOMsgTestHelper.populateMsg(submsg1, new String[][] {
@@ -88,12 +90,12 @@ public class ISOMsgActionStrValCopyTest extends TestCase {
 	}
 	
 	public void testCopieDepuisMessageExterneChampSimpleConcatenationChampInexistant() throws ISOException {
-		action.setIdPath("6");
+		action.setIdPath("7");
 		action.setSrcIdPath("4");
 		action.setSrcMsgIndex(1);
 		action.setConcat(true);
 		action.process(new ISOMsg[] {msg, msg2}, null);
-		assertEquals("msg2_valeur4_source", msg.getString(6));
+		assertEquals("msg2_valeur4_source", msg.getString(7));
 	}
 	
 	public void testCopieDepuisMessageExterneChampSimpleConcatenationChampSourceVide() throws ISOException {
@@ -113,5 +115,14 @@ public class ISOMsgActionStrValCopyTest extends TestCase {
 		action.process(new ISOMsg[] {msg, msg2}, null);
 		assertEquals("valeur4_source", msg.getString(4));
 	}
+	
+	public void testCopieInterneChampSimple_Binary() throws ISOException {
+		action.setIdPath("3");
+		action.setSrcIdPath("6");
+		action.setBinary(true);
+		action.process(new ISOMsg[] {msg}, null);
+		assertEquals("0123", msg.getString(3));
+		assertTrue(msg.getComponent(3) instanceof ISOBinaryField);
+	}	
 	
 }

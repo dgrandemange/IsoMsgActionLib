@@ -22,13 +22,17 @@ import javax.swing.JTextArea;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.betwixt.io.BeanWriter;
 import org.jpos.iso.ISOMsg;
-
+import org.jpos.iso.ISOUtil;
+import org.jpos.jposext.isomsgaction.model.SimpleContextWrapper;
 import org.jpos.jposext.isomsgaction.model.validation.ValidationError;
 import org.jpos.jposext.isomsgaction.model.validation.ValidationErrorTypeEnum;
 import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionCheckField;
 import org.jpos.jposext.isomsgaction.testing.model.ComparisonContext;
+import org.jpos.jposext.isomsgaction.testing.model.ISOCmpDiff;
 import org.jpos.jposext.isomsgaction.testing.model.ManualCheck;
 
 public class MappingTest extends TestCase {
@@ -114,9 +118,13 @@ public class MappingTest extends TestCase {
 
 	private boolean showManualCheckReminder;
 
+	private Map<String, Object> expectedContext = new HashMap<String, Object>();
+
+	private List<String> expectedContextBinaryAttrs = new ArrayList<String>();
+
 	@Override
 	protected void runTest() throws Throwable {
-		List<String> resList = new ArrayList<String>();
+		List<ISOCmpDiff> resList = new ArrayList<ISOCmpDiff>();
 
 		try {
 			ISOMsg targetMsg = new ISOMsg();
@@ -162,8 +170,8 @@ public class MappingTest extends TestCase {
 									.get(ISOMsgActionCheckField.VALIDATION_ERRORS_LIST_ATTRNAME));
 
 					for (ValidationError validationError : lstErrsEnSortie) {
-						if (mapExpectedErrsByIdPath
-								.containsKey(validationError.getParamName())) {
+						if (mapExpectedErrsByIdPath.containsKey(validationError
+								.getParamName())) {
 							List<ValidationErrorTypeEnum> typesErreurAttendus = mapExpectedErrsByIdPath
 									.get(validationError.getParamName());
 							if (!typesErreurAttendus.contains(validationError
@@ -202,24 +210,80 @@ public class MappingTest extends TestCase {
 							.entrySet()) {
 						MyErreurValidation erreurValidation = entry.getKey();
 						resList
-								.add(String
+								.add(new ISOCmpDiff(erreurValidation.getParamName(), String
 										.format(
 												"Field %s : a validation error [%s] was expected",
 												erreurValidation.getParamName(),
 												erreurValidation
-														.getTypeErreur().name()));
+														.getTypeErreur().name())));
 					}
 
 					for (Entry<MyErreurValidation, ValidationError> entry : mapErrsInattendues
 							.entrySet()) {
 						MyErreurValidation erreurValidation = entry.getKey();
 						resList
-								.add(String
+								.add(new ISOCmpDiff(erreurValidation.getParamName(), String
 										.format(
 												"Field %s : validation error [%s] was not expected",
 												erreurValidation.getParamName(),
 												erreurValidation
-														.getTypeErreur().name()));
+														.getTypeErreur().name())));
+					}
+				}
+			}
+
+			boolean expectedContextPopulationFailure = false;
+			if (null != expectedContext) {
+				for (Entry<String, Object> entry : expectedContext.entrySet()) {
+					String ctxPath = entry.getKey();
+					String expectedValue = (String) entry.getValue();
+
+					Object effectiveObject = PropertyUtils.getProperty(
+							new SimpleContextWrapper(context), ctxPath);
+					
+					String effectiveValue = null;
+					if (effectiveObject.getClass().isPrimitive())
+					{
+						effectiveValue=(String) effectiveObject;
+					}
+					else if (effectiveObject instanceof String) {
+						effectiveValue=(String) effectiveObject;
+					}
+					else {
+						effectiveValue = effectiveObject.toString();
+					}
+					if (!(expectedValue.equals(effectiveValue))) {
+						expectedContextPopulationFailure = true;
+						boolean dumpHex = expectedContextBinaryAttrs
+								.contains(ctxPath);
+						if (null != effectiveValue) {
+							resList
+									.add(new ISOCmpDiff(ctxPath, String
+											.format(
+													"Attribute %s : expected %s=[%s], was %s=[%s]",
+													ctxPath,
+													dumpHex ? "(hex dump)" : "",
+													dumpHex ? ISOUtil
+															.hexdump(expectedValue
+																	.getBytes())
+															: expectedValue,
+													dumpHex ? "(hex dump)" : "",
+													dumpHex ? ISOUtil
+															.hexdump(effectiveValue
+																	.getBytes())
+															: effectiveValue)));
+						} else {
+							resList
+									.add(new ISOCmpDiff(ctxPath, String
+											.format(
+													"Attribute %s : expected %s=[%s], but not set",
+													ctxPath,
+													dumpHex ? "(hex dump)" : "",
+													dumpHex ? ISOUtil
+															.hexdump(expectedValue
+																	.getBytes())
+															: expectedValue)));
+						}
 					}
 				}
 			}
@@ -236,40 +300,53 @@ public class MappingTest extends TestCase {
 				throw new AssertionFailedError("Test failed");
 			}
 
+			if (expectedContextPopulationFailure) {
+				throw new AssertionFailedError("Test failed");
+			}
+
 			if (mapManualChecks.size() > 0) {
 				if (showManualCheckReminder) {
 					ByteArrayOutputStream bos = new ByteArrayOutputStream();
-					targetMsg.dump(new PrintStream(bos), "");
-
+					PrintStream printStream = new PrintStream(bos);
+					printStream.println("Generated ISO message :");
+					targetMsg.dump(printStream, "");
+					printStream.println();
+					printStream.println("Resulting context :");
+					BeanWriter beanWriter =new BeanWriter(printStream);
+					beanWriter.enablePrettyPrint();
+					beanWriter.write(context);
+					
 					final JTextArea textArea = new JTextArea();
 					textArea.setFont(new Font("Sans-Serif", Font.PLAIN, 12));
 					textArea.setEditable(false);
 					textArea.setText(bos.toString());
 
 					JScrollPane scrollPane = new JScrollPane(textArea);
-					scrollPane.setPreferredSize(new Dimension(450, 250));
+					scrollPane.setPreferredSize(new Dimension(450, 350));
 
 					JPanel panel = new JPanel();
 					BorderLayout layout = new BorderLayout();
 					panel.setLayout(layout);
 					panel.add(scrollPane, BorderLayout.CENTER);
 					JPanel panLstVerif = new JPanel();
-					panLstVerif.setLayout(new BoxLayout(panLstVerif, BoxLayout.Y_AXIS));
-					panLstVerif.add(new JLabel(
-							"Manual checks :"));
+					panLstVerif.setLayout(new BoxLayout(panLstVerif,
+							BoxLayout.Y_AXIS));
+					panLstVerif.add(new JLabel("Manual checks :"));
 					for (Entry<String, ManualCheck> entry : mapManualChecks
 							.entrySet()) {
-						panLstVerif.add(new JLabel(String.format("\t* field %s : %s",
-								entry.getKey(), entry.getValue().getDesc())));
+						panLstVerif.add(new JLabel(String.format(
+								"\t* %s : %s", entry.getKey(), entry
+										.getValue().getDesc())));
 					}
-					panLstVerif.add(new JLabel(
-					"Do you confirm that checked values complies to their expected check rules ?"));
-					    
+					panLstVerif
+							.add(new JLabel(
+									"Do you confirm that checked values complies to their expected check rules ?"));
+
 					panel.add(panLstVerif, BorderLayout.SOUTH);
-					
+
 					Object[] options = { "Yes", "No" };
-					int n = JOptionPane.showOptionDialog(null, panel,
-							String.format ("Manual checks (%s)",this.getName()),
+					int n = JOptionPane.showOptionDialog(null, panel, String
+							.format("Manual checks (%s)", this.getName()),
 							JOptionPane.YES_NO_OPTION,
 							JOptionPane.QUESTION_MESSAGE, null, options,
 							options[1]);
@@ -291,7 +368,7 @@ public class MappingTest extends TestCase {
 			if (resList.size() > 0) {
 				buf.append("Differences list :");
 				buf.append("\n");
-				for (String resElt : resList) {
+				for (ISOCmpDiff resElt : resList) {
 					buf.append(String.format("\t* %s", resElt));
 					buf.append("\n");
 				}
@@ -299,8 +376,7 @@ public class MappingTest extends TestCase {
 			}
 
 			if (mapManualChecks.size() > 0) {
-				buf
-						.append("Some of the manual checks have failed among :");
+				buf.append("Some of the manual checks have failed among :");
 				buf.append("\n");
 				for (Entry<String, ManualCheck> entry : mapManualChecks
 						.entrySet()) {
@@ -319,8 +395,8 @@ public class MappingTest extends TestCase {
 	protected void dumpErrorsList(PrintStream ps, List<ValidationError> lstErrs) {
 		if (null != lstErrs) {
 			for (ValidationError err : lstErrs) {
-				ps.println(String.format("id=%s, error=%s",
-						err.getParamName(), err.getTypeErreur()));
+				ps.println(String.format("id=%s, error=%s", err.getParamName(),
+						err.getTypeErreur()));
 			}
 		}
 
@@ -403,6 +479,23 @@ public class MappingTest extends TestCase {
 
 	public void setShowManualCheckReminder(boolean showManualCheckReminder) {
 		this.showManualCheckReminder = showManualCheckReminder;
+	}
+
+	public Map<String, Object> getExpectedContext() {
+		return expectedContext;
+	}
+
+	public void setExpectedContext(Map<String, Object> expectedContext) {
+		this.expectedContext = expectedContext;
+	}
+
+	public List<String> getExpectedContextBinaryAttrs() {
+		return expectedContextBinaryAttrs;
+	}
+
+	public void setExpectedContextBinaryAttrs(
+			List<String> expectedContextBinaryAttrs) {
+		this.expectedContextBinaryAttrs = expectedContextBinaryAttrs;
 	}
 
 }

@@ -38,10 +38,10 @@ public class ISOMsgActionStrValCopy extends ISOMsgAbstractAction implements
 		// ... et positionnement de la valeur du champ cible
 		// écrasement du champ cible si et seulement si concat = false ou non positionné
 		if (concat){
-				ISOMsgHelper.setValue(msg[getMsgIndex()], getIdPath(), (strCurrentVal==null ? "" : strCurrentVal)+ (strVal==null ? "" :strVal ));
+				ISOMsgHelper.setValue(msg[getMsgIndex()], getIdPath(), (strCurrentVal==null ? "" : strCurrentVal)+ (strVal==null ? "" :strVal ), isBinary());
 		}
 		else{
-			ISOMsgHelper.setValue(msg[getMsgIndex()], getIdPath(), (strVal==null ? "" :strVal ));
+			ISOMsgHelper.setValue(msg[getMsgIndex()], getIdPath(), (strVal==null ? "" :strVal ), isBinary());
 		}
 
 	}
