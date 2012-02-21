@@ -39,7 +39,8 @@ public abstract class ISOMsgAbstractIfAction extends ISOMsgCompositeAction
 					msg[getSrcMsgIndex()], getIdPath(), getIdPath());
 			cmpParentMsg = cmpInfos.getCmpParentMsg();
 			String sid = cmpInfos.getId();
-			id = Integer.parseInt(sid);
+			//id = Integer.parseInt(sid);
+			id = ISOMsgHelper.getIntIdFromStringId(sid);
 		} catch (ParentMsgDoesNotExistException e) {
 		}
 		

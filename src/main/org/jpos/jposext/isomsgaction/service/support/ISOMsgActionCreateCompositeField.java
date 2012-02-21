@@ -25,9 +25,10 @@ public class ISOMsgActionCreateCompositeField extends ISOMsgAbstractAction
 	@Override
 	public void process(ISOMsg[] msg, Map<String, Object> ctx)
 			throws ISOException {
-		String fieldId = ISOMsgHelper.findLastAtomicId(getIdPath());
+		String strFieldId = ISOMsgHelper.findLastAtomicId(getIdPath());
+		int fieldId = ISOMsgHelper.getIntIdFromStringId(strFieldId);
 		ISOMsgHelper.setComponent(msg[getMsgIndex()], getIdPath(), new ISOMsg(
-				Integer.parseInt(fieldId)));
+				fieldId));
 	}
 
 }

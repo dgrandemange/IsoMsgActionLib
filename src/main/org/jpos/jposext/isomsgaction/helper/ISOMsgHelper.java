@@ -45,7 +45,7 @@ public class ISOMsgHelper {
 		return (cmpInfos.getCmpParentMsg()).getComponent(finalId);
 	}
 
-	protected static int getIntIdFromStringId(String sId) {
+	public static int getIntIdFromStringId(String sId) {
 		int finalId;
 		if (sId.indexOf("0x") == 0) {
 			sId = sId.substring(2);

@@ -503,9 +503,10 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 		// Déterminer les champs composites et les créer
 		for (Entry entry : props.entrySet()) {
 			String idPath = (String) entry.getKey();
-			String lastAtomicId = ISOMsgHelper.findLastAtomicId(idPath);
-
-			if (!(lastAtomicId.equals(idPath))) {
+			String strLastAtomicId = ISOMsgHelper.findLastAtomicId(idPath);
+			int lastAtomicId = ISOMsgHelper.getIntIdFromStringId(strLastAtomicId);
+			
+			if (!(strLastAtomicId.equals(idPath))) {
 				int lastSepIndex = idPath.lastIndexOf(".");
 
 				String pathOnly;
@@ -519,7 +520,8 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 				ISOMsg inter = res;
 				while (tokenizer.hasMoreTokens()) {
 					String token = tokenizer.nextToken();
-					int currentId = Integer.parseInt(token);
+					//int currentId = Integer.parseInt(token);
+					int currentId = ISOMsgHelper.getIntIdFromStringId(token);
 					boolean cmpFieldExists = inter.hasField(currentId);
 					if (!cmpFieldExists) {
 						ISOMsg cmpField = new ISOMsg(currentId);
@@ -532,7 +534,7 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 					inter = (ISOMsg) inter.getComponent(currentId);
 				}
 
-				setFieldValue(inter, Integer.parseInt(lastAtomicId),
+				setFieldValue(inter, lastAtomicId,
 						(String) entry.getValue(), idPath, mappingTest);
 
 			} else {
@@ -547,7 +549,7 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 					String hexNoSpace = hexWithSpace.replace(" ", "");
 					byte[] hex2byte = ISOUtil.hex2byte(hexNoSpace);
 					try {
-						res.set(Integer.parseInt(lastAtomicId), hex2byte);
+						res.set(lastAtomicId, hex2byte);
 						setted = true;
 					} catch (Exception e) {
 						throw new RuntimeException(e);
@@ -555,7 +557,7 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 				}
 
 				if (!setted) {
-					setFieldValue(res, Integer.parseInt(lastAtomicId),
+					setFieldValue(res, lastAtomicId,
 							(String) entry.getValue(), idPath, mappingTest);
 				}
 			}
