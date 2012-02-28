@@ -135,8 +135,8 @@ public class MappingTest extends TestCase {
 
 			for (int i = 1; i <= lstSrcISOMsg.size(); i++) {
 				tabISOMsg[i] = lstSrcISOMsg.get(i - 1);
-				dumpMessage(System.out, tabISOMsg[i], String.format(
-						"Source ISO Message [%d]", i));
+				dumpMessage(System.out, tabISOMsg[i],
+						String.format("Source ISO Message [%d]", i));
 			}
 
 			if (null != expectedISOMsg) {
@@ -168,67 +168,61 @@ public class MappingTest extends TestCase {
 							System.out,
 							(List<ValidationError>) context
 									.get(ISOMsgActionCheckField.VALIDATION_ERRORS_LIST_ATTRNAME));
-
-					for (ValidationError validationError : lstErrsEnSortie) {
-						if (mapExpectedErrsByIdPath.containsKey(validationError
-								.getParamName())) {
-							List<ValidationErrorTypeEnum> typesErreurAttendus = mapExpectedErrsByIdPath
-									.get(validationError.getParamName());
-							if (!typesErreurAttendus.contains(validationError
-									.getTypeErreur())) {
-								mapErrsInattendues.put(new MyErreurValidation(
-										validationError), validationError);
-							} else {
-								mapErrsAttenduesTrouvees
-										.put(new MyErreurValidation(
-												validationError),
-												validationError);
-							}
-						} else {
+				}
+				for (ValidationError validationError : lstErrsEnSortie) {
+					if (mapExpectedErrsByIdPath.containsKey(validationError
+							.getParamName())) {
+						List<ValidationErrorTypeEnum> typesErreurAttendus = mapExpectedErrsByIdPath
+								.get(validationError.getParamName());
+						if (!typesErreurAttendus.contains(validationError
+								.getTypeErreur())) {
 							mapErrsInattendues.put(new MyErreurValidation(
 									validationError), validationError);
+						} else {
+							mapErrsAttenduesTrouvees.put(
+									new MyErreurValidation(validationError),
+									validationError);
+						}
+					} else {
+						mapErrsInattendues.put(new MyErreurValidation(
+								validationError), validationError);
+					}
+				}
+
+				for (Entry<String, List<ValidationErrorTypeEnum>> entry : mapExpectedErrsByIdPath
+						.entrySet()) {
+					String idPath = entry.getKey();
+					for (ValidationErrorTypeEnum validationErrorTypeEnum : entry
+							.getValue()) {
+						MyErreurValidation errValid = new MyErreurValidation(
+								validationErrorTypeEnum, idPath);
+						if (!(mapErrsAttenduesTrouvees.containsKey(errValid))) {
+							mapErrsAttenduesNonTrouvees.put(
+									new MyErreurValidation(errValid), errValid);
 						}
 					}
+				}
 
-					for (Entry<String, List<ValidationErrorTypeEnum>> entry : mapExpectedErrsByIdPath
-							.entrySet()) {
-						String idPath = entry.getKey();
-						for (ValidationErrorTypeEnum validationErrorTypeEnum : entry
-								.getValue()) {
-							MyErreurValidation errValid = new MyErreurValidation(
-									validationErrorTypeEnum, idPath);
-							if (!(mapErrsAttenduesTrouvees
-									.containsKey(errValid))) {
-								mapErrsAttenduesNonTrouvees.put(
-										new MyErreurValidation(errValid),
-										errValid);
-							}
-						}
-					}
+				for (Entry<MyErreurValidation, ValidationError> entry : mapErrsAttenduesNonTrouvees
+						.entrySet()) {
+					MyErreurValidation erreurValidation = entry.getKey();
+					resList.add(new ISOCmpDiff(
+							erreurValidation.getParamName(),
+							String.format(
+									"Field %s : a validation error [%s] was expected",
+									erreurValidation.getParamName(),
+									erreurValidation.getTypeErreur().name())));
+				}
 
-					for (Entry<MyErreurValidation, ValidationError> entry : mapErrsAttenduesNonTrouvees
-							.entrySet()) {
-						MyErreurValidation erreurValidation = entry.getKey();
-						resList
-								.add(new ISOCmpDiff(erreurValidation.getParamName(), String
-										.format(
-												"Field %s : a validation error [%s] was expected",
-												erreurValidation.getParamName(),
-												erreurValidation
-														.getTypeErreur().name())));
-					}
-
-					for (Entry<MyErreurValidation, ValidationError> entry : mapErrsInattendues
-							.entrySet()) {
-						MyErreurValidation erreurValidation = entry.getKey();
-						resList
-								.add(new ISOCmpDiff(erreurValidation.getParamName(), String
-										.format(
-												"Field %s : validation error [%s] was not expected",
-												erreurValidation.getParamName(),
-												erreurValidation
-														.getTypeErreur().name())));
-					}
+				for (Entry<MyErreurValidation, ValidationError> entry : mapErrsInattendues
+						.entrySet()) {
+					MyErreurValidation erreurValidation = entry.getKey();
+					resList.add(new ISOCmpDiff(
+							erreurValidation.getParamName(),
+							String.format(
+									"Field %s : validation error [%s] was not expected",
+									erreurValidation.getParamName(),
+									erreurValidation.getTypeErreur().name())));
 				}
 			}
 
@@ -240,16 +234,13 @@ public class MappingTest extends TestCase {
 
 					Object effectiveObject = PropertyUtils.getProperty(
 							new SimpleContextWrapper(context), ctxPath);
-					
+
 					String effectiveValue = null;
-					if (effectiveObject.getClass().isPrimitive())
-					{
-						effectiveValue=(String) effectiveObject;
-					}
-					else if (effectiveObject instanceof String) {
-						effectiveValue=(String) effectiveObject;
-					}
-					else {
+					if (effectiveObject.getClass().isPrimitive()) {
+						effectiveValue = (String) effectiveObject;
+					} else if (effectiveObject instanceof String) {
+						effectiveValue = (String) effectiveObject;
+					} else {
 						effectiveValue = effectiveObject.toString();
 					}
 					if (!(expectedValue.equals(effectiveValue))) {
@@ -257,32 +248,32 @@ public class MappingTest extends TestCase {
 						boolean dumpHex = expectedContextBinaryAttrs
 								.contains(ctxPath);
 						if (null != effectiveValue) {
-							resList
-									.add(new ISOCmpDiff(ctxPath, String
-											.format(
-													"Attribute %s : expected %s=[%s], was %s=[%s]",
-													ctxPath,
-													dumpHex ? "(hex dump)" : "",
-													dumpHex ? ISOUtil
-															.hexdump(expectedValue
-																	.getBytes())
-															: expectedValue,
-													dumpHex ? "(hex dump)" : "",
-													dumpHex ? ISOUtil
-															.hexdump(effectiveValue
-																	.getBytes())
-															: effectiveValue)));
+							resList.add(new ISOCmpDiff(
+									ctxPath,
+									String.format(
+											"Attribute %s : expected %s=[%s], was %s=[%s]",
+											ctxPath,
+											dumpHex ? "(hex dump)" : "",
+											dumpHex ? ISOUtil
+													.hexdump(expectedValue
+															.getBytes())
+													: expectedValue,
+											dumpHex ? "(hex dump)" : "",
+											dumpHex ? ISOUtil
+													.hexdump(effectiveValue
+															.getBytes())
+													: effectiveValue)));
 						} else {
-							resList
-									.add(new ISOCmpDiff(ctxPath, String
-											.format(
-													"Attribute %s : expected %s=[%s], but not set",
-													ctxPath,
-													dumpHex ? "(hex dump)" : "",
-													dumpHex ? ISOUtil
-															.hexdump(expectedValue
-																	.getBytes())
-															: expectedValue)));
+							resList.add(new ISOCmpDiff(
+									ctxPath,
+									String.format(
+											"Attribute %s : expected %s=[%s], but not set",
+											ctxPath,
+											dumpHex ? "(hex dump)" : "",
+											dumpHex ? ISOUtil
+													.hexdump(expectedValue
+															.getBytes())
+													: expectedValue)));
 						}
 					}
 				}
@@ -312,10 +303,10 @@ public class MappingTest extends TestCase {
 					targetMsg.dump(printStream, "");
 					printStream.println();
 					printStream.println("Resulting context :");
-					BeanWriter beanWriter =new BeanWriter(printStream);
+					BeanWriter beanWriter = new BeanWriter(printStream);
 					beanWriter.enablePrettyPrint();
 					beanWriter.write(context);
-					
+
 					final JTextArea textArea = new JTextArea();
 					textArea.setFont(new Font("Sans-Serif", Font.PLAIN, 12));
 					textArea.setEditable(false);
@@ -334,9 +325,8 @@ public class MappingTest extends TestCase {
 					panLstVerif.add(new JLabel("Manual checks :"));
 					for (Entry<String, ManualCheck> entry : mapManualChecks
 							.entrySet()) {
-						panLstVerif.add(new JLabel(String.format(
-								"\t* %s : %s", entry.getKey(), entry
-										.getValue().getDesc())));
+						panLstVerif.add(new JLabel(String.format("\t* %s : %s",
+								entry.getKey(), entry.getValue().getDesc())));
 					}
 					panLstVerif
 							.add(new JLabel(
@@ -345,11 +335,15 @@ public class MappingTest extends TestCase {
 					panel.add(panLstVerif, BorderLayout.SOUTH);
 
 					Object[] options = { "Yes", "No" };
-					int n = JOptionPane.showOptionDialog(null, panel, String
-							.format("Manual checks (%s)", this.getName()),
-							JOptionPane.YES_NO_OPTION,
-							JOptionPane.QUESTION_MESSAGE, null, options,
-							options[1]);
+					int n = JOptionPane
+							.showOptionDialog(
+									null,
+									panel,
+									String.format("Manual checks (%s)",
+											this.getName()),
+									JOptionPane.YES_NO_OPTION,
+									JOptionPane.QUESTION_MESSAGE, null,
+									options, options[1]);
 					if (n == 1) {
 						throw new AssertionFailedError("Test failed");
 					}
@@ -380,8 +374,8 @@ public class MappingTest extends TestCase {
 				buf.append("\n");
 				for (Entry<String, ManualCheck> entry : mapManualChecks
 						.entrySet()) {
-					buf.append(String.format("\t* champ %s : %s", entry
-							.getKey(), entry.getValue().getDesc()));
+					buf.append(String.format("\t* champ %s : %s",
+							entry.getKey(), entry.getValue().getDesc()));
 					buf.append("\n");
 				}
 				buf.append("\n");

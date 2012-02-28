@@ -1,0 +1,47 @@
+	<isomsg>
+	  <isomsg id="173">
+	    <!-- org.jpos.iso.PDUTlvSubFieldPackager -->
+	    <isomsg id="128">
+	      <!-- org.jpos.iso.PDUAppItemSubFieldPackager -->
+	      <field id="1" value="1704036"/>
+	    </isomsg>
+	    <isomsg id="129">
+	      <!-- org.jpos.iso.PDUAppItemSubFieldPackager -->
+	      <field id="1" value="99"/>
+	    </isomsg>
+	    <isomsg id="131">
+	      <!-- org.jpos.iso.PDUAppItemSubFieldPackager -->
+	      <field id="1" value="0"/>
+	    </isomsg>
+	    <isomsg id="132">
+	      <!-- org.jpos.iso.PDUAppItemSubFieldPackager -->
+	      <field id="1" value="2"/>
+	    </isomsg>
+	    <isomsg id="133">
+	      <!-- org.jpos.iso.AppItemTlvSubFieldPackager -->
+	      <isomsg id="3">
+	        <!-- org.jpos.iso.AppItemTlvSubFieldPackager -->
+	        <isomsg id="5">
+	          <!-- org.jpos.iso.AppItemTlvSubFieldPackager -->
+	          <isomsg id="24">
+	            <!-- org.jpos.iso.PDUAppItemSubFieldPackager -->
+	            <field id="1" value="132"/>
+	            <field id="2" value="8"/>
+	          </isomsg>
+	          <isomsg id="40">
+	            <!-- org.jpos.iso.PDUAppItemSubFieldPackager -->
+	            <field id="1" value="880001425021208032"/>
+	          </isomsg>
+	          <isomsg id="82">
+	            <!-- org.jpos.iso.PDUAppItemSubFieldPackager -->
+	            <field id="1" value="012425"/>
+	          </isomsg>
+	          <isomsg id="150">
+	            <!-- org.jpos.iso.PDUAppItemSubFieldPackager -->
+	            <field id="1" value="A0000000421010" type="binary"/>
+	          </isomsg>
+	        </isomsg>
+	      </isomsg>
+	    </isomsg>
+	  </isomsg>
+	</isomsg>
