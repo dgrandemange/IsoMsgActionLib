@@ -57,6 +57,17 @@
 		<binaryCopy id="35" sourceId="35" />
 	</ifPresent>
 
+	<ifPresent id="36.1">
+		<createCmpField id="36"/>
+		<binaryCopy id="36.1" sourceId="36.1" />
+	</ifPresent>
+
+	<ifPresent id="37.371.1">
+		<createCmpField id="37"/>
+		<createCmpField id="37.371"/>
+		<binaryCopy id="37.371.1" sourceId="37.371.1" />
+	</ifPresent>
+
 	<!-- 
 			41 : Invoice number
 	-->

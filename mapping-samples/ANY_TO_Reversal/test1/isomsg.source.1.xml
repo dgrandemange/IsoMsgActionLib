@@ -1,12 +1,23 @@
 <isomsg>
-  <field id="0" value="0200"/>
-  <field id="2" value="5130123412341234"/>
-  <field id="3" value="000000"/>
-  <field id="4" value="000000010000"/>
-  <field id="11" value="159753"/>
-  <field id="12" value="153305"/>
-  <field id="13" value="0212"/>
-  <field id="32" value="11223344556"/>  
-  <field id="35" value="5130123412341234116D191211035229729F60" type="binary"/>
-  <field id="49" value="978"/>
+	<field id="0" value="0200" />
+	<field id="2" value="5130123412341234" />
+	<field id="3" value="000000" />
+	<field id="4" value="000000010000" />
+	<field id="11" value="159753" />
+	<field id="12" value="153305" />
+	<field id="13" value="0212" />
+	<field id="32" value="11223344556" />
+	<field id="35" value="5130123412341234116D191211035229729F60"
+		type="binary" />
+	<isomsg id="36">
+		<field id="1" value="5130123412341234116D191211035229729F61"
+			type="binary" />
+	</isomsg>
+	<isomsg id="37">
+		<isomsg id="371">
+			<field id="1" value="5130123412341234116D191211035229729F62"
+				type="binary" />
+		</isomsg>
+	</isomsg>
+	<field id="49" value="978" />
 </isomsg>

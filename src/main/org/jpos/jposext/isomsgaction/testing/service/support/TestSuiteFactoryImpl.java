@@ -504,7 +504,8 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 		for (Entry entry : props.entrySet()) {
 			String idPath = (String) entry.getKey();
 			String strLastAtomicId = ISOMsgHelper.findLastAtomicId(idPath);
-			int lastAtomicId = ISOMsgHelper.getIntIdFromStringId(strLastAtomicId);
+			int lastAtomicId = ISOMsgHelper.getIntIdFromStringId(strLastAtomicId);			
+			ISOMsg inter = res;
 			
 			if (!(strLastAtomicId.equals(idPath))) {
 				int lastSepIndex = idPath.lastIndexOf(".");
@@ -517,10 +518,8 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 				}
 
 				StringTokenizer tokenizer = new StringTokenizer(pathOnly, ".");
-				ISOMsg inter = res;
 				while (tokenizer.hasMoreTokens()) {
 					String token = tokenizer.nextToken();
-					//int currentId = Integer.parseInt(token);
 					int currentId = ISOMsgHelper.getIntIdFromStringId(token);
 					boolean cmpFieldExists = inter.hasField(currentId);
 					if (!cmpFieldExists) {
@@ -534,33 +533,30 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 					inter = (ISOMsg) inter.getComponent(currentId);
 				}
 
-				setFieldValue(inter, lastAtomicId,
-						(String) entry.getValue(), idPath, mappingTest);
+			}
 
-			} else {
-				boolean setted = false;
+			boolean setted = false;
 
-				String entryValue = (String) entry.getValue();
-				Pattern pattern = Pattern.compile("^<hexa:(.*)>.*$");
-				Matcher m = pattern.matcher(entryValue);
-				boolean matches = m.matches();
-				if (matches) {
-					String hexWithSpace = m.replaceFirst("$1");
-					String hexNoSpace = hexWithSpace.replace(" ", "");
-					byte[] hex2byte = ISOUtil.hex2byte(hexNoSpace);
-					try {
-						res.set(lastAtomicId, hex2byte);
-						setted = true;
-					} catch (Exception e) {
-						throw new RuntimeException(e);
-					}
-				}
-
-				if (!setted) {
-					setFieldValue(res, lastAtomicId,
-							(String) entry.getValue(), idPath, mappingTest);
+			String entryValue = (String) entry.getValue();
+			Pattern pattern = Pattern.compile("^<hexa:(.*)>.*$");
+			Matcher m = pattern.matcher(entryValue);
+			boolean matches = m.matches();
+			if (matches) {
+				String hexWithSpace = m.replaceFirst("$1");
+				String hexNoSpace = hexWithSpace.replace(" ", "");
+				byte[] hex2byte = ISOUtil.hex2byte(hexNoSpace);
+				try {
+					inter.set(lastAtomicId, hex2byte);
+					setted = true;
+				} catch (Exception e) {
+					throw new RuntimeException(e);
 				}
 			}
+
+			if (!setted) {
+				setFieldValue(inter, lastAtomicId,
+						(String) entry.getValue(), idPath, mappingTest);
+			}			
 
 		}
 
