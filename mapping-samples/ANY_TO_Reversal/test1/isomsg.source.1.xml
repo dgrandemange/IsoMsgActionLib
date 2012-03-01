@@ -19,5 +19,11 @@
 				type="binary" />
 		</isomsg>
 	</isomsg>
+	<isomsg id="38">
+		<isomsg id="16">
+			<field id="1" value="5130123412341234116D191211035229729F63"
+				type="binary" />
+		</isomsg>
+	</isomsg>	
 	<field id="49" value="978" />
 </isomsg>

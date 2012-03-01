@@ -39,6 +39,8 @@ import org.jpos.jposext.isomsgaction.testing.service.ITestSuiteFactory;
 
 public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 
+	private static final String DEFAULT_PATH_SEPARATOR = ".";
+
 	private static final String CHECK_REGEXP = "^<check:(.*)>.*$";
 
 	private static final String DEFAULT_MAPPINGS_DIR = "mappings";
@@ -119,8 +121,8 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 			}
 
 			String agregatedXml = strBuf.toString();
-			ByteArrayInputStream bais = new ByteArrayInputStream(agregatedXml
-					.getBytes());
+			ByteArrayInputStream bais = new ByteArrayInputStream(
+					agregatedXml.getBytes());
 			Digester digester = digesterFactory.createDigester();
 			Map<String, IISOMsgAction> mapActions = (Map<String, IISOMsgAction>) digester
 					.parse(bais);
@@ -304,7 +306,9 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 										.matcher(entryValue);
 								matches = checkMatcher.matches();
 								if (matches) {
-									manageManualChecks(entryValue, "context entry [" + entryKey+"]", mappingTest, CHECK_REGEXP);
+									manageManualChecks(entryValue,
+											"context entry [" + entryKey + "]",
+											mappingTest, CHECK_REGEXP);
 								} else {
 									finalExpectedContextMap.put(entryKey,
 											entryValue);
@@ -468,10 +472,10 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 				}
 
 				try {
-					File xmlBeanMappingFile = new File(testSetDir
-							.getAbsolutePath()
-							+ System.getProperty("file.separator")
-							+ xmlBeanMappingFilePath);
+					File xmlBeanMappingFile = new File(
+							testSetDir.getAbsolutePath()
+									+ System.getProperty("file.separator")
+									+ xmlBeanMappingFilePath);
 
 					BeanReader beanReader = new BeanReader();
 
@@ -502,13 +506,15 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 
 		// Déterminer les champs composites et les créer
 		for (Entry entry : props.entrySet()) {
-			String idPath = (String) entry.getKey();
+			String rawIdPath = (String) entry.getKey();
+			String idPath = hexPathToDecPath(rawIdPath, DEFAULT_PATH_SEPARATOR);
 			String strLastAtomicId = ISOMsgHelper.findLastAtomicId(idPath);
-			int lastAtomicId = ISOMsgHelper.getIntIdFromStringId(strLastAtomicId);			
+			int lastAtomicId = ISOMsgHelper
+					.getIntIdFromStringId(strLastAtomicId);
 			ISOMsg inter = res;
-			
+
 			if (!(strLastAtomicId.equals(idPath))) {
-				int lastSepIndex = idPath.lastIndexOf(".");
+				int lastSepIndex = idPath.lastIndexOf(DEFAULT_PATH_SEPARATOR);
 
 				String pathOnly;
 				if (lastSepIndex > 0) {
@@ -517,7 +523,7 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 					pathOnly = idPath;
 				}
 
-				StringTokenizer tokenizer = new StringTokenizer(pathOnly, ".");
+				StringTokenizer tokenizer = new StringTokenizer(pathOnly, DEFAULT_PATH_SEPARATOR);
 				while (tokenizer.hasMoreTokens()) {
 					String token = tokenizer.nextToken();
 					int currentId = ISOMsgHelper.getIntIdFromStringId(token);
@@ -554,13 +560,30 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 			}
 
 			if (!setted) {
-				setFieldValue(inter, lastAtomicId,
-						(String) entry.getValue(), idPath, mappingTest);
-			}			
+				setFieldValue(inter, lastAtomicId, (String) entry.getValue(),
+						idPath, mappingTest);
+			}
 
 		}
 
 		return res;
+	}
+
+	protected String hexPathToDecPath(String rawIdPath,
+			String defaultPathSeparator) {
+		StringBuffer res = new StringBuffer();
+		StringTokenizer tokenizer = new StringTokenizer(rawIdPath,
+				defaultPathSeparator);
+		String sep = "";
+		while (tokenizer.hasMoreTokens()) {
+			String token = tokenizer.nextToken();
+			int currentId = ISOMsgHelper.getIntIdFromStringId(token);
+			res.append(sep);
+			res.append(currentId);
+			sep = defaultPathSeparator;
+		}
+
+		return res.toString();
 	}
 
 	protected void setFieldValue(ISOMsg msg, int id, String value,
@@ -596,8 +619,8 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 		}
 		mappingTest.setShowManualCheckReminder((null == manualCheck) ? false
 				: manualCheck.booleanValue());
-		mappingTest.addManualCheck(idPath, value
-				.replaceFirst(checkRegExp, "$1"));
+		mappingTest.addManualCheck(idPath,
+				value.replaceFirst(checkRegExp, "$1"));
 	}
 
 	@Override
