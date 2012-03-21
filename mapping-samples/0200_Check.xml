@@ -58,7 +58,7 @@
 			<checkField id="11"/>
 			<checkField id="12"/>
 			<checkField id="13"/>
-			<checkField id="42"/>
+			<checkField id="42"/>			
 			<checkField id="49"/>
 			
 		<!-- 
@@ -73,6 +73,7 @@
 			========================= 
 		-->
 			<checkField id="35"	presence="optional"/>
+			<checkField id="43" presence="optional"/>
 		<!--
 			========================= 
 			END   Optional fields 

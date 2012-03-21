@@ -34,4 +34,6 @@
 
 	<fieldFormat id="42" 		type="ALPHA+NUM+SPACES+SPECIAL" 	lg="15"	lgVariable="false"	desc="Merchant id" />	
 	
+	<fieldFormat id="43" 		type="BINARY" 						lg="14"	lgVariable="true" desc="Track 2 Data" />
+	
 </group>

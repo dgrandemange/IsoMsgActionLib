@@ -21,9 +21,9 @@ import org.jpos.jposext.isomsgaction.model.validation.ValidationErrorTypeEnum;
 /**
  * Action that checks one field against a validation rule<BR/>
  * In case validation errors occur, these are listed in a list that one can
- * retrieve in action execution context map. <BR/>Constant
- * ISOMsgActionCheckField.VALIDATION_ERRORS_LIST_ATTRNAME indicates the key name
- * of this list in action execution context map.
+ * retrieve in action execution context map. <BR/>
+ * Constant ISOMsgActionCheckField.VALIDATION_ERRORS_LIST_ATTRNAME indicates the
+ * key name of this list in action execution context map.
  * 
  * @author dgrandemange
  * 
@@ -106,7 +106,8 @@ public class ISOMsgActionCheckField extends ISOMsgAbstractAction {
 							}
 						}
 					} else if (DataType.BINARY.equals(dataType)) {
-						// Nothing special to do here
+						int len = strCurrentVal.length();
+						erreur = checkLength(validationRule, erreur, len);
 					} else {
 						String jeuCaracteresAdmis = "";
 						for (DataType type : listeTypeDonnee) {
@@ -124,25 +125,7 @@ public class ISOMsgActionCheckField extends ISOMsgAbstractAction {
 
 						int len = strCurrentVal.length();
 
-						if (validationRule.isVariableLength()) {
-							if (len > validationRule.getLength()) {
-								erreur = genErreurDeLongueur(
-										new ValidationError(), getIdPath());
-							} else {
-								if (len > 0) {
-									if (len < validationRule.getMinLength()) {
-										erreur = genErreurDeLongueur(
-												new ValidationError(),
-												getIdPath());
-									}
-								}
-							}
-						} else {
-							if (len != validationRule.getLength()) {
-								erreur = genErreurDeLongueur(
-										new ValidationError(), getIdPath());
-							}
-						}
+						erreur = checkLength(validationRule, erreur, len);
 					}
 				}
 			}
@@ -154,6 +137,35 @@ public class ISOMsgActionCheckField extends ISOMsgAbstractAction {
 			}
 		}
 
+	}
+
+	protected ValidationError checkLength(ValidationRule validationRule,
+			ValidationError erreur, int len) {
+		
+		if (!(0 == validationRule.getMinLength() && 0 == validationRule
+				.getLength())) {
+			
+			if (validationRule.isVariableLength()) {
+				if (len > validationRule.getLength()) {
+					erreur = genErreurDeLongueur(new ValidationError(),
+							getIdPath());
+				} else {
+					if (len > 0) {
+						if (len < validationRule.getMinLength()) {
+							erreur = genErreurDeLongueur(new ValidationError(),
+									getIdPath());
+						}
+					}
+				}
+			} else {
+				if (len != validationRule.getLength()) {
+					erreur = genErreurDeLongueur(new ValidationError(),
+							getIdPath());
+				}
+			}
+		}
+		
+		return erreur;
 	}
 
 	private boolean isEmpty(String value0) {

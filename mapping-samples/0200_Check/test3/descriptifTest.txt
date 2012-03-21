@@ -1,0 +1,3 @@
+Nominal case.
+Test with a invalid message source. 
+Binary field length is not valid
