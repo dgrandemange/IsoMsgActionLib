@@ -17,6 +17,7 @@ import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.Rule;
 import org.jpos.iso.ISOUtil;
 import org.jpos.jposext.isomsgaction.factory.service.DigesterFactory;
+import org.jpos.jposext.isomsgaction.factory.service.ICustomCondition;
 import org.jpos.jposext.isomsgaction.model.DateFieldEnum;
 import org.jpos.jposext.isomsgaction.model.PadDirectionEnum;
 import org.jpos.jposext.isomsgaction.model.validation.DataType;
@@ -31,6 +32,7 @@ import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionCheckField;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionCopyFieldByRef;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionCreateCompositeField;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionDeclFieldFormat;
+import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfCustomCondition;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesDelimConsts;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesRegExp;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfPresent;
@@ -740,6 +742,28 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				parentAction.add(action);
 			}
 
+		});		
+		
+		digester.addObjectCreate("*/ifCustomCondition", ISOMsgActionIfCustomCondition.class);
+		digester.addRule("*/ifCustomCondition", new Rule() {
+
+			@Override
+			public void begin(String namespace, String name, Attributes attr)
+					throws Exception {
+				ISOMsgCompositeAction parentAction = (ISOMsgCompositeAction) digester
+						.peek(1);
+				ISOMsgActionIfCustomCondition action = (ISOMsgActionIfCustomCondition) digester
+						.peek(0);				
+				
+				String customConditionClazzName = attr.getValue("class");
+				action.setCustomConditionClazzName(customConditionClazzName);
+				
+				ICustomCondition customCondition = (ICustomCondition) Class.forName(customConditionClazzName).newInstance();
+				action.setCustomCondition(customCondition);
+				
+				parentAction.add(action);
+			}
+			
 		});		
 		
 		return digester;

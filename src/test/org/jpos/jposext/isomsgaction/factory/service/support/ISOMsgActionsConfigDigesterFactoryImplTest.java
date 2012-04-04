@@ -21,6 +21,7 @@ import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionCheckField;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionCopyFieldByRef;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionCreateCompositeField;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionDeclFieldFormat;
+import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfCustomCondition;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesDelimConsts;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesRegExp;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfPresent;
@@ -410,6 +411,9 @@ public class ISOMsgActionsConfigDigesterFactoryImplTest extends TestCase {
 		ISOMsgActionSetStringValue action0100F_35 = (ISOMsgActionSetStringValue) cmpAction0100D.get(28);
 		assertTrue(action0100F_35.isBinary());
 
+		ISOMsgActionIfCustomCondition action0100F_36 = (ISOMsgActionIfCustomCondition) cmpAction0100D.get(29);
+		assertEquals("dummy.MyCustomizedCondition", action0100F_36.getCustomConditionClazzName());
+		assertTrue(action0100F_36.getCustomCondition() instanceof dummy.MyCustomizedCondition);
 	}
 
 }

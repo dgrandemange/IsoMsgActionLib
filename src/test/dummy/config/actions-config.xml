@@ -366,6 +366,23 @@
 		-->		
 		<set id="456" value="EEDD99" binary="true" />
 
+		<!-- 
+			"ifCustomCondition" element :
+			Here, the condition can be read as 
+				IF my customized condition is true
+				THEN
+					set field in !!dest!! message with value "tutu"
+				ELSE
+					remove field 2 from !!dest!! message
+				END IF			
+		-->
+		<ifCustomCondition class="dummy.MyCustomizedCondition">
+			<set id="2" value="tutu"/>
+			<else>
+				<removeField id="2" />
+			</else>
+		</ifCustomCondition>
+
 	</iso-action>
 
 </iso-actions>
