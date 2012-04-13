@@ -399,8 +399,8 @@
 			Here we want to iterate on each subfield of composite field 6 in message 1.			
 		-->
 		<loop token="i" id="6" msg="1">
-			<createCmpField id="5.i"/>
-			<stringCopy id="5.i.1" sourceId="6.i.2" />
+			<createCmpField id="5.${i}"/>
+			<stringCopy id="5.${i}.1" sourceId="6.${i}.2" />
 		</loop>  
 
 		<!-- 
@@ -408,9 +408,9 @@
 			Here we specify a loop interval [1-4]			
 		-->
 		<loop token="j" begin="1" end="4">
-			<ifPresent id="5.j" applyNotOp="true">
-				<createCmpField id="5.j"/>
-				<stringCopy id="5.j.1" sourceId="6.j.2" />
+			<ifPresent id="5.${j}" applyNotOp="true">
+				<createCmpField id="5.${j}"/>
+				<stringCopy id="5.${j}.1" sourceId="6.${j}.2" />
 			</ifPresent>
 		</loop>  
 
