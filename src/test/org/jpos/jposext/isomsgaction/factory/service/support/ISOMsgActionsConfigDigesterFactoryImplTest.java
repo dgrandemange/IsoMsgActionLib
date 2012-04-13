@@ -2,9 +2,13 @@ package org.jpos.jposext.isomsgaction.factory.service.support;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import javax.sql.PooledConnection;
 
 import junit.framework.TestCase;
 
@@ -25,6 +29,7 @@ import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfCustomConditi
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesDelimConsts;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesRegExp;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfPresent;
+import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionLoop;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionMergeMsg;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionRemoveField;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionSetBinary;
@@ -39,6 +44,7 @@ import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionUpdateExecution
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionUserCustomized;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionValidate;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgCompositeAction;
+import org.jpos.jposext.isomsgaction.service.support.proxy.LoopHandler;
 import org.xml.sax.SAXException;
 
 import dummy.CustomizedISOAction;
@@ -335,10 +341,10 @@ public class ISOMsgActionsConfigDigesterFactoryImplTest extends TestCase {
 		
 		ISOMsgActionDeclFieldFormat action0100F_28_4 = (ISOMsgActionDeclFieldFormat) cmpAction0100F_28.get(3);
 		assertNotNull(action0100F_28_4);
-		assertEquals("18", action0100F_28_4.getIdPath());
+		assertEquals("myFormatForField18", action0100F_28_4.getIdPath());
 		ValidationRule regleValidation_0100F_28_4 = action0100F_28_4.getRegleValidation();
 		assertNotNull(regleValidation_0100F_28_4);
-		assertEquals("18", regleValidation_0100F_28_4.getName());
+		assertEquals("myFormatForField18", regleValidation_0100F_28_4.getName());
 		assertNull(regleValidation_0100F_28_4.getDatePattern());
 		assertEquals("[0-9]{1,10}[.][0-9]{2}[A-Z]{3}", regleValidation_0100F_28_4.getPattern());
 		List<DataType> typeDonnee_0100F_28_4 = regleValidation_0100F_28_4.getDataType();
@@ -372,6 +378,7 @@ public class ISOMsgActionsConfigDigesterFactoryImplTest extends TestCase {
 		ISOMsgActionCheckField action0100F_28_8 = (ISOMsgActionCheckField) cmpAction0100F_28.get(7);
 		assertNotNull(action0100F_28_8);
 		assertEquals("18", action0100F_28_8.getIdPath());
+		assertEquals("myFormatForField18", action0100F_28_8.getFieldFormatRef());  
 		assertEquals(PresenceModeEnum.UNEXPECTED, action0100F_28_8.getPresenceMode());
 		assertEquals(mapValidationRulesByIdPath, action0100F_28_8.getMapValidationRulesByIdPath());
 		
@@ -414,6 +421,27 @@ public class ISOMsgActionsConfigDigesterFactoryImplTest extends TestCase {
 		ISOMsgActionIfCustomCondition action0100F_36 = (ISOMsgActionIfCustomCondition) cmpAction0100D.get(29);
 		assertEquals("dummy.MyCustomizedCondition", action0100F_36.getCustomConditionClazzName());
 		assertTrue(action0100F_36.getCustomCondition() instanceof dummy.MyCustomizedCondition);
+		
+		ISOMsgActionLoop action0100F_37 = (ISOMsgActionLoop) cmpAction0100D.get(30);
+		assertFalse(action0100F_37.isIntervalMode());
+		assertEquals("i", action0100F_37.getToken());
+		assertEquals("6", action0100F_37.getIdPath());
+		assertEquals(1, action0100F_37.getMsgIndex());
+		
+		IISOMsgAction iisoMsgAction_37_1 = action0100F_37.get(0);
+		assertNotNull(iisoMsgAction_37_1);		
+		assertTrue(iisoMsgAction_37_1 instanceof ISOMsgActionCreateCompositeField);
+		
+		IISOMsgAction iisoMsgAction_37_2 = action0100F_37.get(1);
+		assertNotNull(iisoMsgAction_37_2);		
+		assertTrue(iisoMsgAction_37_2 instanceof ISOMsgActionStrValCopy);
+		
+		ISOMsgActionLoop action0100F_38 = (ISOMsgActionLoop) cmpAction0100D.get(31);
+		assertTrue(action0100F_38.isIntervalMode());
+		assertEquals("j", action0100F_38.getToken());
+		assertEquals(1, action0100F_38.getBegin());
+		assertEquals(4, action0100F_38.getEnd());
+		assertNotNull(action0100F_38.get(0));
 	}
 
 }

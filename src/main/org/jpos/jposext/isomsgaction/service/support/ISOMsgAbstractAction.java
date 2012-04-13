@@ -4,8 +4,8 @@ import java.util.Map;
 
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
-
 import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
+import org.jpos.jposext.isomsgaction.service.IISOMsgCommonInfoProvider;
 
 /**
  * A basic abstract iso msg action that provides some standard properties
@@ -15,31 +15,8 @@ import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
  */
 public abstract class ISOMsgAbstractAction implements IISOMsgAction {
 
-	/**
-	 * Index of message (in messages array) to use a the source message
-	 */
-	private int srcMsgIndex;
-
-	/**
-	 * Index of message (in messages array) to use a the dest message
-	 */
-	private int msgIndex;
-
-	/**
-	 * Dest field identifier path<BR/>
-	 */
-	private String idPath;
-
-	/**
-	 * Source field identifier path<BR/>
-	 */
-	private String srcIdPath;
+	private IISOMsgCommonInfoProvider isoMsgCommonInfoProvider;
 	
-	/**
-	 * Binary dest field indicator 
-	 */
-	private boolean binary;
-
 	@Override
 	public void process(ISOMsg msg, Map<String, Object> ctx)
 			throws ISOException {
@@ -47,43 +24,58 @@ public abstract class ISOMsgAbstractAction implements IISOMsgAction {
 	}
 
 	public int getSrcMsgIndex() {
-		return srcMsgIndex;
-	}
-
-	public void setSrcMsgIndex(int srcMsgIndex) {
-		this.srcMsgIndex = srcMsgIndex;
+		return isoMsgCommonInfoProvider.getSrcMsgIndex();
 	}
 
 	public String getIdPath() {
-		return idPath;
-	}
-
-	public void setIdPath(String idPath) {
-		this.idPath = idPath;
+		return isoMsgCommonInfoProvider.getIdPath();
 	}
 
 	public String getSrcIdPath() {
-		return srcIdPath;
-	}
-
-	public void setSrcIdPath(String srcIdPath) {
-		this.srcIdPath = srcIdPath;
+		return isoMsgCommonInfoProvider.getSrcIdPath();
 	}
 
 	public int getMsgIndex() {
-		return msgIndex;
-	}
-
-	public void setMsgIndex(int msgIndex) {
-		this.msgIndex = msgIndex;
+		return isoMsgCommonInfoProvider.getMsgIndex();
 	}
 
 	public boolean isBinary() {
-		return binary;
+		return isoMsgCommonInfoProvider.isBinary();
+	}
+
+	public void setSrcMsgIndex(int srcMsgIndex) {
+		isoMsgCommonInfoProvider.setSrcMsgIndex(srcMsgIndex);		
+	}
+
+	public void setIdPath(String idPath) {
+		isoMsgCommonInfoProvider.setIdPath(idPath);
+	}
+
+	public void setSrcIdPath(String srcIdPath) {
+		isoMsgCommonInfoProvider.setSrcIdPath(srcIdPath);
+	}
+
+	public void setMsgIndex(int msgIndex) {
+		isoMsgCommonInfoProvider.setMsgIndex(msgIndex);		
 	}
 
 	public void setBinary(boolean binary) {
-		this.binary = binary;
+		isoMsgCommonInfoProvider.setBinary(binary);		
+	}	
+	
+	/**
+	 * @param isoMsgCommonInfoProvider the isoMsgCommonInfoProvider to set
+	 */
+	public void setIsoMsgCommonInfoProvider(
+			IISOMsgCommonInfoProvider isoMsgCommonInfoProvider) {
+		this.isoMsgCommonInfoProvider = isoMsgCommonInfoProvider;
+	}
+
+	/**
+	 * @return the isoMsgCommonInfoProvider
+	 */
+	public IISOMsgCommonInfoProvider getIsoMsgCommonInfoProvider() {
+		return isoMsgCommonInfoProvider;
 	}
 
 }

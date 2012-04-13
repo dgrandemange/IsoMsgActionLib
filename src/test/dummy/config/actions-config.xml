@@ -272,6 +272,7 @@
 				
 				Available attributes for filed format declaration :
 				===================================================
+				* "id" : a field path or a string id that may be further referred by a checkField action (using a fieldFormatRef attribute)
 				* "type" : DATE, REGEXP, or {ALPHA,NUM,SPECIAL,SPACES} combination delimited by '+'
 				         	
 				* "lgMin" : min length of field value
@@ -293,7 +294,7 @@
 			<fieldFormat id="15" type="ALPHA+NUM+SPECIAL+SPACES" lgMin="6" lg="15" />
 			<fieldFormat id="16" type="ALPHA+NUM" lg="10" lgVariable="false" />
 			<fieldFormat id="17" type="DATE" pattern="dd/MM/yyyy:HH:mm:ss" />
-			<fieldFormat id="18" type="REGEXP" pattern="[0-9]{1,10}[.][0-9]{2}[A-Z]{3}" />			
+			<fieldFormat id="myFormatForField18" type="REGEXP" pattern="[0-9]{1,10}[.][0-9]{2}[A-Z]{3}" />			
 
 			<!-- 
 				Then only, you can check fields values along with their presence 
@@ -301,7 +302,7 @@
 			<checkField id="15" />
 			<checkField id="16" presence="mandatory"/>
 			<checkField id="17" presence="optional"/>
-			<checkField id="18" presence="unexpected"/>
+			<checkField id="18" presence="unexpected" fieldFormatRef="myFormatForField18" />
 
 		</validate>
 		
@@ -382,6 +383,36 @@
 				<removeField id="2" />
 			</else>
 		</ifCustomCondition>
+
+		<!-- 
+			Loop action
+			
+			The loop action defines first a token.
+			In the sub actions wrapped by the loop action, each time an 'id' or a 'sourceId' attribute refer to this token, these ids will be patched at runtime for each each iteration.  			
+			
+			Two looping modes :			
+			1. precise a 'msg' index and a composite field 'id' path : the loop will execute using each subfield number of this composite field,
+			2. precise a loop interval using the 'begin' and 'end' attributes, 
+		-->
+		<!-- 
+			Loop sample 1
+			Here we want to iterate on each subfield of composite field 6 in message 1.			
+		-->
+		<loop token="i" id="6" msg="1">
+			<createCmpField id="5.i"/>
+			<stringCopy id="5.i.1" sourceId="6.i.2" />
+		</loop>  
+
+		<!-- 
+			Loop sample 2
+			Here we specify a loop interval [1-4]			
+		-->
+		<loop token="j" begin="1" end="4">
+			<ifPresent id="5.j" applyNotOp="true">
+				<createCmpField id="5.j"/>
+				<stringCopy id="5.j.1" sourceId="6.j.2" />
+			</ifPresent>
+		</loop>  
 
 	</iso-action>
 

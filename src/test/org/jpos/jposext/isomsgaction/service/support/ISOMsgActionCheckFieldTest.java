@@ -39,7 +39,8 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		action = new ISOMsgActionCheckField();
-
+		action.setIsoMsgCommonInfoProvider(new ISOMsgCommonInfoProviderImpl());
+		
 		ctx = new HashMap<String, Object>();
 		errorsList = new ArrayList<ValidationError>();
 		ctx.put(ISOMsgActionCheckField.VALIDATION_ERRORS_LIST_ATTRNAME,

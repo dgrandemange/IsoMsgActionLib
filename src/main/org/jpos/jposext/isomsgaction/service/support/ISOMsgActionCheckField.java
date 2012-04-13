@@ -9,14 +9,13 @@ import java.util.Map;
 import org.jpos.iso.ISOComponent;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
-
-import org.jpos.jposext.isomsgaction.exception.ISOMsgActionException;
+import org.jpos.jposext.isomsgaction.exception.ParentMsgDoesNotExistException;
 import org.jpos.jposext.isomsgaction.helper.ISOMsgHelper;
-import org.jpos.jposext.isomsgaction.model.validation.ValidationError;
-import org.jpos.jposext.isomsgaction.model.validation.PresenceModeEnum;
-import org.jpos.jposext.isomsgaction.model.validation.ValidationRule;
 import org.jpos.jposext.isomsgaction.model.validation.DataType;
+import org.jpos.jposext.isomsgaction.model.validation.PresenceModeEnum;
+import org.jpos.jposext.isomsgaction.model.validation.ValidationError;
 import org.jpos.jposext.isomsgaction.model.validation.ValidationErrorTypeEnum;
+import org.jpos.jposext.isomsgaction.model.validation.ValidationRule;
 
 /**
  * Action that checks one field against a validation rule<BR/>
@@ -35,6 +34,8 @@ public class ISOMsgActionCheckField extends ISOMsgAbstractAction {
 
 	private Map<String, ValidationRule> mapValidationRulesByIdPath;
 
+	private String fieldFormatRef;
+
 	@Override
 	public void process(ISOMsg[] msg, Map<String, Object> ctx)
 			throws ISOException {
@@ -45,8 +46,13 @@ public class ISOMsgActionCheckField extends ISOMsgAbstractAction {
 					.get(VALIDATION_ERRORS_LIST_ATTRNAME);
 		}
 
-		ValidationRule validationRule = mapValidationRulesByIdPath.get(this
-				.getIdPath());
+		ValidationRule validationRule;
+		if (null != fieldFormatRef) {
+			validationRule = mapValidationRulesByIdPath.get(this
+					.getFieldFormatRef());
+		} else {
+			validationRule = mapValidationRulesByIdPath.get(this.getIdPath());
+		}
 
 		ValidationError erreur = null;
 
@@ -56,7 +62,8 @@ public class ISOMsgActionCheckField extends ISOMsgAbstractAction {
 			ISOComponent component = ISOMsgHelper.getComponent(
 					msg[getSrcMsgIndex()], getIdPath());
 			presence = (null != component);
-		} catch (ISOMsgActionException e) {
+		} catch (ParentMsgDoesNotExistException e) {
+			presence = false;
 		}
 
 		if (PresenceModeEnum.MANDATORY.equals(presenceMode) && (!presence)) {
@@ -141,10 +148,10 @@ public class ISOMsgActionCheckField extends ISOMsgAbstractAction {
 
 	protected ValidationError checkLength(ValidationRule validationRule,
 			ValidationError erreur, int len) {
-		
+
 		if (!(0 == validationRule.getMinLength() && 0 == validationRule
 				.getLength())) {
-			
+
 			if (validationRule.isVariableLength()) {
 				if (len > validationRule.getLength()) {
 					erreur = genErreurDeLongueur(new ValidationError(),
@@ -164,7 +171,7 @@ public class ISOMsgActionCheckField extends ISOMsgAbstractAction {
 				}
 			}
 		}
-		
+
 		return erreur;
 	}
 
@@ -221,6 +228,21 @@ public class ISOMsgActionCheckField extends ISOMsgAbstractAction {
 	public void setMapValidationRulesByIdPath(
 			Map<String, ValidationRule> mapValidationRulesByIdPath) {
 		this.mapValidationRulesByIdPath = mapValidationRulesByIdPath;
+	}
+
+	/**
+	 * @return the fieldFormatRef
+	 */
+	public String getFieldFormatRef() {
+		return fieldFormatRef;
+	}
+
+	/**
+	 * @param fieldFormatRef
+	 *            the fieldFormatRef to set
+	 */
+	public void setFieldFormatRef(String fieldFormatRef) {
+		this.fieldFormatRef = fieldFormatRef;
 	}
 
 }

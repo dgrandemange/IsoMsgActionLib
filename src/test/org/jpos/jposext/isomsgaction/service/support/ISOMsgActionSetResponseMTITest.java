@@ -17,6 +17,7 @@ public class ISOMsgActionSetResponseMTITest extends TestCase {
 		super.setUp();
 		action = new ISOMsgActionSetResponseMTI();
 		action.setDefaultResponseMTI("9919");
+		action.setIsoMsgCommonInfoProvider(new ISOMsgCommonInfoProviderImpl());
 		
 		msg = new ISOMsg();
 

@@ -7,8 +7,11 @@ package org.jpos.jposext.isomsgaction.factory.service.support;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.Proxy;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -24,6 +27,7 @@ import org.jpos.jposext.isomsgaction.model.validation.DataType;
 import org.jpos.jposext.isomsgaction.model.validation.PresenceModeEnum;
 import org.jpos.jposext.isomsgaction.model.validation.ValidationRule;
 import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
+import org.jpos.jposext.isomsgaction.service.IISOMsgCommonInfoProvider;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgAbstractAction;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgAbstractIfAction;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionBinaryCopy;
@@ -36,6 +40,7 @@ import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfCustomConditi
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesDelimConsts;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesRegExp;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfPresent;
+import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionLoop;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionMergeMsg;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionRemoveField;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionSetBinary;
@@ -49,7 +54,9 @@ import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionStrValRegExpRep
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionUpdateExecutionContext;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionUserCustomized;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionValidate;
+import org.jpos.jposext.isomsgaction.service.support.ISOMsgCommonInfoProviderImpl;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgCompositeAction;
+import org.jpos.jposext.isomsgaction.service.support.proxy.LoopHandler;
 import org.xml.sax.Attributes;
 
 public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
@@ -90,7 +97,7 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionSetStringValue action = (ISOMsgActionSetStringValue) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
 				action.setValue(attr.getValue("value"));
 
@@ -106,7 +113,7 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				}
 				action.setFixedLength(fixedLength);
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
 		});
@@ -123,14 +130,14 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionIfMatchesDelimConsts action = (ISOMsgActionIfMatchesDelimConsts) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 				populateCommonIfActionProperties(action, attr);
 
 				action.setValuesToMatch(attr.getValue("matchlist"));
 				action.setCaseSensitive(!convertStrToBoolean(attr
 						.getValue("ignoreCase")));
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
 		});
@@ -147,12 +154,12 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionIfMatchesRegExp action = (ISOMsgActionIfMatchesRegExp) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 				populateCommonIfActionProperties(action, attr);
 
 				action.setRegexp(attr.getValue("pattern"));
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
 		});
@@ -168,10 +175,10 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionIfPresent action = (ISOMsgActionIfPresent) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 				populateCommonIfActionProperties(action, attr);
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
 		});
@@ -203,7 +210,7 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionSetStrDate action = (ISOMsgActionSetStrDate) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
 				action.setPattern(attr.getValue("format"));
 
@@ -232,7 +239,7 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 
 				action.setDateField(addInterval);
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
 		});
@@ -249,11 +256,11 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionSetRandomNumber action = (ISOMsgActionSetRandomNumber) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
 				action.setNbDigits(Integer.parseInt(attr.getValue("digits")));
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
 		});
@@ -269,20 +276,19 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionStrValCopy action = (ISOMsgActionStrValCopy) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
 				String concat = attr.getValue("concat");
 				if (null != concat) {
 					action.setConcat("true".equalsIgnoreCase(concat));
 				}
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
 		});
 
-		digester
-				.addObjectCreate("*/removeField", ISOMsgActionRemoveField.class);
+		digester.addObjectCreate("*/removeField", ISOMsgActionRemoveField.class);
 		digester.addRule("*/removeField", new Rule() {
 
 			@Override
@@ -293,9 +299,9 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionRemoveField action = (ISOMsgActionRemoveField) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
 		});
@@ -312,9 +318,9 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionCopyFieldByRef action = (ISOMsgActionCopyFieldByRef) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
 		});
@@ -331,12 +337,12 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionStrValRegExpReplace action = (ISOMsgActionStrValRegExpReplace) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
 				action.setRegexpPattern(attr.getValue("pattern"));
 				action.setRegexpReplace(attr.getValue("replace"));
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
 		});
@@ -353,9 +359,9 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionCreateCompositeField action = (ISOMsgActionCreateCompositeField) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
 		});
@@ -373,16 +379,16 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 
 				action.setScriptId(attr.getValue("scriptId"));
 				action.setIncludes(attr.getValue("includes"));
-				
-				parentAction.add(action);
-			}			
-			
+
+				addActionToParent(digester, parentAction, action);
+			}
+
 			@Override
 			public void body(String namespace, String name, String text)
 					throws Exception {
 				ISOMsgActionBshScript action = (ISOMsgActionBshScript) digester
 						.peek(0);
-				action.setBshScript(text.trim());				
+				action.setBshScript(text.trim());
 			}
 
 		});
@@ -399,7 +405,7 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionStrValPadding action = (ISOMsgActionStrValPadding) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
 				String padChar = attr.getValue("padChar");
 				if (null != padChar) {
@@ -411,9 +417,8 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				String padDir = attr.getValue("padDir");
 				PadDirectionEnum defaultPadDir = PadDirectionEnum.LEFT;
 				if (null != padDir) {
-					action
-							.setPadDir("right".equalsIgnoreCase(padDir) ? PadDirectionEnum.RIGHT
-									: defaultPadDir);
+					action.setPadDir("right".equalsIgnoreCase(padDir) ? PadDirectionEnum.RIGHT
+							: defaultPadDir);
 				} else {
 					action.setPadDir(defaultPadDir);
 				}
@@ -428,7 +433,7 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				}
 				action.setExpLen(expLen);
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
 		});
@@ -444,9 +449,9 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionMergeMsg action = (ISOMsgActionMergeMsg) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
 		});
@@ -461,9 +466,9 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionValidate action = (ISOMsgActionValidate) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 		});
 
@@ -485,7 +490,7 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 							"A 'fieldFormat' declaration must have a 'validate' element as ancestor.");
 				}
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
 				ValidationRule regle = new ValidationRule();
 				regle.setName(action.getIdPath());
@@ -498,8 +503,7 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				}
 
 				String lgVariable = attr.getValue("lgVariable");
-				regle.setVariableLength(!("false"
-						.equalsIgnoreCase(lgVariable)));
+				regle.setVariableLength(!("false".equalsIgnoreCase(lgVariable)));
 
 				String lgMin = attr.getValue("lgMin");
 				try {
@@ -553,7 +557,7 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				parentValidateAction.addValidationRule(action.getIdPath(),
 						regle);
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
 		});
@@ -577,7 +581,7 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				action.setMapValidationRulesByIdPath(parentValidateAction
 						.getMapValidationRulesByIdPath());
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
 				PresenceModeEnum presenceMode;
 				String sPresenceMode = attr.getValue("presence");
@@ -588,9 +592,12 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 							.trim().toUpperCase());
 				}
 
+				String fieldFormatRef = attr.getValue("fieldFormatRef");
+				action.setFieldFormatRef(fieldFormatRef);
+				
 				action.setPresenceMode(presenceMode);
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 		});
 
@@ -605,7 +612,7 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgCompositeAction action = (ISOMsgCompositeAction) digester
 						.peek(0);
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
 		});
@@ -621,12 +628,12 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionSetResponseMTI action = (ISOMsgActionSetResponseMTI) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
 				String value = attr.getValue("default");
 				action.setDefaultResponseMTI(value);
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 		});
 
@@ -641,14 +648,15 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionBinaryCopy action = (ISOMsgActionBinaryCopy) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
-		});		
-		
-		digester.addObjectCreate("*/updateContext", ISOMsgActionUpdateExecutionContext.class);
+		});
+
+		digester.addObjectCreate("*/updateContext",
+				ISOMsgActionUpdateExecutionContext.class);
 		digester.addRule("*/updateContext", new Rule() {
 
 			@Override
@@ -659,7 +667,7 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionUpdateExecutionContext action = (ISOMsgActionUpdateExecutionContext) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
 				action.setValueBeanPath(attr.getValue("ctxBeanPath"));
 
@@ -673,12 +681,13 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				}
 				action.setFixedLength(fixedLength);
 
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
-		});		
-		
-		digester.addObjectCreate("*/customAction", ISOMsgActionUserCustomized.class);
+		});
+
+		digester.addObjectCreate("*/customAction",
+				ISOMsgActionUserCustomized.class);
 		digester.addRule("*/customAction", new Rule() {
 
 			@Override
@@ -687,14 +696,14 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgCompositeAction parentAction = (ISOMsgCompositeAction) digester
 						.peek(1);
 				ISOMsgActionUserCustomized action = (ISOMsgActionUserCustomized) digester
-						.peek(0);				
-				
+						.peek(0);
+
 				String customISOActionClazzName = attr.getValue("class");
 				action.setIsoActionClazzName(customISOActionClazzName);
-				
-				parentAction.add(action);
+
+				addActionToParent(digester, parentAction, action);
 			}
-			
+
 			@Override
 			public void body(String namespace, String name, String text)
 					throws Exception {
@@ -707,23 +716,25 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 						.setAttributesForPrimitives(false);
 				beanReader.getBindingConfiguration().setMapIDs(false);
 
-				beanReader.registerBeanClass("customISOAction", Class.forName(action.getIsoActionClazzName()));
+				beanReader.registerBeanClass("customISOAction",
+						Class.forName(action.getIsoActionClazzName()));
 
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
 				PrintWriter writer = new PrintWriter(bos);
 				writer.write("<customISOAction>");
 				writer.write(text);
 				writer.write("</customISOAction>");
-				writer.flush();				
+				writer.flush();
 				writer.close();
-				
-				ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-				
-				Object obj = (Object) beanReader.parse(bis);				
+
+				ByteArrayInputStream bis = new ByteArrayInputStream(bos
+						.toByteArray());
+
+				Object obj = (Object) beanReader.parse(bis);
 				action.setIsoAction((IISOMsgAction) obj);
 			}
-		});			
-		
+		});
+
 		digester.addObjectCreate("*/setBinary", ISOMsgActionSetBinary.class);
 		digester.addRule("*/setBinary", new Rule() {
 
@@ -735,16 +746,17 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgActionSetBinary action = (ISOMsgActionSetBinary) digester
 						.peek(0);
 
-				populateCommonActionProperties(action, attr);
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 				String hexValue = attr.getValue("value");
 				byte[] bytes = ISOUtil.hex2byte(hexValue);
 				action.setBytes(bytes);
-				parentAction.add(action);
+				addActionToParent(digester, parentAction, action);
 			}
 
-		});		
-		
-		digester.addObjectCreate("*/ifCustomCondition", ISOMsgActionIfCustomCondition.class);
+		});
+
+		digester.addObjectCreate("*/ifCustomCondition",
+				ISOMsgActionIfCustomCondition.class);
 		digester.addRule("*/ifCustomCondition", new Rule() {
 
 			@Override
@@ -753,19 +765,49 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				ISOMsgCompositeAction parentAction = (ISOMsgCompositeAction) digester
 						.peek(1);
 				ISOMsgActionIfCustomCondition action = (ISOMsgActionIfCustomCondition) digester
-						.peek(0);				
-				
+						.peek(0);
+
 				String customConditionClazzName = attr.getValue("class");
 				action.setCustomConditionClazzName(customConditionClazzName);
-				
-				ICustomCondition customCondition = (ICustomCondition) Class.forName(customConditionClazzName).newInstance();
+
+				ICustomCondition customCondition = (ICustomCondition) Class
+						.forName(customConditionClazzName).newInstance();
 				action.setCustomCondition(customCondition);
-				
-				parentAction.add(action);
+
+				addActionToParent(digester, parentAction, action);
 			}
-			
-		});		
-		
+
+		});
+
+		digester.addObjectCreate("*/loop", ISOMsgActionLoop.class);
+		digester.addRule("*/loop", new Rule() {
+			@Override
+			public void begin(String namespace, String name, Attributes attr)
+					throws Exception {
+				ISOMsgCompositeAction parentAction = (ISOMsgCompositeAction) digester
+						.peek(1);
+				ISOMsgActionLoop action = (ISOMsgActionLoop) digester.peek(0);
+
+				String token = attr.getValue("token");
+				action.setToken(token);
+
+				String begin = attr.getValue("begin");
+				if (null != begin) {
+					action.setIntervalMode(true);
+					action.setBegin(Integer.parseInt(begin));
+
+					String end = attr.getValue("end");
+					action.setEnd(Integer.parseInt(end));
+				} else {
+					action.setIntervalMode(false);
+				}
+
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
+
+				addActionToParent(digester, parentAction, action);
+			}
+		});
+
 		return digester;
 	}
 
@@ -783,38 +825,82 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 		return res;
 	}
 
-	private void populateCommonActionProperties(ISOMsgAbstractAction action,
+	private ISOMsgActionLoop[] findParentLoopAction(Digester digester) {
+		ISOMsgActionLoop[] res;
+		List<ISOMsgActionLoop> lstLoopActions = new ArrayList<ISOMsgActionLoop>();
+
+		for (int i = 1; i < digester.getCount(); i++) {
+			Object obj = digester.peek(i);
+			if (obj instanceof ISOMsgActionLoop) {
+				lstLoopActions.add((ISOMsgActionLoop) obj);
+			}
+		}
+
+		res = new ISOMsgActionLoop[lstLoopActions.size()];
+		res = lstLoopActions.toArray(res);
+
+		return res;
+	}
+
+	private void addActionToParent(Digester digester,
+			ISOMsgCompositeAction parent, IISOMsgAction action) {
+
+		if (action instanceof ISOMsgAbstractAction) {
+			ISOMsgActionLoop[] parentLoopActions = findParentLoopAction(digester);
+
+			if (parentLoopActions.length > 0) {
+				IISOMsgCommonInfoProvider commonInfoProvider = ((ISOMsgAbstractAction) action)
+						.getIsoMsgCommonInfoProvider();
+				IISOMsgCommonInfoProvider surrogate = (IISOMsgCommonInfoProvider) Proxy
+						.newProxyInstance(
+								action.getClass().getClassLoader(),
+								new Class[] { IISOMsgCommonInfoProvider.class },
+								new LoopHandler(parentLoopActions,
+										commonInfoProvider));
+				((ISOMsgAbstractAction) action).setIsoMsgCommonInfoProvider(surrogate);
+
+			}
+		}
+
+		parent.add(action);
+
+	}
+
+	private ISOMsgCommonInfoProviderImpl populateCommonActionProperties(
 			Attributes attr) {
+		ISOMsgCommonInfoProviderImpl commonInfoProvider = new ISOMsgCommonInfoProviderImpl();
+
 		String id = attr.getValue("id");
-		action.setIdPath(id);
+		commonInfoProvider.setIdPath(id);
 
 		String sourceId = attr.getValue("sourceId");
 		if (null == sourceId) {
 			sourceId = id;
 		}
-		action.setSrcIdPath(sourceId);
+		commonInfoProvider.setSrcIdPath(sourceId);
 
 		int msgIndex = 0;
 		String smsgIndex = attr.getValue("msg");
 		if (null != smsgIndex) {
 			msgIndex = Integer.parseInt(smsgIndex);
 		}
-		action.setMsgIndex(msgIndex);
+		commonInfoProvider.setMsgIndex(msgIndex);
 
 		int sourceMsgIndex = 1;
 		String ssourceMsgIndex = attr.getValue("sourceMsg");
 		if (null != ssourceMsgIndex) {
 			sourceMsgIndex = Integer.parseInt(ssourceMsgIndex);
 		}
-		action.setSrcMsgIndex(sourceMsgIndex);
-		
+		commonInfoProvider.setSrcMsgIndex(sourceMsgIndex);
+
 		boolean binary = false;
 		String sBinary = attr.getValue("binary");
 		if (null != sBinary) {
 			binary = "true".equalsIgnoreCase(sBinary);
 		}
-		action.setBinary(binary);
-		
+		commonInfoProvider.setBinary(binary);
+
+		return commonInfoProvider;
 	}
 
 	private void populateCommonIfActionProperties(

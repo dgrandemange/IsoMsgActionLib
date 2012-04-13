@@ -1,0 +1,11 @@
+<isomsg>
+	<field id="1" value="000000000000" />
+	
+	<isomsg id="2">
+		<field id="1" value="dummy_value_field_1.2" />
+		<field id="3" value="BAD (spaces inside)" />
+		<field id="12" value="BAD_max_length_exceeded_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaarg" />
+		<field id="58" value="dummy_value_field_1.58" />
+	</isomsg>
+
+</isomsg>

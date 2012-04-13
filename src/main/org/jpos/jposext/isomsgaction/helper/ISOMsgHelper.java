@@ -36,6 +36,11 @@ public class ISOMsgHelper {
 	 */
 	public static ISOComponent getComponent(ISOMsg msg, String idPath,
 			String idPathDelimiter) {
+		
+		if ("".equals(idPath.trim())) {
+			return msg;
+		}
+		
 		CmpInfoWrapper cmpInfos = findParentMsg(msg, idPath, idPath,
 				idPathDelimiter);
 
@@ -255,6 +260,7 @@ public class ISOMsgHelper {
 
 	public static CmpInfoWrapper findParentMsg(ISOMsg msg, String fullIdPath,
 			String currentIdPath, String idPathDelimiter) {
+		
 		StringTokenizer tokenizer = new StringTokenizer(currentIdPath,
 				idPathDelimiter);
 		String token = tokenizer.nextToken();

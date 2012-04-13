@@ -24,7 +24,8 @@ public class ISOMsgActionIfPresentTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		action = new ISOMsgActionIfPresent();
-
+		action.setIsoMsgCommonInfoProvider(new ISOMsgCommonInfoProviderImpl());
+		
 		action.setChilds(new ArrayList<IISOMsgAction>());
 
 		action.add(new IISOMsgAction() {

@@ -24,7 +24,8 @@ public class ISOMsgActionIfMatchesDelimConstsTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		action = new ISOMsgActionIfMatchesDelimConsts();
-
+		action.setIsoMsgCommonInfoProvider(new ISOMsgCommonInfoProviderImpl());
+		
 		action.setChilds(new ArrayList<IISOMsgAction>());
 
 		action.add(new IISOMsgAction() {

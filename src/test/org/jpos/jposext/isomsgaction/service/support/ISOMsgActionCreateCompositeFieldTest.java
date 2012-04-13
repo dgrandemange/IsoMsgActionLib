@@ -15,7 +15,8 @@ public class ISOMsgActionCreateCompositeFieldTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		action = new ISOMsgActionCreateCompositeField();
-
+		action.setIsoMsgCommonInfoProvider(new ISOMsgCommonInfoProviderImpl());
+		
 		msg = new ISOMsg();
 
 		ISOMsgTestHelper.populateMsg(msg, new String[][] {

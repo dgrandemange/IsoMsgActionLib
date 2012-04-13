@@ -19,7 +19,8 @@ public class ISOMsgActionUpdateExecutionContextTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		action = new ISOMsgActionUpdateExecutionContext();
-
+		action.setIsoMsgCommonInfoProvider(new ISOMsgCommonInfoProviderImpl());
+		
 		msg = new ISOMsg();
 
 		ISOMsgTestHelper.populateMsg(msg, new String[][] {
