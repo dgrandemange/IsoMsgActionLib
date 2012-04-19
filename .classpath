@@ -11,7 +11,7 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/bsh-2.0b4.jar"/>
 	<classpathentry kind="lib" path="lib/commons-beanutils.jar"/>
-	<classpathentry kind="lib" path="lib/commons-betwixt-0.8.jar"/>
+	<classpathentry kind="lib" path="lib/commons-betwixt-0.8.jar" sourcepath="tmp/betwixt-src"/>
 	<classpathentry kind="lib" path="lib/commons-collections-3.2.jar"/>
 	<classpathentry kind="lib" path="lib/commons-digester-2.0.jar" sourcepath="C:/Users/dgrandemange/.m2/repository/commons-digester/commons-digester/2.0/commons-digester-2.0-sources.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>

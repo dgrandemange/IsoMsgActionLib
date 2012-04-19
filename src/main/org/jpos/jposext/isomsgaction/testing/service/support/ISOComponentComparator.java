@@ -77,11 +77,10 @@ public class ISOComponentComparator implements Comparator<ISOComponent> {
 				comparisonContext
 						.addDiff(
 								currentPath,
-								String
-										.format(
-												"Field %s : Expected data type=%s, Current data type=%s",
-												currentPath, cmp0.getClass(),
-												cmp1.getClass()));
+								String.format(
+										"Field %s : Expected data type=%s, Current data type=%s",
+										currentPath, cmp0.getClass(),
+										cmp1.getClass()));
 				return -1;
 			}
 		}
@@ -103,17 +102,28 @@ public class ISOComponentComparator implements Comparator<ISOComponent> {
 				return 0;
 			}
 		} else {
-			try {
-				boolean same = Arrays.equals(cmp0.getBytes(), cmp1.getBytes());
-				if (!same) {
-					comparisonContext.addDiff(currentPath, String.format(
-							"Field %s : Expected(HEXA)=%s, Current(HEXA)=%s",
-							currentPath, ISOUtil.hexString(cmp0.getBytes()),
-							ISOUtil.hexString(cmp1.getBytes())));
+			if (null == cmp1) {
+				return -1;
+			} else {
+				try {
+					boolean same = Arrays.equals(cmp0.getBytes(),
+							cmp1.getBytes());
+					if (!same) {
+						comparisonContext
+								.addDiff(
+										currentPath,
+										String.format(
+												"Field %s : Expected(HEXA)=%s, Current(HEXA)=%s",
+												currentPath, ISOUtil
+														.hexString(cmp0
+																.getBytes()),
+												ISOUtil.hexString(cmp1
+														.getBytes())));
+					}
+					return same ? 0 : -1;
+				} catch (Exception e) {
+					throw new RuntimeException(e);
 				}
-				return same ? 0 : -1;
-			} catch (Exception e) {
-				throw new RuntimeException(e);
 			}
 		}
 

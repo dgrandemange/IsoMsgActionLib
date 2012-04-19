@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
+import org.jpos.iso.ISOUtil;
 
 import org.jpos.jposext.isomsgaction.helper.ISOMsgHelper;
 import org.jpos.jposext.isomsgaction.helper.ISOMsgHelper.IFulfillCondition;
@@ -53,7 +54,16 @@ public class ISOMsgActionSetStringValue extends ISOMsgAbstractAction implements
 				throw new RuntimeException(e);
 			}
 			if (null != srcObj) {
-				finalValue = srcObj.toString();
+				if (srcObj instanceof byte[]) {
+					if (isBinary()) {
+						finalValue = ISOUtil.hexString((byte[]) srcObj);
+					} else {
+						finalValue = new String((byte[]) srcObj);
+					}
+				}
+				else {
+					finalValue = srcObj.toString();
+				}
 			}
 		}
 

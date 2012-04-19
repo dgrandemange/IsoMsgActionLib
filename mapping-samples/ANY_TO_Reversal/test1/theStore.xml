@@ -7,7 +7,18 @@
 	-->
 
 <store>
+	
 	<id>1</id>
+	
 	<name>Barney's</name>
+	
 	<number>123456789012345</number>
+	
+	<someByteArray>
+		<Byte hexa='A0'/>
+		<Byte hexa='B1'/>
+		<Byte hexa='C2'/>
+		<Byte hexa='FF'/>
+	</someByteArray>
+	
 </store>

@@ -8,15 +8,17 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.SortedMap;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,7 +26,15 @@ import javax.swing.JOptionPane;
 
 import junit.framework.TestSuite;
 
+import org.apache.commons.betwixt.PatchedXMLIntrospector;
+import org.apache.commons.betwixt.expression.Context;
 import org.apache.commons.betwixt.io.BeanReader;
+import org.apache.commons.betwixt.io.read.BeanCreationChain;
+import org.apache.commons.betwixt.io.read.BeanCreationList;
+import org.apache.commons.betwixt.io.read.ChainedBeanCreator;
+import org.apache.commons.betwixt.io.read.ElementMapping;
+import org.apache.commons.betwixt.io.read.ReadContext;
+import org.apache.commons.betwixt.strategy.DefaultObjectStringConverter;
 import org.apache.commons.digester.Digester;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
@@ -478,10 +488,36 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 									+ xmlBeanMappingFilePath);
 
 					BeanReader beanReader = new BeanReader();
+					
+					PatchedXMLIntrospector patchedXmlIntrospector = new PatchedXMLIntrospector();
+					beanReader.setXMLIntrospector(patchedXmlIntrospector);
 
-					beanReader.getXMLIntrospector().getConfiguration()
+					patchedXmlIntrospector.getConfiguration()
 							.setAttributesForPrimitives(false);
+
 					beanReader.getBindingConfiguration().setMapIDs(false);
+
+					ChainedBeanCreator chainedBeanCreator = new ChainedBeanCreator() {
+
+						public Object create(ElementMapping mapping,
+								ReadContext context, BeanCreationChain chain) {
+							if (byte.class.equals(mapping.getType())) {
+								String hexByteValue = mapping.getAttributes()
+										.getValue("hexa");
+								return new Byte(
+										ISOUtil.hex2byte(hexByteValue)[0]);
+							}
+							return chain.create(mapping, context);
+						}
+
+					};
+
+					BeanCreationList chain = BeanCreationList
+							.createStandardChain();
+					chain.insertBeanCreator(1, chainedBeanCreator);
+
+					beanReader.getReadConfiguration().setBeanCreationChain(
+							chain);
 
 					for (Entry<String, String> eltClassEntry : eltClassMap
 							.entrySet()) {
@@ -523,7 +559,8 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 					pathOnly = idPath;
 				}
 
-				StringTokenizer tokenizer = new StringTokenizer(pathOnly, DEFAULT_PATH_SEPARATOR);
+				StringTokenizer tokenizer = new StringTokenizer(pathOnly,
+						DEFAULT_PATH_SEPARATOR);
 				while (tokenizer.hasMoreTokens()) {
 					String token = tokenizer.nextToken();
 					int currentId = ISOMsgHelper.getIntIdFromStringId(token);
