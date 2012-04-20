@@ -1,24 +1,14 @@
 <?xml version='1.0' ?>
 
-	<!--
-		Dummy store put in to action exection context as property
-		'theStore' (see this file's filename)
-		XML Elements should match the Store class attribute's name
-	-->
+<storeWrapper>
 
-<store>
-	
-	<id>1</id>
-	
-	<name>Barney's</name>
-	
-	<number>123456789012345</number>
-	
-	<someByteArray>
-		<Byte hexa='A0'/>
-		<Byte hexa='B1'/>
-		<Byte hexa='C2'/>
-		<Byte hexa='FF'/>
-	</someByteArray>
-	
-</store>
+	<store>
+		<id>1</id>
+		<name>Barney's</name>
+		<number>123456789012345</number>
+	</store>
+
+	<storeByteArrayInjector>A0B1C2FF</storeByteArrayInjector>
+	<storeSecondByteArrayInjector>A1B2C3</storeSecondByteArrayInjector>
+
+</storeWrapper>

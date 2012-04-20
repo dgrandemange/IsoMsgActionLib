@@ -4,21 +4,22 @@
 	<classpathentry kind="src" path="src/main"/>
 	<classpathentry kind="src" path="src/test"/>
 	<classpathentry kind="src" path="wikidoc/src/java"/>
+	<classpathentry kind="src" path="tmp/betwixt-src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6">
 		<attributes>
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/bsh-2.0b4.jar"/>
-	<classpathentry kind="lib" path="lib/commons-beanutils.jar"/>
 	<classpathentry kind="lib" path="lib/commons-betwixt-0.8.jar" sourcepath="tmp/betwixt-src"/>
-	<classpathentry kind="lib" path="lib/commons-collections-3.2.jar"/>
-	<classpathentry kind="lib" path="lib/commons-digester-2.0.jar" sourcepath="C:/Users/dgrandemange/.m2/repository/commons-digester/commons-digester/2.0/commons-digester-2.0-sources.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jpos-dep.jar"/>
 	<classpathentry kind="lib" path="lib-dev/fest-assert-1.4.jar"/>
 	<classpathentry kind="lib" path="lib-dev/fest-util-1.1.6.jar"/>
 	<classpathentry kind="lib" path="lib-dev/mockito-all-1.9.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-beanutils.jar"/>
+	<classpathentry kind="lib" path="lib/commons-collections-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-digester-2.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

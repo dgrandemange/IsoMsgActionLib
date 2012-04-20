@@ -1,19 +1,20 @@
 package isomsgaction.model;
 
-
 /**
  * @author dgrandemange
- *
+ * 
  */
 public class Store {
-	
+
 	private int id;
-	
+
 	private String name;
-	
+
 	private String number;
-	
+
 	private byte[] someByteArray;
+
+	private byte[] secondByteArray;
 
 	public int getId() {
 		return id;
@@ -47,11 +48,26 @@ public class Store {
 	}
 
 	/**
-	 * @param someByteArray the someByteArray to set
+	 * @param someByteArray
+	 *            the someByteArray to set
 	 */
 	public void setSomeByteArray(byte[] someByteArray) {
 		this.someByteArray = someByteArray;
 	}
 
-	
+	/**
+	 * @return the secondByteArray
+	 */
+	public byte[] getSecondByteArray() {
+		return secondByteArray;
+	}
+
+	/**
+	 * @param secondByteArray
+	 *            the secondByteArray to set
+	 */
+	public void setSecondByteArray(byte[] secondByteArray) {
+		this.secondByteArray = secondByteArray;
+	}
+
 }

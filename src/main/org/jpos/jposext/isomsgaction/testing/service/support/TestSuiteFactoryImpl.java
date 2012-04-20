@@ -8,11 +8,9 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -26,15 +24,14 @@ import javax.swing.JOptionPane;
 
 import junit.framework.TestSuite;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.betwixt.PatchedXMLIntrospector;
-import org.apache.commons.betwixt.expression.Context;
 import org.apache.commons.betwixt.io.BeanReader;
 import org.apache.commons.betwixt.io.read.BeanCreationChain;
 import org.apache.commons.betwixt.io.read.BeanCreationList;
 import org.apache.commons.betwixt.io.read.ChainedBeanCreator;
 import org.apache.commons.betwixt.io.read.ElementMapping;
 import org.apache.commons.betwixt.io.read.ReadContext;
-import org.apache.commons.betwixt.strategy.DefaultObjectStringConverter;
 import org.apache.commons.digester.Digester;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
@@ -455,6 +452,8 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 	protected void resolveContextMappedBeans(File testSetDir,
 			Properties contextProps) {
 		String xmlBeanRegExp = "^<xmlbean:(xmlpath=.*)(.*=.*[ ]*)*[ ]*>$";
+		String refBeanRegExp = "^<refbean:(.*)[ ]*>$";
+		Map<String, String> mapRefBean = new HashMap<String, String>();
 		for (Entry<Object, Object> entry : contextProps.entrySet()) {
 			String key = (String) entry.getKey();
 			String value = (String) entry.getValue();
@@ -488,15 +487,15 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 									+ xmlBeanMappingFilePath);
 
 					BeanReader beanReader = new BeanReader();
-					
+
 					PatchedXMLIntrospector patchedXmlIntrospector = new PatchedXMLIntrospector();
 					beanReader.setXMLIntrospector(patchedXmlIntrospector);
 
 					patchedXmlIntrospector.getConfiguration()
 							.setAttributesForPrimitives(false);
-
+					
 					beanReader.getBindingConfiguration().setMapIDs(false);
-
+					
 					ChainedBeanCreator chainedBeanCreator = new ChainedBeanCreator() {
 
 						public Object create(ElementMapping mapping,
@@ -504,8 +503,7 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 							if (byte.class.equals(mapping.getType())) {
 								String hexByteValue = mapping.getAttributes()
 										.getValue("hexa");
-								return new Byte(
-										ISOUtil.hex2byte(hexByteValue)[0]);
+								return new Byte(ISOUtil.hex2byte(hexByteValue)[0]);
 							}
 							return chain.create(mapping, context);
 						}
@@ -513,7 +511,7 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 					};
 
 					BeanCreationList chain = BeanCreationList
-							.createStandardChain();
+							.createStandardChain();					
 					chain.insertBeanCreator(1, chainedBeanCreator);
 
 					beanReader.getReadConfiguration().setBeanCreationChain(
@@ -533,6 +531,22 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 				}
 
 			}
+			else if(value.matches(refBeanRegExp)) {
+				mapRefBean.put(key, value);
+			}
+		}
+
+		for (Entry<String, String> entry : mapRefBean.entrySet()) {
+			String beanPath=entry.getValue().replaceFirst(refBeanRegExp, "$1");
+			String[] splitStr = beanPath.split("\\.", 2);				
+			try {
+				Object obj = PropertyUtils.getProperty(contextProps.get(splitStr[0]), splitStr[1]);
+				contextProps.put(entry.getKey(), obj);
+			}
+			catch(Exception e) {
+				throw new RuntimeException(e);
+			}
+
 		}
 	}
 

@@ -85,6 +85,8 @@
 	<set id="42" ctxBeanPath="ctx(theStore).number" />
 	
 	<set id="43" ctxBeanPath="ctx(theStore).someByteArray" binary="true" />
+	
+	<set id="44" ctxBeanPath="ctx(theStore).secondByteArray" binary="true" />
  
 	<!-- 
 			49 : Currency Code, Transaction 
