@@ -15,6 +15,8 @@ public class Store {
 	private byte[] someByteArray;
 
 	private byte[] secondByteArray;
+	
+	private String[] strArray;
 
 	public int getId() {
 		return id;
@@ -68,6 +70,20 @@ public class Store {
 	 */
 	public void setSecondByteArray(byte[] secondByteArray) {
 		this.secondByteArray = secondByteArray;
+	}
+
+	/**
+	 * @return the strArray
+	 */
+	public String[] getStrArray() {
+		return strArray;
+	}
+
+	/**
+	 * @param strArray the strArray to set
+	 */
+	public void setStrArray(String[] strArray) {
+		this.strArray = strArray;
 	}
 
 }

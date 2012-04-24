@@ -59,4 +59,35 @@ public class StoreWrapper {
 		return ISOUtil.hexString(store.getSecondByteArray());
 	}
 
+	/**
+	 * @return the strArray
+	 */
+	public String getStrArray() {
+		String strs[] =  store.getStrArray();
+		if (null == strs) {
+			return null;
+		} else {
+			StringBuffer strArrayPipeDelim = new StringBuffer();
+			String sep="";
+			for (String str : strs) {
+				strArrayPipeDelim.append(sep);
+				strArrayPipeDelim.append(str);
+				sep="|";	
+			}
+			return strArrayPipeDelim.toString();
+		}		
+	}
+
+	/**
+	 * @param strArray the strArray to set
+	 */
+	public void setStrArray(String strArrayPipeDelim) {
+		if (null == strArrayPipeDelim) {
+			store.setStrArray(new String[] {});
+		} else {
+			String strs[] =  strArrayPipeDelim.split("\\|");			
+			store.setStrArray(strs);
+		}
+	}
+	
 }

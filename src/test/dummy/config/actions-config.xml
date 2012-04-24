@@ -388,11 +388,15 @@
 			Loop action
 			
 			The loop action defines first a token.
-			In the sub actions wrapped by the loop action, each time an 'id' or a 'sourceId' attribute refer to this token, these ids will be patched at runtime for each each iteration.  			
+			In the sub actions wrapped by the loop action, each time 'id', 'sourceId', 'value' and 'valueBeanPath' attributes refer to this token, these ids will be patched at runtime for each each iteration.  			
 			
 			Two looping modes :			
 			1. precise a 'msg' index and a composite field 'id' path : the loop will execute using each subfield number of this composite field,
 			2. precise a loop interval using the 'begin' and 'end' attributes, 
+			
+			Besides, you can apply some arithmetic operations on a token using the 'EXPR(...)' expression in the previously eumerated attributes.
+			For instance, a 'value' attribute set to 'EXPR(${i}-1)' will set the value to the current iteration index minus 1. 
+			 
 		-->
 		<!-- 
 			Loop sample 1
@@ -411,6 +415,7 @@
 			<ifPresent id="5.${j}" applyNotOp="true">
 				<createCmpField id="5.${j}"/>
 				<stringCopy id="5.${j}.1" sourceId="6.${j}.2" />
+				<set id="5.${j}.2" value="someValue EXPR(${j} - 1)" />
 			</ifPresent>
 		</loop>  
 

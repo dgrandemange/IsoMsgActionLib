@@ -24,16 +24,6 @@ import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
 public class ISOMsgActionSetStringValue extends ISOMsgAbstractAction implements
 		IISOMsgAction {
 
-	/**
-	 * Valeur fixe à positionner
-	 */
-	private String value;
-
-	/**
-	 * Chemin d'une propriété du contexte à utiliser comme valeur
-	 */
-	private String valueBeanPath;
-	
 	private int fixedLength=-1;
 
 	public ISOMsgActionSetStringValue() {
@@ -43,13 +33,13 @@ public class ISOMsgActionSetStringValue extends ISOMsgAbstractAction implements
 	@Override
 	public void process(ISOMsg[] msg, Map<String, Object> ctx)
 			throws ISOException {
-		String finalValue = value;
+		String finalValue = getValue();
 
-		if (null != valueBeanPath) {
+		if (null != getValueBeanPath()) {
 			Object srcObj;
 			try {
 				srcObj = PropertyUtils.getProperty(
-						new SimpleContextWrapper(ctx), valueBeanPath);
+						new SimpleContextWrapper(ctx), getValueBeanPath());
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -81,22 +71,6 @@ public class ISOMsgActionSetStringValue extends ISOMsgAbstractAction implements
 			ISOMsgHelper.setValue(msg[getMsgIndex()], getIdPath(), finalValue,
 					(IFulfillCondition) null, isBinary());
 		}
-	}
-
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
-
-	public String getValueBeanPath() {
-		return valueBeanPath;
-	}
-
-	public void setValueBeanPath(String valueBeanPath) {
-		this.valueBeanPath = valueBeanPath;
 	}
 
 	public int getFixedLength() {

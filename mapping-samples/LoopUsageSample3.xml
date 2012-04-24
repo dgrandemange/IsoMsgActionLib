@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<iso-action id="LoopUsageSample2"
-	desc="Show loop action usage (interval mode)"
+<iso-action id="LoopUsageSample3"
+	desc="Show loop action usage with context bean path"
 	xmlns:xi="http://www.w3.org/2001/XInclude" >
 
 	<!--
@@ -16,15 +16,11 @@
 	-->
 
 	<createCmpField id="1"/>
-	
+
 	<loop token="i" begin="1" end="3">
-		
-		<createCmpField id="1.${i}"/>
-		
-		<loop token="j" begin="1" end="2">
-			<set id="1.${i}.${j}" value="a dummy value ${i}.${j}" />
-		</loop>
-			
+
+		<set id="1.${i}" ctxBeanPath="ctx(theStore).strArray[EXPR(${i} - 1)]" />
+
 	</loop>		 
-	
+
 </iso-action>

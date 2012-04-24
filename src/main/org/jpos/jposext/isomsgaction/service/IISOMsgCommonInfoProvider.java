@@ -26,4 +26,11 @@ public interface IISOMsgCommonInfoProvider {
 	
 	public void setBinary(boolean binary);
 	
+	public String getValue();
+
+	public void setValue(String value);
+
+	public String getValueBeanPath();
+
+	public void setValueBeanPath(String valueBeanPath);
 }

@@ -24,11 +24,6 @@ import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
 public class ISOMsgActionUpdateExecutionContext extends ISOMsgAbstractAction
 		implements IISOMsgAction {
 
-	/**
-	 * Path (in the execution context) of the attribute to set
-	 */
-	private String valueBeanPath;
-
 	private int fixedLength = -1;
 
 	public ISOMsgActionUpdateExecutionContext() {
@@ -56,21 +51,13 @@ public class ISOMsgActionUpdateExecutionContext extends ISOMsgAbstractAction
 			}
 		}
 		
-		if (null != valueBeanPath) {			
+		if (null != getValueBeanPath()) {			
 			try {
-				PropertyUtils.setProperty(new SimpleContextWrapper(ctx), valueBeanPath, attrValue);
+				PropertyUtils.setProperty(new SimpleContextWrapper(ctx), getValueBeanPath(), attrValue);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}		
-	}
-
-	public String getValueBeanPath() {
-		return valueBeanPath;
-	}
-
-	public void setValueBeanPath(String valueBeanPath) {
-		this.valueBeanPath = valueBeanPath;
 	}
 
 	public int getFixedLength() {

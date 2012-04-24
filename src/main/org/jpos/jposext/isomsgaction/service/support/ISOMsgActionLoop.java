@@ -7,7 +7,6 @@ import org.jpos.iso.ISOComponent;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 import org.jpos.jposext.isomsgaction.helper.ISOMsgHelper;
-import org.objenesis.instantiator.basic.NewInstanceInstantiator;
 
 /**
  * 

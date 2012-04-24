@@ -70,6 +70,16 @@ public class LoopHandlerTest extends TestCase {
 		assertThat(handler.invoke(null, method, args)).isEqualTo("5.4.7.6");
 	}	
 	
+	public void testCheckForExprToEvaluate_NominalCase() {
+		String res = handler.checkForExprToEvaluate("aaaaEXPR(5-1)bbbEXPR(2+5+12)ccc");
+		assertThat(res).isEqualTo("aaaa4bbb19ccc");
+	}
+
+	public void testCheckForExprToEvaluate_InvalidExpressionCase() {
+		String res = handler.checkForExprToEvaluate("aaaaEXPR(unvalidexpr/;+)bbb");
+		assertThat(res).isEqualTo("aaaaEXPR(unvalidexpr/;+)bbb");
+	}	
+	
 	public String getIdPath() {
 		return "dummy";
 	}

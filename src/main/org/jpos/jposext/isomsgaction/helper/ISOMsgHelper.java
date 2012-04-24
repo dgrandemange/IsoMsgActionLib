@@ -184,7 +184,7 @@ public class ISOMsgHelper {
 		int finalId = getIntIdFromStringId(sId);
 		if ((null == condition)
 				|| (condition.isConditionFulfilled(cmpParentMsg, finalId))) {
-			cmpParentMsg.set(sId, bytesToSet);
+			cmpParentMsg.set(finalId, bytesToSet);
 		}
 	}
 

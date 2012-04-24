@@ -1,0 +1,7 @@
+<isomsg>
+  <isomsg id="1">
+      <field id="1" value="a first value"/>
+      <field id="2" value="a second one"/>
+      <field id="3" value="eventually a third one"/>
+  </isomsg>
+</isomsg>

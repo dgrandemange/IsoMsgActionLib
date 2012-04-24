@@ -1,0 +1,13 @@
+<?xml version='1.0' ?>
+
+<storeWrapper>
+
+	<store>
+		<id>1</id>
+		<name>Barney's</name>
+		<number>123456789012345</number>
+	</store>
+
+	<strArray>a first value|a second one|eventually a third one</strArray>
+	
+</storeWrapper>

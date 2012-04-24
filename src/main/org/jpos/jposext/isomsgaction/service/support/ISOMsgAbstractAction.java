@@ -63,6 +63,22 @@ public abstract class ISOMsgAbstractAction implements IISOMsgAction {
 		isoMsgCommonInfoProvider.setBinary(binary);		
 	}	
 	
+	public String getValue() {
+		return isoMsgCommonInfoProvider.getValue();
+	}
+
+	public void setValue(String value) {
+		isoMsgCommonInfoProvider.setValue(value);
+	}
+
+	public String getValueBeanPath() {
+		return isoMsgCommonInfoProvider.getValueBeanPath();
+	}
+
+	public void setValueBeanPath(String valueBeanPath) {
+		isoMsgCommonInfoProvider.setValueBeanPath(valueBeanPath);		
+	}	
+	
 	/**
 	 * @param isoMsgCommonInfoProvider the isoMsgCommonInfoProvider to set
 	 */
