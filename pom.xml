@@ -90,6 +90,7 @@
 	<scm>
 		<developerConnection>scm:git:ssh://git@github.com/dgrandemange/IsoMsgActionLib.git</developerConnection>
 		<connection>scm:git:ssh://git@github.com/dgrandemange/IsoMsgActionLib.git</connection>
+		<url>scm:git:ssh://git@github.com/dgrandemange/IsoMsgActionLib.git</url>
 	</scm>
 	
 	<build>
