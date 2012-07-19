@@ -17,12 +17,16 @@ import org.jpos.jposext.isomsgaction.model.validation.ValidationRule;
 import org.jpos.jposext.isomsgaction.model.validation.DataType;
 import org.jpos.jposext.isomsgaction.model.validation.ValidationErrorTypeEnum;
 
+/**
+ * @author dgrandemange
+ * 
+ */
 public class ISOMsgActionCheckFieldTest extends TestCase {
 
 	private ISOMsgActionCheckField action;
 
 	private ISOMsg msg;
-	
+
 	private ISOMsg submsg1;
 
 	private Map<String, Object> ctx;
@@ -33,14 +37,14 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 
 	private List<DataType> typesDonnee;
 
-	private Map<String, ValidationRule> mapValidationRulesByIdPath;	
-	
+	private Map<String, ValidationRule> mapValidationRulesByIdPath;
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		action = new ISOMsgActionCheckField();
 		action.setIsoMsgCommonInfoProvider(new ISOMsgCommonInfoProviderImpl());
-		
+
 		ctx = new HashMap<String, Object>();
 		errorsList = new ArrayList<ValidationError>();
 		ctx.put(ISOMsgActionCheckField.VALIDATION_ERRORS_LIST_ATTRNAME,
@@ -65,16 +69,17 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 				new String[] { "3", "sub1_valeur3" } });
 
 		msg.set(submsg1);
-		msg.set(10, new byte[] {0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01});
-		
+		msg.set(10, new byte[] { 0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03,
+				0x02, 0x01 });
+
 		action.setIdPath("4");
 
 		validationRule = new ValidationRule();
 		typesDonnee = new ArrayList<DataType>();
 		validationRule.setDataType(typesDonnee);
 		validationRule.setVariableLength(true);
-		validationRule.setLength(100);		
-		
+		validationRule.setLength(100);
+
 		mapValidationRulesByIdPath = new HashMap<String, ValidationRule>();
 		action.setMapValidationRulesByIdPath(mapValidationRulesByIdPath);
 	}
@@ -83,134 +88,154 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 		typesDonnee.add(DataType.ALPHA);
 
 		validationRule.setName("1");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);
-		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
+
 		action.setIdPath(validationRule.getName());
 
 		action.process(msg, ctx);
 		assertEquals(0, errorsList.size());
 	}
-	
-	public void testPresenceRequiseDuChamp() throws ISOException, ParseException {
+
+	public void testPresenceRequiseDuChamp() throws ISOException,
+			ParseException {
 		typesDonnee.add(DataType.ALPHA);
 
-		validationRule.setName("100");		
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);
-		
+		validationRule.setName("100");
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
+
 		action.setIdPath(validationRule.getName());
 		action.process(msg, ctx);
 
 		assertEquals(1, errorsList.size());
 		ValidationError err = errorsList.get(0);
-		assertEquals(ValidationErrorTypeEnum.FIELD_PRESENCE, err.getTypeErreur());
+		assertEquals(ValidationErrorTypeEnum.FIELD_PRESENCE,
+				err.getTypeErreur());
 	}
 
-	public void testPresenceRequiseDuSousChamp_ChampParentInexistant() throws ISOException, ParseException {
+	public void testPresenceRequiseDuSousChamp_ChampParentInexistant()
+			throws ISOException, ParseException {
 		typesDonnee.add(DataType.ALPHA);
 
-		validationRule.setName("200.1");		
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);
-		
+		validationRule.setName("200.1");
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
+
 		action.setIdPath(validationRule.getName());
 		action.process(msg, ctx);
 
 		assertEquals(1, errorsList.size());
 		ValidationError err = errorsList.get(0);
-		assertEquals(ValidationErrorTypeEnum.FIELD_PRESENCE, err.getTypeErreur());
-	}	
-	
-	public void testPresenceRequiseChampComposite_PasDeRegleValidationAssociee() throws ISOException, ParseException {
+		assertEquals(ValidationErrorTypeEnum.FIELD_PRESENCE,
+				err.getTypeErreur());
+	}
+
+	public void testPresenceRequiseChampComposite_PasDeRegleValidationAssociee()
+			throws ISOException, ParseException {
 		action.setIdPath("9");
-		action.process(msg, ctx);		
+		action.process(msg, ctx);
 
 		assertEquals(0, errorsList.size());
-	}	
+	}
 
-	public void testAbsenceRequiseChampComposite_PasDeRegleValidationAssociee() throws ISOException, ParseException {
+	public void testAbsenceRequiseChampComposite_PasDeRegleValidationAssociee()
+			throws ISOException, ParseException {
 		action.setIdPath("50");
 		action.setPresenceMode(PresenceModeEnum.UNEXPECTED);
-		action.process(msg, ctx);				
-		
-		assertEquals(0, errorsList.size());
-	}		
+		action.process(msg, ctx);
 
-	public void testPresenceOptionelleChampComposite_PasDeRegleValidationAssociee() throws ISOException, ParseException {
-		action.setPresenceMode(PresenceModeEnum.OPTIONAL);
-		
-		action.setIdPath("9");		
-		action.process(msg, ctx);				
 		assertEquals(0, errorsList.size());
-		
-		action.setIdPath("50");		
-		action.process(msg, ctx);						
-		assertEquals(0, errorsList.size());		
-	}	
-	
-	public void testAbsenceObligatoireDunChamp_ChampAbsent() throws ISOException, ParseException {
+	}
+
+	public void testPresenceOptionelleChampComposite_PasDeRegleValidationAssociee()
+			throws ISOException, ParseException {
+		action.setPresenceMode(PresenceModeEnum.OPTIONAL);
+
+		action.setIdPath("9");
+		action.process(msg, ctx);
+		assertEquals(0, errorsList.size());
+
+		action.setIdPath("50");
+		action.process(msg, ctx);
+		assertEquals(0, errorsList.size());
+	}
+
+	public void testAbsenceObligatoireDunChamp_ChampAbsent()
+			throws ISOException, ParseException {
 		action.setPresenceMode(PresenceModeEnum.UNEXPECTED);
-		
+
 		typesDonnee.add(DataType.ALPHA);
 
 		validationRule.setName("100");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);
-		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
+
 		action.setIdPath(validationRule.getName());
 		action.process(msg, ctx);
 
 		assertEquals(0, errorsList.size());
-	}	
-	
-	public void testAbsenceObligatoireDunChamp_ChampPresent() throws ISOException, ParseException {
+	}
+
+	public void testAbsenceObligatoireDunChamp_ChampPresent()
+			throws ISOException, ParseException {
 		action.setPresenceMode(PresenceModeEnum.UNEXPECTED);
-		
+
 		typesDonnee.add(DataType.ALPHA);
 
 		validationRule.setName("1");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);
-		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
+
 		action.setIdPath(validationRule.getName());
 		action.process(msg, ctx);
 
 		assertEquals(1, errorsList.size());
 		ValidationError err = errorsList.get(0);
-		assertEquals(ValidationErrorTypeEnum.FIELD_PRESENCE, err.getTypeErreur());
+		assertEquals(ValidationErrorTypeEnum.FIELD_PRESENCE,
+				err.getTypeErreur());
 	}
-	
-	public void testPresenceOptionnelleDunChamp_ChampPresent() throws ISOException, ParseException {
+
+	public void testPresenceOptionnelleDunChamp_ChampPresent()
+			throws ISOException, ParseException {
 		action.setPresenceMode(PresenceModeEnum.OPTIONAL);
-		
+
 		typesDonnee.add(DataType.ALPHA);
 
 		validationRule.setName("1");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);
-		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
+
 		action.setIdPath(validationRule.getName());
 		action.process(msg, ctx);
 
 		assertEquals(0, errorsList.size());
-	}		
+	}
 
-	public void testPresenceOptionnelleDunChamp_ChampAbsent() throws ISOException, ParseException {
+	public void testPresenceOptionnelleDunChamp_ChampAbsent()
+			throws ISOException, ParseException {
 		action.setPresenceMode(PresenceModeEnum.OPTIONAL);
-		
+
 		typesDonnee.add(DataType.ALPHA);
 
 		validationRule.setName("100");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);
-		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
+
 		action.setIdPath(validationRule.getName());
 		action.process(msg, ctx);
 
 		assertEquals(0, errorsList.size());
-	}		
-	
+	}
+
 	public void testTypeChampAlpha() throws ISOException, ParseException {
 		typesDonnee.add(DataType.ALPHA);
 
 		validationRule.setName("2");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
 		action.setIdPath(validationRule.getName());
-		
+
 		action.process(msg, ctx);
 
 		assertEquals(1, errorsList.size());
@@ -220,7 +245,8 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 		errorsList.clear();
 
 		validationRule.setName("1");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
 		action.setIdPath(validationRule.getName());
 		action.process(msg, ctx);
 		assertEquals(0, errorsList.size());
@@ -231,9 +257,10 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 		typesDonnee.add(DataType.NUM);
 
 		validationRule.setName("3");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
 		action.setIdPath(validationRule.getName());
-		
+
 		action.process(msg, ctx);
 
 		assertEquals(1, errorsList.size());
@@ -243,7 +270,8 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 		errorsList.clear();
 
 		validationRule.setName("2");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
 		action.setIdPath(validationRule.getName());
 		action.process(msg, ctx);
 		assertEquals(0, errorsList.size());
@@ -256,9 +284,10 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 		typesDonnee.add(DataType.SPACES);
 
 		validationRule.setName("4");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
 		action.setIdPath(validationRule.getName());
-		
+
 		action.process(msg, ctx);
 
 		assertEquals(1, errorsList.size());
@@ -268,7 +297,8 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 		errorsList.clear();
 
 		validationRule.setName("3");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
 		action.setIdPath(validationRule.getName());
 		action.process(msg, ctx);
 		assertEquals(0, errorsList.size());
@@ -282,9 +312,10 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 		typesDonnee.add(DataType.SPECIAL);
 
 		validationRule.setName("5");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
 		action.setIdPath(validationRule.getName());
-		
+
 		action.process(msg, ctx);
 
 		assertEquals(0, errorsList.size());
@@ -292,7 +323,8 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 		errorsList.clear();
 
 		validationRule.setName("4");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
 		action.setIdPath(validationRule.getName());
 		action.process(msg, ctx);
 		assertEquals(0, errorsList.size());
@@ -306,9 +338,10 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 		typesDonnee.add(DataType.SPECIAL);
 
 		validationRule.setName("5");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
 		action.setIdPath(validationRule.getName());
-		
+
 		action.process(msg, ctx);
 		assertEquals(0, errorsList.size());
 	}
@@ -317,10 +350,11 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 		typesDonnee.add(DataType.DATE);
 
 		validationRule.setName("6");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
 		validationRule.setDatePattern("dd/MM/yyyy");
 		action.setIdPath(validationRule.getName());
-		
+
 		action.process(msg, ctx);
 
 		assertEquals(1, errorsList.size());
@@ -340,10 +374,11 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 
 		regexpPattern = "^maxibouze$";
 		validationRule.setName("7");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
 		validationRule.setPattern(regexpPattern);
 		action.setIdPath(validationRule.getName());
-		
+
 		action.process(msg, ctx);
 
 		assertEquals(1, errorsList.size());
@@ -361,7 +396,8 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 		errorsList.clear();
 
 		validationRule.setName("8");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
 		validationRule.setPattern(regexpPattern);
 		action.setIdPath(validationRule.getName());
 		action.process(msg, ctx);
@@ -370,11 +406,12 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 
 	public void testLongueur() throws ISOException, ParseException {
 		ValidationError err;
-		
+
 		typesDonnee.add(DataType.ALPHA);
 
 		validationRule.setName("1");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
 		validationRule.setMinLength(0);
 		validationRule.setLength(100);
 		validationRule.setVariableLength(true);
@@ -383,7 +420,7 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 		action.process(msg, ctx);
 
 		assertEquals(0, errorsList.size());
-		
+
 		errorsList.clear();
 
 		validationRule.setMinLength(50);
@@ -392,7 +429,8 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 		action.process(msg, ctx);
 		assertEquals(1, errorsList.size());
 		err = errorsList.get(0);
-		assertEquals(ValidationErrorTypeEnum.INVALID_LENGTH, err.getTypeErreur());
+		assertEquals(ValidationErrorTypeEnum.INVALID_LENGTH,
+				err.getTypeErreur());
 
 		errorsList.clear();
 
@@ -402,17 +440,50 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 		action.process(msg, ctx);
 		assertEquals(1, errorsList.size());
 		err = errorsList.get(0);
-		assertEquals(ValidationErrorTypeEnum.INVALID_LENGTH, err.getTypeErreur());		
-	}	
-	
+		assertEquals(ValidationErrorTypeEnum.INVALID_LENGTH,
+				err.getTypeErreur());
+	}
+
 	public void testTypeChampBinary() throws ISOException, ParseException {
 		typesDonnee.add(DataType.BINARY);
 
 		validationRule.setName("10");
-		mapValidationRulesByIdPath.put(validationRule.getName(), validationRule);		
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
 		action.setIdPath(validationRule.getName());
 		action.process(msg, ctx);
-		assertEquals(0, errorsList.size());		
-	}	
-	
+		assertEquals(0, errorsList.size());
+	}
+
+	public void testUsingAFieldFormatReference() throws ISOException,
+			ParseException {
+		typesDonnee.add(DataType.ALPHA);
+
+		validationRule.setName("1");
+		mapValidationRulesByIdPath.put("myRef", validationRule);
+
+		action.setIdPath(validationRule.getName());
+		action.setFieldFormatRef("myRef");
+
+		action.process(msg, ctx);
+	}
+
+	public void testFieldFormatReferenceNotFound() throws ISOException,
+			ParseException {
+		typesDonnee.add(DataType.ALPHA);
+
+		validationRule.setName("1");
+		mapValidationRulesByIdPath
+				.put(validationRule.getName(), validationRule);
+
+		action.setIdPath(validationRule.getName());
+		action.setFieldFormatRef("invalidRef");
+
+		try {
+			action.process(msg, ctx);
+			fail("An iso exception was expected");
+		} catch (ISOException e) {
+			assertTrue(e.getMessage().contains("invalidRef"));
+		}
+	}
 }

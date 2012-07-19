@@ -44,6 +44,10 @@ import org.jpos.jposext.isomsgaction.model.validation.ValidationErrorTypeEnum;
 import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
 import org.jpos.jposext.isomsgaction.testing.service.ITestSuiteFactory;
 
+/**
+ * @author dgrandemange
+ *
+ */
 public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 
 	private static final String DEFAULT_PATH_SEPARATOR = ".";
@@ -139,8 +143,9 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 			for (File mappingCfgFile : mappingCfgFiles) {
 				String mappingCfgName = mappingCfgFile.getName().replaceFirst(
 						"(^.*)\\.xml$", "$1");
-				File mappingCfgDir = new File(String.format("%s/%s",
-						mappingsDirPath, mappingCfgName));
+				String mappingCfgDirPath = String.format("%s/%s",
+						mappingsDirPath, mappingCfgName);
+				File mappingCfgDir = new File(mappingCfgDirPath);
 				if (mappingCfgDir.isDirectory()) {
 					TestSuite mappingTestSuite = new TestSuite();
 					mappingTestSuite.setName(String
@@ -165,7 +170,18 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 						mappingTest.setName(String.format("%s.%s",
 								mappingCfgName, testSetDir.getName()));
 
-						mappingTest.setAction(mapActions.get(mappingCfgName));
+						IISOMsgAction action = mapActions.get(mappingCfgName);
+
+						if (null == action) {
+							throw new Exception(
+									String.format(
+											"No iso action found with id '%s'. Please check mapping config '%s/%s' : attribute 'id', in the <iso-action> element, should be set to '%s'",
+											mappingCfgName, mappingsDirPath,
+											mappingCfgFile.getName(),
+											mappingCfgName));
+						}
+
+						mappingTest.setAction(action);
 
 						// Constitution des messages ISO sources
 						// et injection dans le test de mapping
@@ -493,9 +509,9 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 
 					patchedXmlIntrospector.getConfiguration()
 							.setAttributesForPrimitives(false);
-					
+
 					beanReader.getBindingConfiguration().setMapIDs(false);
-					
+
 					ChainedBeanCreator chainedBeanCreator = new ChainedBeanCreator() {
 
 						public Object create(ElementMapping mapping,
@@ -503,7 +519,8 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 							if (byte.class.equals(mapping.getType())) {
 								String hexByteValue = mapping.getAttributes()
 										.getValue("hexa");
-								return new Byte(ISOUtil.hex2byte(hexByteValue)[0]);
+								return new Byte(
+										ISOUtil.hex2byte(hexByteValue)[0]);
 							}
 							return chain.create(mapping, context);
 						}
@@ -511,7 +528,7 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 					};
 
 					BeanCreationList chain = BeanCreationList
-							.createStandardChain();					
+							.createStandardChain();
 					chain.insertBeanCreator(1, chainedBeanCreator);
 
 					beanReader.getReadConfiguration().setBeanCreationChain(
@@ -530,20 +547,20 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 					throw new RuntimeException(e);
 				}
 
-			}
-			else if(value.matches(refBeanRegExp)) {
+			} else if (value.matches(refBeanRegExp)) {
 				mapRefBean.put(key, value);
 			}
 		}
 
 		for (Entry<String, String> entry : mapRefBean.entrySet()) {
-			String beanPath=entry.getValue().replaceFirst(refBeanRegExp, "$1");
-			String[] splitStr = beanPath.split("\\.", 2);				
+			String beanPath = entry.getValue()
+					.replaceFirst(refBeanRegExp, "$1");
+			String[] splitStr = beanPath.split("\\.", 2);
 			try {
-				Object obj = PropertyUtils.getProperty(contextProps.get(splitStr[0]), splitStr[1]);
+				Object obj = PropertyUtils.getProperty(
+						contextProps.get(splitStr[0]), splitStr[1]);
 				contextProps.put(entry.getKey(), obj);
-			}
-			catch(Exception e) {
+			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 
@@ -554,7 +571,7 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 			MappingTest mappingTest) {
 		ISOMsg res = new ISOMsg();
 
-		// Déterminer les champs composites et les créer
+		// Dï¿½terminer les champs composites et les crï¿½er
 		for (Entry entry : props.entrySet()) {
 			String rawIdPath = (String) entry.getKey();
 			String idPath = hexPathToDecPath(rawIdPath, DEFAULT_PATH_SEPARATOR);

@@ -50,6 +50,9 @@ public class ISOMsgActionCheckField extends ISOMsgAbstractAction {
 		if (null != fieldFormatRef) {
 			validationRule = mapValidationRulesByIdPath.get(this
 					.getFieldFormatRef());
+			if (null == validationRule) {
+				throw new ISOException(String.format("Validation rule not found for fieldFormatRef '%s'",fieldFormatRef));
+			}
 		} else {
 			validationRule = mapValidationRulesByIdPath.get(this.getIdPath());
 		}
