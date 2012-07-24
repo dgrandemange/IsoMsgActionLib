@@ -64,12 +64,12 @@ public class MappingTest extends TestCase {
 			final int multiplier = 17;
 
 			// Pour chaque attribut, on calcule le hashcode
-			// que l'on ajoute au résultat après l'avoir multiplié
+			// que l'on ajoute au rï¿½sultat aprï¿½s l'avoir multipliï¿½
 			// par le nombre "multiplieur" :
 			result = multiplier * result + this.getParamName().hashCode();
 			result = multiplier * result + this.getTypeErreur().hashCode();
 
-			// On retourne le résultat :
+			// On retourne le rï¿½sultat :
 			return result;
 		}
 
@@ -121,6 +121,8 @@ public class MappingTest extends TestCase {
 	private Map<String, Object> expectedContext = new HashMap<String, Object>();
 
 	private List<String> expectedContextBinaryAttrs = new ArrayList<String>();
+	
+	private List<String> expectedContextNullAttrs = new ArrayList<String>();	
 
 	@Override
 	protected void runTest() throws Throwable {
@@ -235,45 +237,57 @@ public class MappingTest extends TestCase {
 					Object effectiveObject = PropertyUtils.getProperty(
 							new SimpleContextWrapper(context), ctxPath);
 
-					String effectiveValue = null;
-					if (effectiveObject.getClass().isPrimitive()) {
-						effectiveValue = (String) effectiveObject;
-					} else if (effectiveObject instanceof String) {
-						effectiveValue = (String) effectiveObject;
+					boolean nullValueExpected = expectedContextNullAttrs.contains(ctxPath);
+					if (nullValueExpected) {
+						if (null != effectiveObject) {
+							expectedContextPopulationFailure = true;
+							resList.add(new ISOCmpDiff(
+									ctxPath,
+									String.format(
+											"Attribute %s : null expected, but set=[%s]",
+											ctxPath, effectiveObject.toString())));
+						}
 					} else {
-						effectiveValue = effectiveObject.toString();
-					}
-					if (!(expectedValue.equals(effectiveValue))) {
-						expectedContextPopulationFailure = true;
-						boolean dumpHex = expectedContextBinaryAttrs
-								.contains(ctxPath);
-						if (null != effectiveValue) {
-							resList.add(new ISOCmpDiff(
-									ctxPath,
-									String.format(
-											"Attribute %s : expected %s=[%s], was %s=[%s]",
-											ctxPath,
-											dumpHex ? "(hex dump)" : "",
-											dumpHex ? ISOUtil
-													.hexdump(expectedValue
-															.getBytes())
-													: expectedValue,
-											dumpHex ? "(hex dump)" : "",
-											dumpHex ? ISOUtil
-													.hexdump(effectiveValue
-															.getBytes())
-													: effectiveValue)));
+						String effectiveValue = null;
+						if (effectiveObject.getClass().isPrimitive()) {
+							effectiveValue = (String) effectiveObject;
+						} else if (effectiveObject instanceof String) {
+							effectiveValue = (String) effectiveObject;
 						} else {
-							resList.add(new ISOCmpDiff(
-									ctxPath,
-									String.format(
-											"Attribute %s : expected %s=[%s], but not set",
-											ctxPath,
-											dumpHex ? "(hex dump)" : "",
-											dumpHex ? ISOUtil
-													.hexdump(expectedValue
-															.getBytes())
-													: expectedValue)));
+							effectiveValue = effectiveObject.toString();
+						}
+						if (!(expectedValue.equals(effectiveValue))) {
+							expectedContextPopulationFailure = true;
+							boolean dumpHex = expectedContextBinaryAttrs
+									.contains(ctxPath);
+							if (null != effectiveValue) {
+								resList.add(new ISOCmpDiff(
+										ctxPath,
+										String.format(
+												"Attribute %s : expected %s=[%s], was %s=[%s]",
+												ctxPath,
+												dumpHex ? "(hex dump)" : "",
+												dumpHex ? ISOUtil
+														.hexdump(expectedValue
+																.getBytes())
+														: expectedValue,
+												dumpHex ? "(hex dump)" : "",
+												dumpHex ? ISOUtil
+														.hexdump(effectiveValue
+																.getBytes())
+														: effectiveValue)));
+							} else {
+								resList.add(new ISOCmpDiff(
+										ctxPath,
+										String.format(
+												"Attribute %s : expected %s=[%s], but not set",
+												ctxPath,
+												dumpHex ? "(hex dump)" : "",
+												dumpHex ? ISOUtil
+														.hexdump(expectedValue
+																.getBytes())
+														: expectedValue)));
+							}
 						}
 					}
 				}
@@ -492,4 +506,13 @@ public class MappingTest extends TestCase {
 		this.expectedContextBinaryAttrs = expectedContextBinaryAttrs;
 	}
 
+	public List<String> getExpectedContextNullAttrs() {
+		return expectedContextNullAttrs;
+	}
+
+	public void setExpectedContextNullAttrs(
+			List<String> expectedContextNullAttrs) {
+		this.expectedContextNullAttrs = expectedContextNullAttrs;
+	}	
+	
 }

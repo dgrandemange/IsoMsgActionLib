@@ -302,8 +302,10 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 							HashMap<String, Object> finalExpectedContextMap = new HashMap<String, Object>();
 
 							List<String> binaryAttrs = new ArrayList<String>();
+							List<String> nullAttrs = new ArrayList<String>();
 							Pattern patternHexa = Pattern
 									.compile("^<hexa:(.*)>.*$");
+							Pattern patternNull = Pattern.compile("^<null:(.*)>.*$");
 							Pattern patternCheck = Pattern
 									.compile(CHECK_REGEXP);
 							for (Entry<String, Object> entry : expectedContextMap
@@ -325,6 +327,13 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 									binaryAttrs.add(entryKey);
 								}
 
+								Matcher nullMatcher = patternNull
+										.matcher(entryValue);
+								matches = nullMatcher.matches();
+								if (matches) {
+									nullAttrs.add(entryKey);
+								}								
+								
 								Matcher checkMatcher = patternCheck
 										.matcher(entryValue);
 								matches = checkMatcher.matches();
@@ -343,6 +352,8 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 									.setExpectedContext(finalExpectedContextMap);
 							mappingTest
 									.setExpectedContextBinaryAttrs(binaryAttrs);
+							mappingTest
+									.setExpectedContextNullAttrs(nullAttrs);
 						}
 
 						// Constitution du message ISO attendu
