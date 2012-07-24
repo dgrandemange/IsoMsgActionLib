@@ -254,7 +254,9 @@ public class MappingTest extends TestCase {
 						} else if (effectiveObject instanceof String) {
 							effectiveValue = (String) effectiveObject;
 						} else {
-							effectiveValue = effectiveObject.toString();
+							if (null != effectiveObject) {
+								effectiveValue = effectiveObject.toString();
+							}
 						}
 						if (!(expectedValue.equals(effectiveValue))) {
 							expectedContextPopulationFailure = true;
