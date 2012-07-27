@@ -10,6 +10,30 @@
 
 	<name>isomsgaction</name>
 
+	<scm>
+		<developerConnection>scm:git:ssh://git@github.com/dgrandemange/IsoMsgActionLib.git</developerConnection>
+		<connection>scm:git:ssh://git@github.com/dgrandemange/IsoMsgActionLib.git</connection>
+		<url>scm:git:ssh://git@github.com/dgrandemange/IsoMsgActionLib.git</url>
+	</scm>
+
+	<distributionManagement>
+		<!--
+			To deploy as a snapshot:
+			> mvn -DaltDeploymentRepository=snapshot-repo::default::file:../dgrandemange-mvn-repo/snapshots deploy
+			
+			To deploy as a release :
+			> mvn -DaltDeploymentRepository=repo::default::file:../dgrandemange-mvn-repo/releases deploy		  
+		-->	
+		<repository>
+			<id>repo</id>
+			<url>https://github.com/dgrandemange/dgrandemange-mvn-repo/raw/master/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshot-repo</id>
+			<url>https://github.com/dgrandemange/dgrandemange-mvn-repo/raw/master/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 	<repositories>
 		<repository>
 			<id>jpos</id>
@@ -89,12 +113,6 @@
 		</dependency>
 	</dependencies>
 
-	<scm>
-		<developerConnection>scm:git:ssh://git@github.com/dgrandemange/IsoMsgActionLib.git</developerConnection>
-		<connection>scm:git:ssh://git@github.com/dgrandemange/IsoMsgActionLib.git</connection>
-		<url>scm:git:ssh://git@github.com/dgrandemange/IsoMsgActionLib.git</url>
-	</scm>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -104,24 +122,5 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<distributionManagement>
-		<!--
-			To deploy as a snapshot:
-			> mvn -DaltDeploymentRepository=snapshot-repo::default::file:../dgrandemange-mvn-repo/snapshots deploy
-			
-			To deploy as a release :
-			> mvn -DaltDeploymentRepository=repo::default::file:../dgrandemange-mvn-repo/releases deploy		  
-		-->	
-		<repository>
-			<id>repo</id>
-			<url>https://github.com/dgrandemange/dgrandemange-mvn-repo/raw/master/releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>snapshot-repo</id>
-			<url>https://github.com/dgrandemange/dgrandemange-mvn-repo/raw/master/snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
-
 
 </project>
