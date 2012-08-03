@@ -1,0 +1,1 @@
+Creates a message using loops to parse some array in a context bean. 

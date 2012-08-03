@@ -22,7 +22,9 @@ public class ISOMsgComparator implements Comparator<ISOMsg> {
 		this.skipBitmapComparison = skipBitmapComparison;
 	}
 
-	@Override
+	/* (non-Javadoc)
+	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+	 */
 	public int compare(ISOMsg isomsg0, ISOMsg isomsg1) {
 		int res = 0;
 				
@@ -58,7 +60,7 @@ public class ISOMsgComparator implements Comparator<ISOMsg> {
 			allOk = allOk && (compare == 0);
 		}
 
-		// Lister les composants de isomsg1 et vérifier si leur présence n'était
+		// Lister les composants de isomsg1 et vï¿½rifier si leur prï¿½sence n'ï¿½tait
 		// pas attendue
 		for (Object obj : isomsg1.getChildren().entrySet()) {
 			Entry<Integer, ISOComponent> entry = (Entry<Integer, ISOComponent>) obj;

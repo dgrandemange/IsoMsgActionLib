@@ -1,13 +1,12 @@
 package org.jpos.jposext.isomsgaction.testing.service.support;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,13 +39,14 @@ import org.jpos.iso.ISOUtil;
 import org.jpos.iso.packager.XMLPackager;
 import org.jpos.jposext.isomsgaction.factory.service.support.ISOMsgActionsConfigDigesterFactoryImpl;
 import org.jpos.jposext.isomsgaction.helper.ISOMsgHelper;
+import org.jpos.jposext.isomsgaction.helper.IsoMsgActionHelper;
 import org.jpos.jposext.isomsgaction.model.validation.ValidationErrorTypeEnum;
 import org.jpos.jposext.isomsgaction.service.IISOMsgAction;
 import org.jpos.jposext.isomsgaction.testing.service.ITestSuiteFactory;
 
 /**
  * @author dgrandemange
- *
+ * 
  */
 public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 
@@ -64,13 +64,18 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 
 	private ISOPackager xmlPackager;
 
+	private String mappingTestsDirPath = "";
+
 	public TestSuiteFactoryImpl() {
 		super();
 	}
 
-	public TestSuiteFactoryImpl(String mappingsDirPath) {
+	public TestSuiteFactoryImpl(String mappingsDirPath, String mappingTestsDirPath) {
 		super();
+		
 		this.mappingsDirPath = mappingsDirPath;
+		this.mappingTestsDirPath = mappingTestsDirPath;
+		
 		try {
 			xmlPackager = new XMLPackager();
 		} catch (ISOException e) {
@@ -80,60 +85,12 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 
 	public TestSuite core(String mappingId) {
 		try {
-			final String finalMappingId = mappingId;
-
-			File mappingsDir = new File(mappingsDirPath);
-
-			File[] mappingCfgFiles = mappingsDir.listFiles(new FileFilter() {
-
-				@Override
-				public boolean accept(File file) {
-					boolean res = false;
-
-					if (file.isFile()) {
-						if (null == finalMappingId) {
-							if (file.getName().endsWith(".xml")) {
-								return true;
-							}
-						} else {
-							if (file.getName().equals(
-									String.format("%s.xml", finalMappingId))) {
-								return true;
-							}
-						}
-					}
-
-					return res;
-				}
-
-			});
+			List<File> mappingCfgFiles = new ArrayList<File>();
+			InputStream bais = IsoMsgActionHelper
+					.getMainISOActionConfigInputStream(mappingsDirPath,
+							mappingId, mappingCfgFiles);
 
 			ISOMsgActionsConfigDigesterFactoryImpl digesterFactory = new ISOMsgActionsConfigDigesterFactoryImpl();
-			StringBuffer strBuf = new StringBuffer();
-			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(
-							getClass()
-									.getResourceAsStream(
-											"/org/jpos/jposext/isomsgaction/template/isoaction-main-template.xml")));
-
-			StringBuffer inclusionsBuf = new StringBuffer();
-			for (File mappingCfgFile : mappingCfgFiles) {
-				inclusionsBuf.append(String.format(
-						"<xi:include href=\"%s/%s\" />\n", mappingsDirPath,
-						mappingCfgFile.getName()));
-			}
-
-			for (String line = reader.readLine(); line != null; line = reader
-					.readLine()) {
-				String replacedLine = line.replaceFirst(
-						"(^.*)\\#INCLUSIONS_TOKEN\\#(.*$)", "$1"
-								+ inclusionsBuf.toString() + "$2");
-				strBuf.append(replacedLine);
-			}
-
-			String agregatedXml = strBuf.toString();
-			ByteArrayInputStream bais = new ByteArrayInputStream(
-					agregatedXml.getBytes());
 			Digester digester = digesterFactory.createDigester();
 			Map<String, IISOMsgAction> mapActions = (Map<String, IISOMsgAction>) digester
 					.parse(bais);
@@ -143,18 +100,23 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 			for (File mappingCfgFile : mappingCfgFiles) {
 				String mappingCfgName = mappingCfgFile.getName().replaceFirst(
 						"(^.*)\\.xml$", "$1");
-				String mappingCfgDirPath = String.format("%s/%s",
-						mappingsDirPath, mappingCfgName);
-				File mappingCfgDir = new File(mappingCfgDirPath);
-				if (mappingCfgDir.isDirectory()) {
+				String mappingCfgTestsDirPath = String.format("%s/%s",
+						(!("".equals(mappingTestsDirPath))) ? mappingTestsDirPath
+								: mappingsDirPath, mappingCfgName);
+				File mappingCfgTestsDir = new File(mappingCfgTestsDirPath);
+				if (mappingCfgTestsDir.isDirectory()) {
 					TestSuite mappingTestSuite = new TestSuite();
 					mappingTestSuite.setName(String
 							.format("%s", mappingCfgName));
 					final String testSetRegExp = "^test.*$";
 
-					File[] testSetDirs = mappingCfgDir
+					File[] testSetDirs = mappingCfgTestsDir
 							.listFiles(new FileFilter() {
-								@Override
+								/*
+								 * (non-Javadoc)
+								 * 
+								 * @see java.io.FileFilter#accept(java.io.File)
+								 */
 								public boolean accept(File file) {
 									boolean res = false;
 									if (file.isDirectory()) {
@@ -189,7 +151,12 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 						File[] sourceMsgDefsFiles = testSetDir
 								.listFiles(new FileFilter() {
 
-									@Override
+									/*
+									 * (non-Javadoc)
+									 * 
+									 * @see
+									 * java.io.FileFilter#accept(java.io.File)
+									 */
 									public boolean accept(File file) {
 										boolean res = false;
 
@@ -256,7 +223,12 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 						File[] mappingContextDefsFiles = testSetDir
 								.listFiles(new FileFilter() {
 
-									@Override
+									/*
+									 * (non-Javadoc)
+									 * 
+									 * @see
+									 * java.io.FileFilter#accept(java.io.File)
+									 */
 									public boolean accept(File file) {
 										boolean res = false;
 										if (file.isFile()) {
@@ -281,7 +253,12 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 						File[] mappingExpectedContextDefsFiles = testSetDir
 								.listFiles(new FileFilter() {
 
-									@Override
+									/*
+									 * (non-Javadoc)
+									 * 
+									 * @see
+									 * java.io.FileFilter#accept(java.io.File)
+									 */
 									public boolean accept(File file) {
 										boolean res = false;
 										if (file.isFile()) {
@@ -305,7 +282,8 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 							List<String> nullAttrs = new ArrayList<String>();
 							Pattern patternHexa = Pattern
 									.compile("^<hexa:(.*)>.*$");
-							Pattern patternNull = Pattern.compile("^<null:(.*)>.*$");
+							Pattern patternNull = Pattern
+									.compile("^<null:(.*)>.*$");
 							Pattern patternCheck = Pattern
 									.compile(CHECK_REGEXP);
 							for (Entry<String, Object> entry : expectedContextMap
@@ -332,8 +310,8 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 								matches = nullMatcher.matches();
 								if (matches) {
 									nullAttrs.add(entryKey);
-								}								
-								
+								}
+
 								Matcher checkMatcher = patternCheck
 										.matcher(entryValue);
 								matches = checkMatcher.matches();
@@ -352,8 +330,7 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 									.setExpectedContext(finalExpectedContextMap);
 							mappingTest
 									.setExpectedContextBinaryAttrs(binaryAttrs);
-							mappingTest
-									.setExpectedContextNullAttrs(nullAttrs);
+							mappingTest.setExpectedContextNullAttrs(nullAttrs);
 						}
 
 						// Constitution du message ISO attendu
@@ -362,7 +339,12 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 						File[] expectedMsgDefsFiles = testSetDir
 								.listFiles(new FileFilter() {
 
-									@Override
+									/*
+									 * (non-Javadoc)
+									 * 
+									 * @see
+									 * java.io.FileFilter#accept(java.io.File)
+									 */
 									public boolean accept(File file) {
 										boolean res = false;
 
@@ -418,7 +400,12 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 						File[] validationErrorsDefsFiles = testSetDir
 								.listFiles(new FileFilter() {
 
-									@Override
+									/*
+									 * (non-Javadoc)
+									 * 
+									 * @see
+									 * java.io.FileFilter#accept(java.io.File)
+									 */
 									public boolean accept(File file) {
 										boolean res = false;
 										if (file.isFile()) {
@@ -702,12 +689,22 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 				value.replaceFirst(checkRegExp, "$1"));
 	}
 
-	@Override
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.jpos.jposext.isomsgaction.testing.service.ITestSuiteFactory#create()
+	 */
 	public TestSuite create() {
 		return core(null);
 	}
 
-	@Override
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.jpos.jposext.isomsgaction.testing.service.ITestSuiteFactory#
+	 * createByMappingId(java.lang.String)
+	 */
 	public TestSuite createByMappingId(String id) {
 		return core(id);
 	}
@@ -718,6 +715,14 @@ public class TestSuiteFactoryImpl implements ITestSuiteFactory {
 
 	public void setMappingsDirPath(String mappingsDirPath) {
 		this.mappingsDirPath = mappingsDirPath;
+	}
+
+	public String getMappingTestsDirPath() {
+		return mappingTestsDirPath;
+	}
+
+	public void setMappingTestsDirPath(String mappingTestsDirPath) {
+		this.mappingTestsDirPath = mappingTestsDirPath;
 	}
 
 	public boolean isInteractive() {

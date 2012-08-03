@@ -19,13 +19,17 @@ public class ISOMsgActionUserCustomizedTest extends TestCase {
 		
 		isoAction.setIsoAction(new IISOMsgAction() {
 			
-			@Override
+			/* (non-Javadoc)
+			 * @see org.jpos.jposext.isomsgaction.service.IISOMsgAction#process(org.jpos.iso.ISOMsg, java.util.Map)
+			 */
 			public void process(ISOMsg msg, Map<String, Object> ctx)
 					throws ISOException {
 				called.set(true);
 			}
 			
-			@Override
+			/* (non-Javadoc)
+			 * @see org.jpos.jposext.isomsgaction.service.IISOMsgAction#process(org.jpos.iso.ISOMsg[], java.util.Map)
+			 */
 			public void process(ISOMsg[] msg, Map<String, Object> ctx)
 					throws ISOException {
 				called.set(true);

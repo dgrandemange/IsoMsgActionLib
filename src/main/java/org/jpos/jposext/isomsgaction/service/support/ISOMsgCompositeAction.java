@@ -29,7 +29,7 @@ public class ISOMsgCompositeAction extends ISOMsgAbstractAction implements
 	private List<IISOMsgAction> childs = new ArrayList<IISOMsgAction>();
 
 	/**
-	 * Indique si l'action maman doit ignorer les ISOExceptions remontées par
+	 * Indique si l'action maman doit ignorer les ISOExceptions remontï¿½es par
 	 * ses actions filles
 	 */
 	private boolean ignoreISOExceptions = false;
@@ -45,7 +45,9 @@ public class ISOMsgCompositeAction extends ISOMsgAbstractAction implements
 		this.ignoreISOExceptions = ignoreISOExceptions;
 	}
 
-	@Override
+	/* (non-Javadoc)
+	 * @see org.jpos.jposext.isomsgaction.service.IISOMsgAction#process(org.jpos.iso.ISOMsg[], java.util.Map)
+	 */
 	public void process(ISOMsg[] msg, Map<String, Object> map)
 			throws ISOException {
 		for (IISOMsgAction action : childs) {

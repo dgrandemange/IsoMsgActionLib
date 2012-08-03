@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<iso-action id="LoopUsageSample2"
+	desc="Show loop action usage (interval mode)"
+	xmlns:xi="http://www.w3.org/2001/XInclude" >
+
+	<!--
+		Availables message (sorted by index) :
+		======================================
+		* 0 (dest message) : empty message 
+		* 1 (source message n°1) : existing request message		
+		
+		Context info :
+		==============
+		* a list of validation errors will be put into the context   
+	-->
+
+	<createCmpField id="1"/>
+	
+	<loop token="i" begin="1" end="3">
+		
+		<createCmpField id="1.${i}"/>
+		
+		<loop token="j" begin="1" end="2">
+			<set id="1.${i}.${j}" value="a dummy value ${i}.${j}" />
+		</loop>
+			
+	</loop>		 
+	
+</iso-action>

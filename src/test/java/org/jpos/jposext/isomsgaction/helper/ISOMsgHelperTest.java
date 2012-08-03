@@ -150,7 +150,9 @@ public class ISOMsgHelperTest extends TestCase {
 		String valueChamp3ToSet = "replaced value champ 3 present";
 		ISOMsgHelper.setValue(msg, "3", valueChamp3ToSet, new ISOMsgHelper.IFulfillCondition() {
 
-			@Override
+			/* (non-Javadoc)
+			 * @see org.jpos.jposext.isomsgaction.helper.ISOMsgHelper.IFulfillCondition#isConditionFulfilled(org.jpos.iso.ISOMsg, int)
+			 */
 			public boolean isConditionFulfilled(ISOMsg msg, int id) {
 				return false;
 			}
@@ -161,7 +163,9 @@ public class ISOMsgHelperTest extends TestCase {
 		
 		ISOMsgHelper.setValue(msg, "0x3", valueChamp3ToSet, new ISOMsgHelper.IFulfillCondition() {
 
-			@Override
+			/* (non-Javadoc)
+			 * @see org.jpos.jposext.isomsgaction.helper.ISOMsgHelper.IFulfillCondition#isConditionFulfilled(org.jpos.iso.ISOMsg, int)
+			 */
 			public boolean isConditionFulfilled(ISOMsg msg, int id) {
 				return true;
 			}

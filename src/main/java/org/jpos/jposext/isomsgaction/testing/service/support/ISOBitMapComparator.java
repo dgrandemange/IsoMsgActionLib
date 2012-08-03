@@ -18,7 +18,9 @@ public class ISOBitMapComparator implements Comparator<ISOBitMap> {
 		this.path = path;
 	}
 
-	@Override
+	/* (non-Javadoc)
+	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+	 */
 	public int compare(ISOBitMap bitmap0, ISOBitMap bitmap1) {
 
 		if (null != bitmap0) {

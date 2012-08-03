@@ -30,22 +30,24 @@ public class ISOMsgActionUpdateExecutionContext extends ISOMsgAbstractAction
 		super();
 	}
 
-	@Override
+	/* (non-Javadoc)
+	 * @see org.jpos.jposext.isomsgaction.service.IISOMsgAction#process(org.jpos.iso.ISOMsg[], java.util.Map)
+	 */
 	public void process(ISOMsg[] msg, Map<String, Object> ctx)
 			throws ISOException {
-		// Récupération de la valeur du champ source ...
+		// Rï¿½cupï¿½ration de la valeur du champ source ...
 		String attrValue = ISOMsgHelper.getStringValue(msg[getSrcMsgIndex()],
 				getSrcIdPath());
 
 		if (null != attrValue) {
 			if (fixedLength > 0) {
-				// Ajout soit d'un padding à blanc à doite soit d'un truncate à
+				// Ajout soit d'un padding ï¿½ blanc ï¿½ doite soit d'un truncate ï¿½
 				// fixedLength
 				if (attrValue.length() > fixedLength) {
 					// On fait un truncate sur la valeur.
 					attrValue = attrValue.substring(0, fixedLength);
 				} else {
-					// on pad à doite avec des blancs
+					// on pad ï¿½ doite avec des blancs
 					attrValue = padright(attrValue, fixedLength, ' ');
 				}
 			}

@@ -23,10 +23,12 @@ public class ISOMsgActionCopyFieldByRef extends ISOMsgAbstractAction implements 
 		super();
 	}
 
-	@Override
+	/* (non-Javadoc)
+	 * @see org.jpos.jposext.isomsgaction.service.IISOMsgAction#process(org.jpos.iso.ISOMsg[], java.util.Map)
+	 */
 	public void process(ISOMsg[] msg, Map<String, Object> ctx)
 			throws ISOException {
-		// Récupération du composant depuis le message source ...
+		// Rï¿½cupï¿½ration du composant depuis le message source ...
 		ISOComponent cmp = ISOMsgHelper.getComponent(msg[getSrcMsgIndex()], getSrcIdPath());
 		
 		// ... et recopie vers le message cible

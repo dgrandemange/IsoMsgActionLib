@@ -19,13 +19,17 @@ public class ISOMsgActionUserCustomized implements IISOMsgAction {
 	
 	private IISOMsgAction isoAction;
 
-	@Override
+	/* (non-Javadoc)
+	 * @see org.jpos.jposext.isomsgaction.service.IISOMsgAction#process(org.jpos.iso.ISOMsg, java.util.Map)
+	 */
 	public void process(ISOMsg msg, Map<String, Object> ctx)
 			throws ISOException {
 		isoAction.process(new ISOMsg[] { msg }, ctx);
 	}
 
-	@Override
+	/* (non-Javadoc)
+	 * @see org.jpos.jposext.isomsgaction.service.IISOMsgAction#process(org.jpos.iso.ISOMsg[], java.util.Map)
+	 */
 	public void process(ISOMsg[] msg, Map<String, Object> ctx)
 			throws ISOException {
 		isoAction.process(msg, ctx);		

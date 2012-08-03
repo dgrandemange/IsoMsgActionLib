@@ -1,0 +1,14 @@
+<?xml version='1.0' ?>
+
+<storeWrapper>
+
+	<store>
+		<id>1</id>
+		<name>Barney's</name>
+		<number>123456789012345</number>
+	</store>
+
+	<storeByteArrayInjector>A0B1C2FF</storeByteArrayInjector>
+	<storeSecondByteArrayInjector>A1B2C3</storeSecondByteArrayInjector>
+
+</storeWrapper>

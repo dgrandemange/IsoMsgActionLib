@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<iso-action id="LoopUsageSample1"
+	desc="Show how the loop action usage (composite iso msg field iteration)"
+	xmlns:xi="http://www.w3.org/2001/XInclude" >
+
+	<!--
+		Availables message (sorted by index) :
+		======================================
+		* 0 (dest message) : empty message 
+		* 1 (source message n°1) : existing request message		
+		
+		Context info :
+		==============
+		* a list of validation errors will be put into the context   
+	-->
+
+	<!-- 
+		First we need to state we enter in a validation phase.
+		This is required in order to declare field formats and check operations  
+	-->
+	<validate>
+
+		<!--
+			========================================
+			BEGIN Fields format declarations 
+			========================================
+		-->
+		<fieldFormat id="1" 	type="NUM" lg="12"	lgVariable="true"	desc="some dummy field" />
+		
+		<!-- 
+			Field 2 of source msg (msg index=1) is a composite field (that is, an iso msg) in which all subfields should conform to one same format.
+		-->
+		<fieldFormat id="aCommonFormatForChildsOfField2" 	type="ALPHA+NUM+SPECIAL" lg="30"	lgVariable="true"	desc="common format to use for all subfields of field 2" />
+		<!--
+			========================================
+			END   Fields format declarations 
+			========================================
+		-->
+		
+		<!--
+			========================================
+			 BEGIN Fields check
+			========================================
+		-->
+		<checkField id="1" />
+		
+		<!-- For all subfields of field 2 in message 1 -->
+		<loop token="i" id="2" msg="1">
+			<checkField id="2.${i}" fieldFormatRef="aCommonFormatForChildsOfField2"/>
+		</loop>		 
+		<!--
+			========================================
+			 END   Fields check
+			========================================
+		-->
+					
+	</validate>
+	
+</iso-action>

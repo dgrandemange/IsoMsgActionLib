@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<iso-action id="0800_ECHO"
+		desc="Echo message creation from scratch">
+		
+	<!-- 
+		0 : Message Type 
+	-->
+	<set id="0" value="0800" />
+			
+	<!--
+		11 : Systems Trace Audit Number 
+	-->
+	<!-- Note: here we are using current time as STAN-->
+	<setDate id="11" format="HHmmss" />
+	
+	<!-- 
+		12 : Time, Local Transaction
+	-->
+	<setDate id="12" format="HHmmss" />
+
+	<!--
+		13 : Date, Local Transaction		
+	-->
+	<setDate id="13" format="MMdd" />
+
+	<!--
+		70 : Network Management Info Code
+		Here, 301 stands for echo message		
+	-->	
+	<set id="70" value="301" />
+	
+</iso-action>

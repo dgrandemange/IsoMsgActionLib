@@ -1,0 +1,12 @@
+<isomsg>
+  <field id="0" value="0100"/>
+  <field id="2" value="5130123412341234"/>
+  <field id="3" value="ABCDEF"/>
+  <field id="4" value="000000000000"/>
+  <field id="7" value="0511135400"/>
+  <field id="11" value="052659"/>
+  <field id="12" value="153305"/>
+  <field id="13" value="0212"/>
+  <field id="42" value="1234567123     "/>
+  <field id="43" value="1122334455" type="binary"/>
+</isomsg>

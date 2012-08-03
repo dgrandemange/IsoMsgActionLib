@@ -23,7 +23,9 @@ public class ISOMsgActionIfCustomCondition extends ISOMsgAbstractIfAction {
 		super();
 	}
 
-	@Override
+	/* (non-Javadoc)
+	 * @see org.jpos.jposext.isomsgaction.service.support.ISOMsgAbstractIfAction#process(org.jpos.iso.ISOMsg[], java.util.Map)
+	 */
 	public void process(ISOMsg[] msg, Map<String, Object> ctx)
 			throws ISOException {
 		
@@ -62,7 +64,9 @@ public class ISOMsgActionIfCustomCondition extends ISOMsgAbstractIfAction {
 		this.customCondition = customCondition;
 	}
 
-	@Override
+	/* (non-Javadoc)
+	 * @see org.jpos.jposext.isomsgaction.service.IFulfillCondition#isConditionFulfilled(org.jpos.iso.ISOMsg, int)
+	 */
 	public boolean isConditionFulfilled(ISOMsg msg, int id) {
 		throw new RuntimeException("Shouldn't be invoked here !");
 	}

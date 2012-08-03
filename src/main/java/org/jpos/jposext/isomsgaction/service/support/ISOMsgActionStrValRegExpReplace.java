@@ -22,7 +22,7 @@ public class ISOMsgActionStrValRegExpReplace extends ISOMsgAbstractAction
 		implements IISOMsgAction {
 
 	/**
-	 * Pattern d'expression régulière
+	 * Pattern d'expression rï¿½guliï¿½re
 	 */
 	private String regexpPattern;
 
@@ -35,10 +35,12 @@ public class ISOMsgActionStrValRegExpReplace extends ISOMsgAbstractAction
 		super();
 	}
 
-	@Override
+	/* (non-Javadoc)
+	 * @see org.jpos.jposext.isomsgaction.service.IISOMsgAction#process(org.jpos.iso.ISOMsg[], java.util.Map)
+	 */
 	public void process(ISOMsg[] msg, Map<String, Object> ctx)
 			throws ISOException {
-		// Récupération de la valeur du champ source ...
+		// Rï¿½cupï¿½ration de la valeur du champ source ...
 		String strVal = ISOMsgHelper.getStringValue(msg[getSrcMsgIndex()],
 				getSrcIdPath());
 

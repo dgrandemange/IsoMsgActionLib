@@ -14,17 +14,19 @@ public class ISOMsgActionTestTool {
 			throws SecurityException, NoSuchMethodException {
 		String mappingsDir = null;
 		String mappingID = null;
+		String mappingTestsDir = null;
 		boolean interactive = false;
 		
 		TestIsoMapping annotation = testDecl.getClass().getAnnotation(TestIsoMapping.class);
 		if (annotation != null) {
 			mappingsDir = ((TestIsoMapping) annotation).mappingsDir();
+			mappingTestsDir = ((TestIsoMapping) annotation).mappingTestsDir();
 			mappingID = ((TestIsoMapping) annotation).mappingId();
 			interactive = ((TestIsoMapping) annotation).interactive();
 		}
 		
 		TestSuiteFactoryImpl testSuiteFactory = new TestSuiteFactoryImpl(
-				mappingsDir);		
+				mappingsDir, mappingTestsDir);		
 		testSuiteFactory.setInteractive(interactive);
 		Test test = null;
 

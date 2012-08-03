@@ -17,6 +17,11 @@ public @interface TestIsoMapping {
 	 * @return Directory location of mapping files 
 	 */
 	String mappingsDir();
+
+	/**
+	 * @return Directory location of mapping tests 
+	 */
+	String mappingTestsDir() default "";	
 	
 	/**
 	 * @return Id of mapping file to test

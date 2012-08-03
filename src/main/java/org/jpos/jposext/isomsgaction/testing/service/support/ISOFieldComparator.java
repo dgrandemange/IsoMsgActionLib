@@ -18,7 +18,9 @@ public class ISOFieldComparator implements Comparator<ISOField> {
 		this.path = path;
 	}
 
-	@Override
+	/* (non-Javadoc)
+	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+	 */
 	public int compare(ISOField field0, ISOField field1) {
 
 		if (null != field0) {

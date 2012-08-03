@@ -30,7 +30,9 @@ public class ISOMsgActionSetStringValue extends ISOMsgAbstractAction implements
 		super();
 	}
 
-	@Override
+	/* (non-Javadoc)
+	 * @see org.jpos.jposext.isomsgaction.service.IISOMsgAction#process(org.jpos.iso.ISOMsg[], java.util.Map)
+	 */
 	public void process(ISOMsg[] msg, Map<String, Object> ctx)
 			throws ISOException {
 		String finalValue = getValue();
@@ -59,12 +61,12 @@ public class ISOMsgActionSetStringValue extends ISOMsgAbstractAction implements
 
 		if (null != finalValue) {
 			if (fixedLength > 0) {
-				//Ajout soit d'un padding à blanc à doite soit d'un truncate à fixedLength
+				//Ajout soit d'un padding ï¿½ blanc ï¿½ doite soit d'un truncate ï¿½ fixedLength
 				if (finalValue.length() > fixedLength){
 					// On fait un truncate sur la valeur.
 					finalValue = finalValue.substring(0, fixedLength);
 				}else{
-					// on pad à doite avec des blancs
+					// on pad ï¿½ doite avec des blancs
 					finalValue = padright(finalValue, fixedLength, ' ');
 				}
 			}

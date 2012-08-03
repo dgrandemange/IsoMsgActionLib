@@ -1,0 +1,16 @@
+<isomsg>
+  <isomsg id="1">
+    <isomsg id="1">
+      <field id="1" value="a dummy value 1.1"/>
+      <field id="2" value="a dummy value 1.2"/>
+    </isomsg>
+    <isomsg id="2">
+      <field id="1" value="a dummy value 2.1"/>
+      <field id="2" value="a dummy value 2.2"/>
+    </isomsg>
+    <isomsg id="3">
+      <field id="1" value="a dummy value 3.1"/>
+      <field id="2" value="a dummy value 3.2"/>
+    </isomsg>
+  </isomsg>
+</isomsg>

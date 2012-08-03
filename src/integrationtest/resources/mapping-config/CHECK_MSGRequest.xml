@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<iso-action id="CHECK_MSGRequest"
+	desc="Message request header validity checking actions configuration"
+	xmlns:xi="http://www.w3.org/2001/XInclude" >
+
+	<!--
+		Availables messages :
+		==================================
+		* 0 : target message (unused in this config)
+		* 1 : source message (the one to check)
+		
+		Action context attributes :
+		===========================
+		* (IN) /
+		* (OUT) errors list
+	-->
+
+	<validate>
+
+		<!--
+			==================================================== 
+			BEGIN Fields format declarations
+			==================================================== 					    
+		-->
+			<fieldFormat id="0xAD.0x80.1" 		type="NUM" 	lg="10"	lgVariable="true"	desc="call Id" />
+		
+			<!-- fieldFormat id="0xAD.0x81.1" 		type="NUM" 	lg="3"	lgVariable="true"	desc="Mode indicator" /-->
+			<fieldFormat id="0xAD.0x81.1" 		type="REGEXP" pattern="^1$" desc="Mode indicator" />
+		
+			<fieldFormat id="0xAD.0x83.1" 		type="NUM" 	lg="3"	lgVariable="true"	desc="Object class" />
+		
+			<!-- fieldFormat id="0xAD.0x84.1" 		type="NUM" 	lg="3"	lgVariable="true"	desc="typeEvt" /-->
+			<fieldFormat id="0xAD.0x84.1" 		type="REGEXP" pattern="^2$" desc="typeEvt" />
+		
+			<!-- 		
+			<fieldFormat id="0xAD.0x85" 		type="BINARY" 	lg="1024"	lgVariable="true"	desc="application item" />
+		 	<fieldFormat id="0xAD.0x85.0x01" 	type="BINARY"  	lg="1024"	lgVariable="true"	desc="application item level 1" />
+		  	-->
+		 
+		<!-- 
+			==================================================== 
+			END   Fields format declarations
+			==================================================== 					    
+		-->
+
+		<!--
+			========================= 
+			BEGIN Mandatory fields 
+			========================= 
+		-->
+			<checkField id="0xAD.0x80.1"/>
+			<checkField id="0xAD.0x81.1"/>
+			<checkField id="0xAD.0x83.1"/>
+			<checkField id="0xAD.0x84.1"/>
+			
+			<!-- 
+			<checkField id="0xAD.0x85"/>
+			 -->
+			 
+			<ifPresent id="0xAD.0x85.0x01">
+			<else>
+				<ifPresent id="0xAD.0x85.0x03">
+				<else>
+					<ifPresent id="0xAD.0x85.0x05">
+					<else>
+						<ifPresent id="0xAD.0x85.0x06">
+							<else>
+								<checkField id="0xAD.0x85.0x01"/>					
+							</else>
+						</ifPresent>
+					</else>
+					</ifPresent>	
+				</else>			
+				</ifPresent>
+			</else>
+			</ifPresent>
+			
+		<!-- 
+			========================= 
+			END   Mandatory fields 
+			========================= 
+		-->
+
+		<!-- 
+			========================= 
+			BEGIN Optional fields 
+			========================= 
+		-->
+			<!-- checkField id=""	presence="optional"/ -->			
+		<!--
+			========================= 
+			END   Optional fields 
+			========================= 
+		-->
+	</validate>
+	
+</iso-action>

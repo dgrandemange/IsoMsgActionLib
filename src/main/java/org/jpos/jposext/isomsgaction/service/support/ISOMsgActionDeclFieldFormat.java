@@ -18,7 +18,9 @@ public class ISOMsgActionDeclFieldFormat extends ISOMsgAbstractAction {
 
 	private ValidationRule validationRule;
 
-	@Override
+	/* (non-Javadoc)
+	 * @see org.jpos.jposext.isomsgaction.service.IISOMsgAction#process(org.jpos.iso.ISOMsg[], java.util.Map)
+	 */
 	public void process(ISOMsg[] msg, Map<String, Object> ctx)
 			throws ISOException {
 		// Well, nothing special to do here

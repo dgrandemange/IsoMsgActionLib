@@ -25,18 +25,20 @@ public class ISOMsgActionStrValCopy extends ISOMsgAbstractAction implements
 		super();
 	}
 
-	@Override
+	/* (non-Javadoc)
+	 * @see org.jpos.jposext.isomsgaction.service.IISOMsgAction#process(org.jpos.iso.ISOMsg[], java.util.Map)
+	 */
 	public void process(ISOMsg[] msg, Map<String, Object> ctx)
 			throws ISOException {
-		// Récupération de la valeur du champ source ...
+		// Rï¿½cupï¿½ration de la valeur du champ source ...
 		String strVal = ISOMsgHelper.getStringValue(msg[getSrcMsgIndex()],
 				getSrcIdPath());
-		// Récupération de la valeur du champ actuel
+		// Rï¿½cupï¿½ration de la valeur du champ actuel
 		String strCurrentVal = ISOMsgHelper.getStringValue(msg[getMsgIndex()],
 				getIdPath());
 		
 		// ... et positionnement de la valeur du champ cible
-		// écrasement du champ cible si et seulement si concat = false ou non positionné
+		// ï¿½crasement du champ cible si et seulement si concat = false ou non positionnï¿½
 		if (concat){
 				ISOMsgHelper.setValue(msg[getMsgIndex()], getIdPath(), (strCurrentVal==null ? "" : strCurrentVal)+ (strVal==null ? "" :strVal ), isBinary());
 		}

@@ -21,7 +21,7 @@ public class ISOMsgActionSetRandomNumber extends ISOMsgAbstractAction implements
 		IISOMsgAction {
 
 	/**
-	 * Nombre de digits du nombre aléatoire
+	 * Nombre de digits du nombre alï¿½atoire
 	 */
 	private int nbDigits;	
 	
@@ -29,7 +29,9 @@ public class ISOMsgActionSetRandomNumber extends ISOMsgAbstractAction implements
 		super();
 	}
 
-	@Override
+	/* (non-Javadoc)
+	 * @see org.jpos.jposext.isomsgaction.service.IISOMsgAction#process(org.jpos.iso.ISOMsg[], java.util.Map)
+	 */
 	public void process(ISOMsg[] msg, Map<String, Object> ctx)
 			throws ISOException {
 		StringBuffer res = new StringBuffer("");
