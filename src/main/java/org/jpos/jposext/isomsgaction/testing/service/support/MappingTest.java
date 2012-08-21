@@ -249,14 +249,14 @@ public class MappingTest extends TestCase {
 						}
 					} else {
 						String effectiveValue = null;
-						if (effectiveObject.getClass().isPrimitive()) {
+						if (null == effectiveObject) {
+							effectiveValue = null;
+						} else if (effectiveObject.getClass().isPrimitive()) {
 							effectiveValue = (String) effectiveObject;
 						} else if (effectiveObject instanceof String) {
 							effectiveValue = (String) effectiveObject;
 						} else {
-							if (null != effectiveObject) {
-								effectiveValue = effectiveObject.toString();
-							}
+							effectiveValue = effectiveObject.toString();
 						}
 						if (!(expectedValue.equals(effectiveValue))) {
 							expectedContextPopulationFailure = true;
