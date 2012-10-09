@@ -14,13 +14,19 @@ public enum ValidationErrorTypeEnum {
     FIELD_PRESENCE,
     
     /**
-     * Current data lenth is invalid, or does not match a speicified fixed length, or exceeeds a specified max length
+     * Current data lenth is invalid, or does not match a specified fixed length, or exceeeds a specified max length
      */
     INVALID_LENGTH,
     
     /**
      * Current data type is not the expected one
      */
-    INVALID_TYPE;
+    INVALID_TYPE,
+    
+    /**
+     * Field value is not the expected one
+     */
+    UNEXPECTED_VALUE
+    ;
     
 }

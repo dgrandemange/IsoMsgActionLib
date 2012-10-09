@@ -94,7 +94,7 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 		action.setIdPath(validationRule.getName());
 
 		action.process(msg, ctx);
-		assertEquals(0, errorsList.size());
+		assertEquals(0, errorsList.size());		
 	}
 
 	public void testPresenceRequiseDuChamp() throws ISOException,
@@ -486,4 +486,90 @@ public class ISOMsgActionCheckFieldTest extends TestCase {
 			assertTrue(e.getMessage().contains("invalidRef"));
 		}
 	}
+	
+	public void testCompareValueToAnotherMessageFieldValue_ValuesAreEquals() throws ISOException, ParseException {
+		ISOMsg referencedMsg = new ISOMsg();
+		ISOMsgTestHelper.populateMsg(referencedMsg, new String[][] {
+				new String[] { "4", "abcdefABCDEF123 *_;&#" } });
+
+		action.setIdPath("4");
+		action.setCompareToMessageField(true);
+		action.setCompareToMsgIndex(1);
+		action.setCompareToIdPath("4");
+				
+		action.process(new ISOMsg[] {msg, referencedMsg}, ctx);
+		assertEquals(0, errorsList.size());
+	}
+
+	/*
+		submsg1 = new ISOMsg(9);
+		ISOMsgTestHelper.populateMsg(submsg1, new String[][] {
+				new String[] { "1", "sub1_valeur1" },
+				new String[] { "2", "sub1_valeur2" },
+				new String[] { "3", "sub1_valeur3" } });
+
+		msg.set(submsg1);
+		msg.set(10, new byte[] { 0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03,
+				0x02, 0x01 });
+	 */
+	
+	public void testCompareValueToAnotherMessageFieldValue_ValuesAreNotEquals() throws ISOException, ParseException {
+		ISOMsg referencedMsg = new ISOMsg();
+		ISOMsgTestHelper.populateMsg(referencedMsg, new String[][] {
+				new String[] { "4", "abcdefABCDEF123 *_;&#" },
+				new String[] { "5", "dummy value" } });
+
+		action.setIdPath("4");
+		action.setCompareToMessageField(true);
+		action.setCompareToMsgIndex(1);
+		action.setCompareToIdPath("5");
+				
+		action.process(new ISOMsg[] {msg, referencedMsg}, ctx);
+		assertEquals(1, errorsList.size());
+		ValidationError err = errorsList.get(0);
+		assertEquals(ValidationErrorTypeEnum.UNEXPECTED_VALUE, err.getTypeErreur());
+		assertEquals("4", err.getParamName());
+	}		
+	
+	public void testCompareValueToAnotherMessageFieldValue_ValuesAreCompositeFieldsAndEquals() throws ISOException, ParseException {
+		ISOMsg referencedMsg = new ISOMsg();
+		ISOMsg referencedSubmsg1 = new ISOMsg(9);
+		ISOMsgTestHelper.populateMsg(referencedSubmsg1, new String[][] {
+				new String[] { "1", "sub1_valeur1" },
+				new String[] { "2", "sub1_valeur2" },
+				new String[] { "3", "sub1_valeur3" } });
+
+		referencedMsg.set(referencedSubmsg1);
+
+		action.setIdPath("9");
+		action.setCompareToMessageField(true);
+		action.setCompareToMsgIndex(1);
+		action.setCompareToIdPath("9");
+				
+		action.process(new ISOMsg[] {msg, referencedMsg}, ctx);
+		assertEquals(0, errorsList.size());
+	}
+	
+	public void testCompareValueToAnotherMessageFieldValue_ValuesAreCompositeFieldsAndNotEquals() throws ISOException, ParseException {
+		ISOMsg referencedMsg = new ISOMsg();
+		ISOMsg referencedSubmsg1 = new ISOMsg(9);
+		ISOMsgTestHelper.populateMsg(referencedSubmsg1, new String[][] {
+				new String[] { "1", "sub1_valeur1" },
+				new String[] { "2", "!!! we set some dummy value here !!!" },
+				new String[] { "3", "sub1_valeur3" } });
+
+		referencedMsg.set(referencedSubmsg1);
+
+		action.setIdPath("9");
+		action.setCompareToMessageField(true);
+		action.setCompareToMsgIndex(1);
+		action.setCompareToIdPath("9");
+				
+		action.process(new ISOMsg[] {msg, referencedMsg}, ctx);
+		assertEquals(1, errorsList.size());
+		ValidationError err = errorsList.get(0);
+		assertEquals(ValidationErrorTypeEnum.UNEXPECTED_VALUE, err.getTypeErreur());
+		assertEquals("9", err.getParamName());
+	}
+	
 }

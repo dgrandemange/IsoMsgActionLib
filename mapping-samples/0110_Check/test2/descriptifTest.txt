@@ -1,0 +1,3 @@
+Test with a valid message 0110.
+NB : optional field 12 not set, and so not cheked against msg 0100. 
+No error expected.

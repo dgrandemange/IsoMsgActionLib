@@ -2,13 +2,9 @@ package org.jpos.jposext.isomsgaction.factory.service.support;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import javax.sql.PooledConnection;
 
 import junit.framework.TestCase;
 
@@ -44,7 +40,6 @@ import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionUpdateExecution
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionUserCustomized;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionValidate;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgCompositeAction;
-import org.jpos.jposext.isomsgaction.service.support.proxy.LoopHandler;
 import org.xml.sax.SAXException;
 
 import dummy.CustomizedISOAction;
@@ -362,25 +357,47 @@ public class ISOMsgActionsConfigDigesterFactoryImplTest extends TestCase {
 		assertEquals("15", action0100F_28_5.getIdPath());
 		assertEquals(PresenceModeEnum.MANDATORY, action0100F_28_5.getPresenceMode());
 		assertEquals(mapValidationRulesByIdPath, action0100F_28_5.getMapValidationRulesByIdPath());
+		assertEquals(false, action0100F_28_5.isCompareToMessageField());
 		
 		ISOMsgActionCheckField action0100F_28_6 = (ISOMsgActionCheckField) cmpAction0100F_28.get(5);
 		assertNotNull(action0100F_28_6);
 		assertEquals("16", action0100F_28_6.getIdPath());
 		assertEquals(PresenceModeEnum.MANDATORY, action0100F_28_6.getPresenceMode());
 		assertEquals(mapValidationRulesByIdPath, action0100F_28_6.getMapValidationRulesByIdPath());
+		assertEquals(false, action0100F_28_6.isCompareToMessageField());
 
 		ISOMsgActionCheckField action0100F_28_7 = (ISOMsgActionCheckField) cmpAction0100F_28.get(6);
 		assertNotNull(action0100F_28_7);
 		assertEquals("17", action0100F_28_7.getIdPath());
 		assertEquals(PresenceModeEnum.OPTIONAL, action0100F_28_7.getPresenceMode());
 		assertEquals(mapValidationRulesByIdPath, action0100F_28_7.getMapValidationRulesByIdPath());
+		assertEquals(false, action0100F_28_7.isCompareToMessageField());
 
 		ISOMsgActionCheckField action0100F_28_8 = (ISOMsgActionCheckField) cmpAction0100F_28.get(7);
 		assertNotNull(action0100F_28_8);
 		assertEquals("18", action0100F_28_8.getIdPath());
 		assertEquals("myFormatForField18", action0100F_28_8.getFieldFormatRef());  
 		assertEquals(PresenceModeEnum.UNEXPECTED, action0100F_28_8.getPresenceMode());
-		assertEquals(mapValidationRulesByIdPath, action0100F_28_8.getMapValidationRulesByIdPath());
+		assertEquals(mapValidationRulesByIdPath, action0100F_28_8.getMapValidationRulesByIdPath());		
+		assertEquals(false, action0100F_28_8.isCompareToMessageField());
+		
+		ISOMsgActionCheckField action0100F_28_9 = (ISOMsgActionCheckField) cmpAction0100F_28.get(8);
+		assertNotNull(action0100F_28_9);
+		assertEquals("19", action0100F_28_9.getIdPath());
+		assertEquals(PresenceModeEnum.OPTIONAL, action0100F_28_9.getPresenceMode());
+		assertEquals(mapValidationRulesByIdPath, action0100F_28_9.getMapValidationRulesByIdPath());
+		assertEquals("69", action0100F_28_9.getCompareToIdPath());
+		assertEquals(2, action0100F_28_9.getCompareToMsgIndex());
+		assertEquals(true, action0100F_28_9.isCompareToMessageField());
+
+		ISOMsgActionCheckField action0100F_28_10 = (ISOMsgActionCheckField) cmpAction0100F_28.get(9);
+		assertNotNull(action0100F_28_10);
+		assertEquals("19", action0100F_28_10.getIdPath());
+		assertEquals(PresenceModeEnum.OPTIONAL, action0100F_28_10.getPresenceMode());
+		assertEquals(mapValidationRulesByIdPath, action0100F_28_10.getMapValidationRulesByIdPath());
+		assertEquals("19", action0100F_28_10.getCompareToIdPath());
+		assertEquals(2, action0100F_28_10.getCompareToMsgIndex());
+		assertEquals(true, action0100F_28_10.isCompareToMessageField());
 		
 		ISOMsgCompositeAction cmpAction0100F_29 = (ISOMsgCompositeAction) cmpAction0100D.get(22);
 		assertNotNull(cmpAction0100F_29);

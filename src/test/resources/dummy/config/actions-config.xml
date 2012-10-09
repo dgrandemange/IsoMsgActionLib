@@ -305,7 +305,17 @@
 			<checkField id="16" presence="mandatory"/>
 			<checkField id="17" presence="optional"/>
 			<checkField id="18" presence="unexpected" fieldFormatRef="myFormatForField18" />
-
+			
+			<!-- 
+				A field value can also be checked against another message field :
+				below the value of field 19 will be checked against field 19 (attribute 'compareToId') 
+				of the 2nd message (attribute 'compareToMsg') in the available messages array.
+				Value comparison failure will cause a validation error. 
+			-->
+			<checkField id="19" presence="optional" compareToMsg="2" compareToId="69" />
+			
+			<!-- If attribute 'compareToId' is omitted, attribute 'id' is used -->
+			<checkField id="19" presence="optional" compareToMsg="2" />
 		</validate>
 		
 		<!-- 

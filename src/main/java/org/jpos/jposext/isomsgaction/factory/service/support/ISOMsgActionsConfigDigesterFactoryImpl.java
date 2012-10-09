@@ -511,7 +511,7 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 				} catch (NumberFormatException e) {
 				}
 
-				// Type de données
+				// Type de donnï¿½es
 				Vector<DataType> listeTypes = new Vector<DataType>();
 				String strListeTypes = attr.getValue("type");
 				StringTokenizer tokenizer = new StringTokenizer(strListeTypes,
@@ -541,12 +541,12 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 
 				String pattern = attr.getValue("pattern");
 				if (DataType.DATE == listeTypes.get(0)) {
-					// Vérifier la validité du pattern
-					// une IllegalArgumentException devrait être balancée si
+					// Vï¿½rifier la validitï¿½ du pattern
+					// une IllegalArgumentException devrait ï¿½tre balancï¿½e si
 					// invalide
 					new SimpleDateFormat(pattern);
 
-					// Si on est là, c'est que le pattern date est valide
+					// Si on est lï¿½, c'est que le pattern date est valide
 					regle.setDatePattern(pattern);
 				} else {
 					regle.setPattern(pattern);
@@ -591,11 +591,25 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 					presenceMode = PresenceModeEnum.valueOf(sPresenceMode
 							.trim().toUpperCase());
 				}
-
+				action.setPresenceMode(presenceMode);
+				
 				String fieldFormatRef = attr.getValue("fieldFormatRef");
 				action.setFieldFormatRef(fieldFormatRef);
 				
-				action.setPresenceMode(presenceMode);
+				String compareToMsgIndex = attr.getValue("compareToMsg");
+				if ((null != compareToMsgIndex)) {
+					action.setCompareToMessageField(true);
+					action.setCompareToMsgIndex(Integer.parseInt(compareToMsgIndex));
+					String compareToFieldIdPath = attr.getValue("compareToId");
+					if (null != compareToFieldIdPath) {
+						action.setCompareToIdPath(compareToFieldIdPath);
+					} else {
+						action.setCompareToIdPath(action.getIdPath());
+					}
+				}
+				else {
+					action.setCompareToMessageField(false);
+				}
 
 				addActionToParent(digester, parentAction, action);
 			}

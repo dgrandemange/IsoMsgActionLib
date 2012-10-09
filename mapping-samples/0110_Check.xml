@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<iso-action id="0110_Check"
+	desc="Check a message 0200 validity"
+	xmlns:xi="http://www.w3.org/2001/XInclude" >
+
+	<!--
+		Availables message (sorted by index) :
+		======================================
+		* 0 (dest message) : empty message (UNUSED HERE)
+		* 1 (source message n°1) : existing 0110, the SAA response we want to check
+		* 2 (source message n°2) : existing 0100, the initial request sent to SAA		
+		
+		Context info :
+		==============
+		* a list of validation errors will be put into the context   
+	-->
+
+	<!-- 
+		First we need to state we enter in a validation phase.
+		This is required in order to declare field formats and check operations  
+	-->
+	<validate>
+	
+		<fieldFormat id="2" type="NUM" lg="19" lgVariable="true" desc="Primary Account Number"/>
+		<fieldFormat id="12" type="NUM" lg="6" lgVariable="true" desc="Time, Local Transaction"/>
+		
+		<!--
+			========================= 
+			BEGIN Mandatory fields 
+			========================= 
+		-->
+			<!-- Received PAN should be the same as the PAN sent in the request -->
+			<checkField id="2" compareToMsg="2" />			
+		<!-- 
+			========================= 
+			END   Mandatory fields 
+			========================= 
+		-->
+
+		<!-- 
+			========================= 
+			BEGIN Optional fields 
+			========================= 
+		-->
+			<!-- 
+				If local time is set in response, it should be the same as the local time sent in the request
+				NB :  attribute 'compareToId' could have been omitted here (same value as attribute 'id')
+			-->
+			<checkField id="12"	presence="optional" compareToMsg="2" compareToId="12"/>
+		<!--
+			========================= 
+			END   Optional fields 
+			========================= 
+		-->
+	</validate>
+	
+</iso-action>

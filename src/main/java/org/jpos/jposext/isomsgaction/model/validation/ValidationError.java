@@ -19,7 +19,7 @@ public class ValidationError {
     private ValidationErrorTypeEnum typeErreur;
     
     /**
-     * Identifiant paramètre en erreur
+     * Identifiant paramï¿½tre en erreur
      */
     private String paramName;
 

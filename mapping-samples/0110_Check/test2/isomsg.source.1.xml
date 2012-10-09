@@ -1,0 +1,5 @@
+<isomsg>
+  <field id="0" value="0110"/>
+  <field id="2" value="5130123412341234"/>
+  <!-- We omit field 12 -->
+</isomsg>
