@@ -25,6 +25,7 @@ import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfCustomConditi
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesDelimConsts;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesRegExp;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfPresent;
+import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfValidationErrors;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionLoop;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionMergeMsg;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionRemoveField;
@@ -61,6 +62,7 @@ public class ISOMsgActionsConfigDigesterFactoryImplTest extends TestCase {
 		super.setUp();
 	}
 
+	@SuppressWarnings("unchecked")
 	public void testDigestion() throws FileNotFoundException, IOException,
 			SAXException {
 		Digester digester = digesterFactory.createDigester();
@@ -459,6 +461,12 @@ public class ISOMsgActionsConfigDigesterFactoryImplTest extends TestCase {
 		assertEquals(1, action0100F_38.getBegin());
 		assertEquals(4, action0100F_38.getEnd());
 		assertNotNull(action0100F_38.get(0));
+		
+		ISOMsgActionIfValidationErrors action0100F_39 = (ISOMsgActionIfValidationErrors) cmpAction0100D.get(32);
+		IISOMsgAction action0100F_39_subaction_1 = action0100F_39.get(0);
+		assertNotNull(action0100F_39_subaction_1);
+		assertTrue(action0100F_39_subaction_1 instanceof ISOMsgActionSetStrDate);
+
 	}
 
 }

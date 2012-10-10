@@ -40,6 +40,7 @@ import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfCustomConditi
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesDelimConsts;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesRegExp;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfPresent;
+import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfValidationErrors;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionLoop;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionMergeMsg;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionRemoveField;
@@ -76,6 +77,7 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 			@Override
 			public void begin(String namespace, String name, Attributes attr)
 					throws Exception {
+				@SuppressWarnings("unchecked")
 				HashMap<String, IISOMsgAction> mapActions = (HashMap<String, IISOMsgAction>) digester
 						.peek(1);
 				ISOMsgCompositeAction cmpAction = (ISOMsgCompositeAction) digester
@@ -822,6 +824,25 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 			}
 		});
 
+		digester.addObjectCreate("*/ifValidationErrors", ISOMsgActionIfValidationErrors.class);
+		digester.addRule("*/ifValidationErrors", new Rule() {
+
+			@Override
+			public void begin(String namespace, String name, Attributes attr)
+					throws Exception {
+				ISOMsgCompositeAction parentAction = (ISOMsgCompositeAction) digester
+						.peek(1);
+				ISOMsgActionIfValidationErrors action = (ISOMsgActionIfValidationErrors) digester
+						.peek(0);
+
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
+				populateCommonIfActionProperties(action, attr);
+
+				addActionToParent(digester, parentAction, action);
+			}
+
+		});		
+		
 		return digester;
 	}
 

@@ -431,6 +431,14 @@
 			</ifPresent>
 		</loop>  
 
+		<!-- 			
+			"ifValidationErrors" element :
+			Here, condition is fulfilled if there are one or more validation errors in the iso action context
+		-->
+		<ifValidationErrors>
+			<setDate id="21" format="MMyyyy" />
+		</ifValidationErrors>
+
 	</iso-action>
 
 </iso-actions>
