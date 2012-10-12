@@ -439,6 +439,14 @@
 			<setDate id="21" format="MMyyyy" />
 		</ifValidationErrors>
 
+		<!-- 			
+			"ifSetInContext" element :
+			Here, condition is fulfilled if the iso action context contains one entry with attribute 'key' as entry name, and a non null value 
+		-->
+		<ifSetInContext key="incomingRequestBean">
+			<setDate id="21" format="MMyyyy" />
+		</ifSetInContext>
+
 	</iso-action>
 
 </iso-actions>

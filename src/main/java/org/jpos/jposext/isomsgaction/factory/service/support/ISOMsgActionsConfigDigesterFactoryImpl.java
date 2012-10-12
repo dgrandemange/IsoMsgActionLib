@@ -40,6 +40,7 @@ import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfCustomConditi
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesDelimConsts;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesRegExp;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfPresent;
+import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfSetInContext;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfValidationErrors;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionLoop;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionMergeMsg;
@@ -842,6 +843,28 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 			}
 
 		});		
+
+		digester.addObjectCreate("*/ifSetInContext", ISOMsgActionIfSetInContext.class);
+		digester.addRule("*/ifSetInContext", new Rule() {
+
+			@Override
+			public void begin(String namespace, String name, Attributes attr)
+					throws Exception {
+				ISOMsgCompositeAction parentAction = (ISOMsgCompositeAction) digester
+						.peek(1);
+				ISOMsgActionIfSetInContext action = (ISOMsgActionIfSetInContext) digester
+						.peek(0);
+
+				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
+				populateCommonIfActionProperties(action, attr);
+
+				String key = attr.getValue("key");
+				action.setKey(key);
+				
+				addActionToParent(digester, parentAction, action);
+			}
+
+		});
 		
 		return digester;
 	}

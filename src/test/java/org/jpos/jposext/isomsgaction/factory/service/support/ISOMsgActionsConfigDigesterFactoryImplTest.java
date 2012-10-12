@@ -25,6 +25,7 @@ import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfCustomConditi
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesDelimConsts;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfMatchesRegExp;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfPresent;
+import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfSetInContext;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionIfValidationErrors;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionLoop;
 import org.jpos.jposext.isomsgaction.service.support.ISOMsgActionMergeMsg;
@@ -467,6 +468,11 @@ public class ISOMsgActionsConfigDigesterFactoryImplTest extends TestCase {
 		assertNotNull(action0100F_39_subaction_1);
 		assertTrue(action0100F_39_subaction_1 instanceof ISOMsgActionSetStrDate);
 
+		ISOMsgActionIfSetInContext action0100F_40 = (ISOMsgActionIfSetInContext) cmpAction0100D.get(33);
+		assertEquals("incomingRequestBean", action0100F_40.getKey());
+		IISOMsgAction action0100F_40_subaction_1 = action0100F_40.get(0);
+		assertNotNull(action0100F_40_subaction_1);
+		assertTrue(action0100F_40_subaction_1 instanceof ISOMsgActionSetStrDate);
 	}
 
 }
