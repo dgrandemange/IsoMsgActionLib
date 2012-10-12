@@ -4,7 +4,7 @@
 
 	<groupId>org.jpos.jposext</groupId>
 	<artifactId>isomsgaction</artifactId>
-	<version>0.7-SNAPSHOT</version>
+	<version>0.7</version>
 	<packaging>jar</packaging>
 
 	<name>isomsgaction</name>
