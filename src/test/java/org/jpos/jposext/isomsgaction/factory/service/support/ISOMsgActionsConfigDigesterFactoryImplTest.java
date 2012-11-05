@@ -230,7 +230,8 @@ public class ISOMsgActionsConfigDigesterFactoryImplTest extends TestCase {
 		assertEquals(0, action0100F_19.getMsgIndex());
 		assertEquals(1, action0100F_19.getSrcMsgIndex());
 		assertNull(action0100F_19.getIdPath());
-		assertNull(action0100F_19.getSrcIdPath());	
+		assertNull(action0100F_19.getSrcIdPath());
+		assertTrue(action0100F_19.isClone());
 		
 		ISOMsgActionSetStrDate action0100F_20 = (ISOMsgActionSetStrDate) cmpAction0100D.get(13);
 		assertNotNull(action0100F_20);		
@@ -473,6 +474,15 @@ public class ISOMsgActionsConfigDigesterFactoryImplTest extends TestCase {
 		IISOMsgAction action0100F_40_subaction_1 = action0100F_40.get(0);
 		assertNotNull(action0100F_40_subaction_1);
 		assertTrue(action0100F_40_subaction_1 instanceof ISOMsgActionSetStrDate);
+		
+		ISOMsgActionMergeMsg action0100F_41 = (ISOMsgActionMergeMsg) cmpAction0100D
+		.get(34);
+		assertNotNull(action0100F_41);		
+		assertEquals(0, action0100F_41.getMsgIndex());
+		assertEquals(1, action0100F_41.getSrcMsgIndex());
+		assertNull(action0100F_41.getIdPath());
+		assertNull(action0100F_41.getSrcIdPath());
+		assertFalse(action0100F_41.isClone());		
 	}
 
 }

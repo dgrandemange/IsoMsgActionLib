@@ -454,6 +454,13 @@ public class ISOMsgActionsConfigDigesterFactoryImpl implements DigesterFactory {
 
 				action.setIsoMsgCommonInfoProvider(populateCommonActionProperties(attr));
 
+				boolean clone = false;
+				String sClone = attr.getValue("clone");
+				if (null != sClone) {
+					clone = "true".equalsIgnoreCase(sClone);
+				}
+				action.setClone(clone);				
+				
 				addActionToParent(digester, parentAction, action);
 			}
 

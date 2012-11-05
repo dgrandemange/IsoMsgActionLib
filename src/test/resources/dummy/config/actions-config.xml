@@ -209,9 +209,13 @@
 		<!--
 			"merge" element :
 			Merge all fields from source message into dest message.
-			Source fields may replace already existing dest fields in dest message.  
+			Source fields may replace already existing dest fields in dest message.
+			
+			When attribute 'clone' is set to 'true', the source message is cloned. 
+			This is this cloned instance that is merged with the dest message.
+			Clone is set to 'false' by default.    
 		-->
-		<merge msg="0" sourceMsg="1" />
+		<merge msg="0" sourceMsg="1" clone="true" />
 		
 		<!--  
 			"setDate" element :
@@ -446,6 +450,9 @@
 		<ifSetInContext key="incomingRequestBean">
 			<setDate id="21" format="MMyyyy" />
 		</ifSetInContext>
+		
+		<!-- Merge action : 'clone' attribute not set ('false' by default) -->
+		<merge msg="0" sourceMsg="1" />
 
 	</iso-action>
 
