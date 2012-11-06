@@ -1,1 +1,30 @@
-See wiki page for documentation
+Adding IsoMsgActionLib to your mavenized jPos project :
+-------------------------------------------------------
+Simply add the following snippet to your pom.xml's dependencies section :
+
+    <repositories>
+    
+      <!-- ... your specific repositories if there are any ... -->
+    
+      <repository>
+    		<id>dgrandemange-mvn-repo-releases</id>
+    		<name>dgrandemange GitHub Maven Repository releases</name>
+    		<url>https://github.com/dgrandemange/dgrandemange-mvn-repo/raw/master/releases/</url>
+    	</repository>
+    
+    </repositories>
+
+    <dependencies>
+    
+        <!-- ... your project dependencies -->
+    
+      <dependency>
+        <groupId>org.jpos.jposext</groupId>
+        <artifactId>isomsgaction</artifactId>
+        <version>0.8</version>
+      </dependency>
+    </dependencies>
+
+User guide :
+------------
+See this project wiki page
