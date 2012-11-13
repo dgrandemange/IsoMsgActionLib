@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<iso-action xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="isomsgaction.xsd" id="dummy"
+	desc="Somme dummy config to check the XSD">
+
+	<!-- Action : set -->
+	<set id="0" value="106" />
+	<set id="1" msg="0" ctxBeanPath="ctx(onePropertyPath)" />
+	<set id="2" value="tutu" />
+	<set id="14" value="C'EST SUPER LES FILTRES" fixedLength="12" />
+	<set id="14" ctxBeanPath="ctx(onePropertyPath)" fixedLength="18" />
+	<set id="456" value="EEDD99" binary="false" />
+
+	<!-- Action : setDate -->
+	<setDate id="6" format="ddMMyyyy" addValue="1" addInterval="DAY" />
+	<setDate id="6" format="ddMMyyyy" addValue="1" addInterval="MONTH" />
+	<setDate id="6" format="ddMMyyyy" addValue="-1" addInterval="YEAR" />
+	<setDate id="6" format="ddMMyyyy hh:mm:ss" addValue="1"
+		addInterval="HOUR" />
+	<setDate id="6" format="MMyyyy hh:mm:ss" addValue="1"
+		addInterval="MINUTE" />
+	<setDate id="6" format="MMyyyy hh:mm:ss" addValue="10"
+		addInterval="SECOND" />
+
+	<!-- Action : setRandomNumber -->
+	<setRandomNumber id="11" digits="6" />
+
+	<!-- Action : stringCopy -->
+	<stringCopy id="8" sourceId="7" />
+	<stringCopy id="14" msg="0" sourceId="7" sourceMsg="1" />
+	<stringCopy id="15" msg="0" sourceId="7" sourceMsg="1"
+		concat="true" />
+
+	<!-- Action : removeField -->
+	<removeField id="2" />
+
+	<!-- Action : fieldCopyByRef -->
+	<fieldCopyByRef id="11" sourceId="2" sourceMsg="1" />
+
+	<!-- Action : stringRegExpReplace -->
+	<stringRegExpReplace id="12" sourceId="11" pattern="^(.*)$"
+		replace="$1" />
+
+	<!-- Action : createCmpField -->
+	<createCmpField id="13.1" />
+
+	<!-- Action : bshScript -->
+	<bshScript includes="scriptIdToInclude, anotherScriptIdToInclude"
+		scriptId="thisScriptUniqueId">
+			<![CDATA[
+				// Here, two messages in array
+				// Our goal here is to update field 4 of first message in array (index 0) from
+				// - either the value of field 1 of second message in array (index 1),
+				// - either the value of property 'defaultValue' in action execution context,
+				// Decision is made based on target message's field 2 value.
+
+				entrypoint() {
+					org.jpos.iso.ISOMsg destMsg = messages[0];
+					org.jpos.iso.ISOMsg srcMsg = messages[1];
+	
+					String valChamp2MsgDest = destMsg.getString(2);
+	
+					if ("babebibobu".equals(valChamp2MsgDest)) {
+						destMsg.set(4, srcMsg.getString(1));
+					} else {
+						destMsg.set(4, context.get("defaultValue"));
+					}
+				}
+			]]>
+	</bshScript>
+
+	<!-- Action : stringPadding -->
+	<stringPadding id="14" msg="0" expLen="10" />
+	<stringPadding id="14" msg="0" padChar="0" padDir="left"
+		expLen="10" />
+
+	<!-- Action : merge -->
+	<merge msg="0" sourceMsg="1" />
+	<merge msg="0" sourceMsg="1" clone="true" />
+
+	<!-- Action : setResponseMTI -->
+	<setResponseMTI msg="0" />
+	<setResponseMTI msg="0" default="0246" />
+
+	<!-- Action : binaryCopy -->
+	<binaryCopy id="8" sourceId="7" />
+
+	<!-- Action : updateContext -->
+	<updateContext ctxBeanPath="ctx(anotherPropertyPath)"
+		sourceId="7" />
+	<updateContext ctxBeanPath="ctx(anotherPropertyPath)"
+		sourceId="7" fixedLength="20" />
+
+	<!-- Action : customAction -->
+	<customAction class="dummy.OneCustomizedISOAction" />
+
+	<customAction class="dummy.AnotherCustomizedISOActionWithMemberInjection">
+	<![CDATA[
+		<someIntMember>12345</someIntMember>
+		<anotherStringMember>a dummy string</anotherStringMember>
+		]]>
+	</customAction>
+
+	<!-- Action : setBinary -->
+	<setBinary id="123" value="" />
+
+	<!-- Action : ifMatchesList -->
+	<ifMatchesList id="2" matchlist="tata tete titi toto">
+		<set id="2" value="tutu" />
+		<else>
+			<removeField id="2" />
+		</else>
+	</ifMatchesList>
+
+	<ifMatchesList id="3" matchlist="baba bebe bibi bobo"
+		ignoreCase="true">
+		<set id="3" ctxBeanPath="ctx(anotherPropertyPath)" />
+	</ifMatchesList>
+
+	<!-- Action : ifMatchesRegExp -->
+	<ifMatchesRegExp id="4" pattern="^([tT][aeiouy]){2}$">
+		<set id="4" value="toto" />
+	</ifMatchesRegExp>
+
+	<!-- Action : ifPresent -->
+	<ifPresent id="5" applyNotOp="true">
+		<set id="5" value="defaultValue" />
+	</ifPresent>
+
+	<ifCustomCondition class="dummy.MyCustomizedCondition">
+		<set id="2" value="tutu" />
+		<else>
+			<removeField id="2" />
+		</else>
+	</ifCustomCondition>
+
+	<ifSetInContext key="incomingRequestBean">
+		<setDate id="21" format="MMyyyy" />
+	</ifSetInContext>
+
+</iso-action>
