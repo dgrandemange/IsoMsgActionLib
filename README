@@ -21,7 +21,7 @@ Simply add the following snippet to your pom.xml's dependencies section :
       <dependency>
         <groupId>org.jpos.jposext</groupId>
         <artifactId>isomsgaction</artifactId>
-        <version>0.8</version>
+        <version>0.9</version>
       </dependency>
     </dependencies>
 
