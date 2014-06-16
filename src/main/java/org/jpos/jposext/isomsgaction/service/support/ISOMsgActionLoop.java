@@ -1,7 +1,7 @@
 package org.jpos.jposext.isomsgaction.service.support;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jpos.iso.ISOComponent;
 import org.jpos.iso.ISOException;
@@ -25,7 +25,7 @@ public class ISOMsgActionLoop extends ISOMsgCompositeAction {
 
 	private boolean intervalMode;
 
-	protected Map<Long, String> mapCurrIteratorValByThread = new HashMap<Long, String>();
+	protected Map<Long, String> mapCurrIteratorValByThread = new ConcurrentHashMap<Long, String>();
 
 	@Override
 	public void process(ISOMsg[] msg, Map<String, Object> map)

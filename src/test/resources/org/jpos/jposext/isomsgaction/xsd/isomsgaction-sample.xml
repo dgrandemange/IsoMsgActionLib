@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<iso-action xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:noNamespaceSchemaLocation="isomsgaction.xsd"
+<iso-action xmlns="http://www.jpos.org/jposext/iso-action"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.jpos.org/jposext/iso-action http://www.jpos.org/jposext/iso-action/iso-action-0.9.xsd"
 	id="ISO_ACTIONS_SET_1" desc="One first iso actions set demonstrating some actions use">	
 
 	<!-- "set" element : it sets a message field using a string value -->

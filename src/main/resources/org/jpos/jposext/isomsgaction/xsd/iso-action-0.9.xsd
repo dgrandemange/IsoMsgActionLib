@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.jpos.org/jposext/iso-action" 
+	xmlns="http://www.jpos.org/jposext/iso-action"
+	elementFormDefault="unqualified"
+	attributeFormDefault="unqualified"
+	>
 
 	<!-- ============================ -->
 	<!-- BEGIN Common attributes defs -->
@@ -73,14 +79,14 @@
 	<xs:attribute name="ctxBeanPath" type="xs:string" default="ctx(attr).property">
 		<xs:annotation>
 			<xs:documentation>
-    		<![CDATA[The ctxBeanPath attribute provide the path through execution context to the relevant property from which to retrieve a value.<BR>
+    		<![CDATA[The ctxBeanPath attribute provide the path through action execution context to the relevant property from which to retrieve a value.<BR>
 			This path use the notation used by class PropertyUtils ({@link http://commons.apache.org/beanutils/api/index.html}) from Jakarta Commons BeanUtils API.<BR>
 			See also section 8.5 of "Apache Jakarta and Beyond-A Java programmer's introduction" book.<BR>
 			<BR>
    			Sample values : <BR>
    			--------------- <BR>
-			* ctx(contractNumber) : will look for a "contractNumber" entry in the current action context, and retrieve its value,<BR>
-			* ctx(merchant).activityCode : will look for bean 'merchant' in action context, then retrieve its "activityCode" property's value<BR>			
+			* ctx(contractNumber) : will look for a "contractNumber" entry in the current action execution context, and retrieve its value,<BR>
+			* ctx(merchant).activityCode : will look for bean 'merchant' in action execution context, then retrieve its "activityCode" property's value<BR>			
        		]]>
 			</xs:documentation>
 		</xs:annotation>
@@ -103,11 +109,11 @@
 			</xs:documentation>
 		</xs:annotation>
 	</xs:attribute>
-	
-	<xs:attributeGroup name="conditionalActionsCommonAttributes">
+
+	<xs:attributeGroup name="conditionalActionsCommonAttributes" id="toto">
 		<xs:attribute ref="id" use="required" />
 		<xs:attribute ref="msg" use="optional" />
-		<xs:attribute ref="applyNotOp" use="optional" default="false" />					
+		<xs:attribute ref="applyNotOp" use="optional" default="false" />
 	</xs:attributeGroup>
 	<!-- ========================== -->
 	<!-- END Common attributes defs -->
@@ -126,7 +132,7 @@
     			<BR>
     			Value can be specified as :<BR>
     			* a literal string (see attribute "value"),<BR>
-    			* a value retrieved from the current action context (see attribute "ctxBeanPath")<BR>
+    			* a value retrieved from the current action execution context (see attribute "ctxBeanPath")<BR>
     			]]>
 			</xs:documentation>
 		</xs:annotation>
@@ -336,7 +342,7 @@
     			Snippet must provide an "entrypoint()" method.<BR>
     			Here follows the prefedined variables in the BSH context :<BR>
     			* messages : the current action's message array,<BR>
-    			* context : the current action's execution context<BR>
+    			* context : the current action execution context<BR>
     			 ]]>
 			</xs:documentation>
 		</xs:annotation>
@@ -410,7 +416,8 @@
 			<xs:attribute ref="msg" use="required" />
 			<xs:attribute ref="sourceMsg" use="required" />
 
-			<xs:attribute name="clone" type="xs:boolean" use="optional" default="false">
+			<xs:attribute name="clone" type="xs:boolean" use="optional"
+				default="false">
 				<xs:annotation>
 					<xs:documentation>
 		    			<![CDATA[When attribute 'clone' is set to 'true', the source message is cloned.<BR> 
@@ -512,14 +519,14 @@
 			<xs:element ref="merge" minOccurs="0" maxOccurs="unbounded" />
 
 			<xs:element ref="setResponseMTI" minOccurs="0" maxOccurs="unbounded" />
-			 
-			<xs:element ref="binaryCopy" minOccurs="0" maxOccurs="unbounded" /> 
 
-			<xs:element ref="updateContext" minOccurs="0" maxOccurs="unbounded" /> 
+			<xs:element ref="binaryCopy" minOccurs="0" maxOccurs="unbounded" />
 
-			<xs:element ref="customAction" minOccurs="0" maxOccurs="unbounded" /> 
+			<xs:element ref="updateContext" minOccurs="0" maxOccurs="unbounded" />
 
-			<xs:element ref="setBinary" minOccurs="0" maxOccurs="unbounded" /> 
+			<xs:element ref="customAction" minOccurs="0" maxOccurs="unbounded" />
+
+			<xs:element ref="setBinary" minOccurs="0" maxOccurs="unbounded" />
 
 		</xs:sequence>
 	</xs:group>
@@ -527,7 +534,7 @@
 	<!-- Conditional actions -->
 	<xs:group name="conditionalActionsGroup">
 		<xs:sequence>
-		
+
 			<xs:element name="ifMatchesList" minOccurs="0" maxOccurs="unbounded">
 				<xs:annotation>
 					<xs:documentation>
@@ -538,8 +545,7 @@
 
 				<xs:complexType>
 					<xs:sequence>
-						<xs:group ref="allActionsGroup" minOccurs="0"
-							maxOccurs="unbounded" />
+						<xs:group ref="allActionsGroup" minOccurs="0" maxOccurs="unbounded" />
 						<xs:element name="else" minOccurs="0" maxOccurs="1">
 							<xs:complexType>
 								<xs:sequence>
@@ -550,8 +556,8 @@
 						</xs:element>
 					</xs:sequence>
 
-					<xs:attributeGroup ref="conditionalActionsCommonAttributes"/>					
-					
+					<xs:attributeGroup ref="conditionalActionsCommonAttributes" />
+
 					<xs:attribute name="matchlist" type="xs:string" use="required">
 						<xs:annotation>
 							<xs:documentation>
@@ -560,12 +566,14 @@
 						</xs:annotation>
 					</xs:attribute>
 
-					<xs:attribute name="ignoreCase" type="xs:boolean" use="optional" default="false"/>
+					<xs:attribute name="ignoreCase" type="xs:boolean" use="optional"
+						default="false" />
 
 				</xs:complexType>
 			</xs:element>
-			
-			<xs:element name="ifMatchesRegExp" minOccurs="0" maxOccurs="unbounded">
+
+			<xs:element name="ifMatchesRegExp" minOccurs="0"
+				maxOccurs="unbounded">
 				<xs:annotation>
 					<xs:documentation>
     			<![CDATA[Conditional action processed if a field of a message matches the specified regular expression  
@@ -575,8 +583,7 @@
 
 				<xs:complexType>
 					<xs:sequence>
-						<xs:group ref="allActionsGroup" minOccurs="0"
-							maxOccurs="unbounded" />
+						<xs:group ref="allActionsGroup" minOccurs="0" maxOccurs="unbounded" />
 						<xs:element name="else" minOccurs="0" maxOccurs="1">
 							<xs:complexType>
 								<xs:sequence>
@@ -587,8 +594,8 @@
 						</xs:element>
 					</xs:sequence>
 
-					<xs:attributeGroup ref="conditionalActionsCommonAttributes"/>					
-					
+					<xs:attributeGroup ref="conditionalActionsCommonAttributes" />
+
 					<xs:attribute name="pattern" type="xs:string" use="required">
 						<xs:annotation>
 							<xs:documentation>
@@ -610,8 +617,7 @@
 
 				<xs:complexType>
 					<xs:sequence>
-						<xs:group ref="allActionsGroup" minOccurs="0"
-							maxOccurs="unbounded" />
+						<xs:group ref="allActionsGroup" minOccurs="0" maxOccurs="unbounded" />
 						<xs:element name="else" minOccurs="0" maxOccurs="1">
 							<xs:complexType>
 								<xs:sequence>
@@ -622,12 +628,13 @@
 						</xs:element>
 					</xs:sequence>
 
-					<xs:attributeGroup ref="conditionalActionsCommonAttributes"/>
+					<xs:attributeGroup ref="conditionalActionsCommonAttributes" />
 
 				</xs:complexType>
 			</xs:element>
 
-			<xs:element name="ifCustomCondition" minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="ifCustomCondition" minOccurs="0"
+				maxOccurs="unbounded">
 				<xs:annotation>
 					<xs:documentation>
     			<![CDATA[Conditional action processed if a custom condition is fulfilled  
@@ -637,8 +644,7 @@
 
 				<xs:complexType>
 					<xs:sequence>
-						<xs:group ref="allActionsGroup" minOccurs="0"
-							maxOccurs="unbounded" />
+						<xs:group ref="allActionsGroup" minOccurs="0" maxOccurs="unbounded" />
 						<xs:element name="else" minOccurs="0" maxOccurs="1">
 							<xs:complexType>
 								<xs:sequence>
@@ -651,7 +657,7 @@
 
 					<xs:attribute ref="msg" use="optional" />
 					<xs:attribute ref="applyNotOp" use="optional" default="false" />
-					
+
 					<xs:attribute name="class" type="xs:string" use="required">
 						<xs:annotation>
 							<xs:documentation>
@@ -659,7 +665,7 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
-					
+
 				</xs:complexType>
 			</xs:element>
 
@@ -673,8 +679,7 @@
 
 				<xs:complexType>
 					<xs:sequence>
-						<xs:group ref="allActionsGroup" minOccurs="0"
-							maxOccurs="unbounded" />
+						<xs:group ref="allActionsGroup" minOccurs="0" maxOccurs="unbounded" />
 						<xs:element name="else" minOccurs="0" maxOccurs="1">
 							<xs:complexType>
 								<xs:sequence>
@@ -683,10 +688,10 @@
 								</xs:sequence>
 							</xs:complexType>
 						</xs:element>
-					</xs:sequence>					
-										
-					<xs:attribute ref="applyNotOp" use="optional" default="false" />					
-					
+					</xs:sequence>
+
+					<xs:attribute ref="applyNotOp" use="optional" default="false" />
+
 					<xs:attribute name="key" type="xs:string" use="required">
 						<xs:annotation>
 							<xs:documentation>
@@ -694,21 +699,380 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
-					
+
 				</xs:complexType>
 			</xs:element>
-			
+
+			<xs:element name="ifValidationErrors" minOccurs="0"
+				maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>
+    			<![CDATA[Conditional action processed if validation errors are found in the action execution context  
+    			]]>
+					</xs:documentation>
+				</xs:annotation>
+
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="allActionsGroup" minOccurs="0" maxOccurs="unbounded" />
+						<xs:element name="else" minOccurs="0" maxOccurs="1">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="allActionsGroup" minOccurs="0"
+										maxOccurs="unbounded" />
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+
+					<xs:attribute ref="applyNotOp" use="optional" default="false" />
+
+				</xs:complexType>
+			</xs:element>
+
 		</xs:sequence>
 	</xs:group>
-	
+
+	<!-- Common composite actions (non conditional) -->
+	<xs:group name="commonCompositeActionsGroup">
+		<xs:sequence>
+
+			<xs:element name="group" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>
+    			<![CDATA[Some facility to group actions
+    			]]>
+					</xs:documentation>
+				</xs:annotation>
+
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="allActionsGroup" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+
+					<xs:attribute name="desc" type="xs:string" use="optional">
+						<xs:annotation>
+							<xs:documentation>
+		    			<![CDATA[a group description]]>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="loop" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>
+		    			<![CDATA[Loop action<BR>
+		    			<BR>
+		    			Two looping modes are available :<BR>		
+						* either specify a composite field in a message : loop will iterate on each subfield number of this composite field,<BR>
+						* either specify a loop interval through "begin" and "end" attributes : loop will iterate on each value of this interval<BR>
+						<BR>
+						Loop iterator identifier is specified through the "token" attribute. For instance : <I>token="i"</I> <BR>
+						This identifier may be refrenced in loop child actions in the following action attributes : "id", "sourceId", "value" and "valueBeanPath".
+						At runtime, any id reference will be patched with the current iteration value.<BR>
+						<BR> 
+						Besides, some arithmetic operations on a iterator id using the "EXPR(...)" expression in the previously eumerated attributes.<BR>
+						For instance, a "value" attribute set to "EXPR(${i}-1)" will set the value to the current iteration minus 1.						
+						
+		    			]]>
+					</xs:documentation>
+				</xs:annotation>
+
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="allActionsGroup" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+
+					<xs:attribute name="token" type="xs:string" use="required">
+						<xs:annotation>
+							<xs:documentation>
+		    			<![CDATA[iterator identifier that may be further referenced from child actions attributes<BR>
+		    			]]>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+
+					<xs:attribute ref="id" use="optional" />
+					<xs:attribute ref="msg" use="optional" />
+
+					<xs:attribute name="begin" type="xs:integer" use="optional">
+						<xs:annotation>
+							<xs:documentation>
+		    			<![CDATA[loop interval begin value<BR>
+		    			]]>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+
+					<xs:attribute name="end" type="xs:integer" use="optional">
+						<xs:annotation>
+							<xs:documentation>
+		    			<![CDATA[loop interval end value<BR>
+		    			]]>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="validate" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>
+    			<![CDATA[Validation context initialization action<BR>
+    			A validation context is required before any &lt;fieldFormat&gt; or &lt;checkField&gt; declaration.<BR>
+    			]]>
+					</xs:documentation>
+				</xs:annotation>
+
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="allActionsGroup" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+		</xs:sequence>
+	</xs:group>
+
+	<!-- Validation context dependant actions -->
+	<xs:group name="validationContextDependantActionsGroup">
+		<xs:sequence>
+
+			<xs:element name="checkField" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>
+		    			<![CDATA[Check a message field<BR>
+		    			Available checks are : <BR>
+		    			* field presence  : field can be {mandatory, optional, unexpected (prohibited)},<BR>
+		    			* field format/value : provided you have previously declare a format for this field,<BR>
+		    			* field value against another message's field value : by specifying with message field to compare to, thanks to "compareToId" and "compareToMsg" attributes<BR>
+		    			]]>
+					</xs:documentation>
+				</xs:annotation>
+
+				<xs:complexType>
+					<xs:attribute ref="id" use="required" />
+					<xs:attribute ref="msg" use="optional" />
+
+					<xs:attribute name="presence" use="optional" default="mandatory">
+						<xs:simpleType>
+							<xs:annotation>
+								<xs:documentation>
+				    		<![CDATA[Field presence criteria
+				    		]]>
+								</xs:documentation>
+							</xs:annotation>
+							<xs:restriction base="xs:string">
+								<xs:enumeration value="mandatory" />
+								<xs:enumeration value="optional" />
+								<xs:enumeration value="unexpected" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+
+					<xs:attribute name="fieldFormatRef" type="xs:string"
+						use="optional">
+						<xs:annotation>
+							<xs:documentation>
+				    		<![CDATA[A reference name to a previously declared field format. If no field format is found with this name, action throw an exception.<BR>
+				    		If this attribute is not set, action's default behaviour is to try to look for a field format identified with current action "id" attribute's value. If such field format can't be found, no exception is thrown. 
+				    		]]>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+
+					<xs:attribute name="compareToMsg" type="xs:integer"
+						use="optional">
+						<xs:annotation>
+							<xs:documentation>
+				    		<![CDATA[Msg index from which to extract the comparison field]]>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+
+					<xs:attribute name="compareToId" type="xs:integer"
+						use="optional">
+						<xs:annotation>
+							<xs:documentation>
+				    		<![CDATA[Field id/path to compare to]]>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="fieldFormat" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>
+		    			<![CDATA[Declare a field format for further field check
+		    			]]>
+					</xs:documentation>
+				</xs:annotation>
+
+				<xs:complexType>
+					<xs:attribute name="id" type="xs:string" use="required">
+						<xs:annotation>
+							<xs:documentation>
+			    		<![CDATA[field id or format name that can be further referenced from a &lt;checkField&gt; action (using "fieldFormatRef" attribute)
+			    		]]>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+
+					<xs:attribute name="type" use="required">
+						<xs:simpleType>
+							<xs:annotation>
+								<xs:documentation>
+						    		<![CDATA[format type among :<BR>
+						    		* "DATE"	: field value shoud match a date format specified in attribute "pattern",<BR>
+						    		* "REGEXP"	: field value shoud match a regular expression specified in attribute "pattern",<BR>
+						    		* "BINARY"  : field value will be considered binary; no specific check in this case,<BR>
+						    		* a combination of {"ALPHA","NUM","SPECIAL","SPACES"} delimited by character '+'<BR>
+						    		<BR>			    		
+						    		]]>
+								</xs:documentation>
+							</xs:annotation>
+
+							<xs:restriction base="xs:string">
+								<xs:enumeration value="DATE" />
+								<xs:enumeration value="REGEXP" />
+								<xs:enumeration value="BINARY" />
+								<xs:enumeration value="ALPHA" />
+								<xs:enumeration value="ALPHA+NUM" />
+								<xs:enumeration value="ALPHA+NUM+SPECIAL" />
+								<xs:enumeration value="ALPHA+NUM+SPECIAL+SPACES" />
+								<xs:enumeration value="ALPHA+NUM+SPACES" />
+								<xs:enumeration value="ALPHA+NUM+SPACES+SPECIAL" />
+								<xs:enumeration value="ALPHA+SPECIAL" />
+								<xs:enumeration value="ALPHA+SPECIAL+NUM" />
+								<xs:enumeration value="ALPHA+SPECIAL+NUM+SPACES" />
+								<xs:enumeration value="ALPHA+SPECIAL+SPACES+NUM" />
+								<xs:enumeration value="ALPHA+SPACES" />
+								<xs:enumeration value="ALPHA+SPACES+NUM" />
+								<xs:enumeration value="ALPHA+SPACES+NUM+SPECIAL" />
+								<xs:enumeration value="ALPHA+SPACES+SPECIAL" />
+								<xs:enumeration value="ALPHA+SPACES+SPECIAL+NUM" />
+								<xs:enumeration value="NUM" />
+								<xs:enumeration value="NUM+ALPHA" />
+								<xs:enumeration value="NUM+ALPHA+SPECIAL" />
+								<xs:enumeration value="NUM+ALPHA+SPECIAL+SPACES" />
+								<xs:enumeration value="NUM+ALPHA+SPACES" />
+								<xs:enumeration value="NUM+ALPHA+SPACES+SPECIAL" />
+								<xs:enumeration value="NUM+SPECIAL" />
+								<xs:enumeration value="NUM+SPECIAL+ALPHA" />
+								<xs:enumeration value="NUM+SPECIAL+ALPHA+SPACES" />
+								<xs:enumeration value="NUM+SPECIAL+SPACES" />
+								<xs:enumeration value="NUM+SPECIAL+SPACES+ALPHA" />
+								<xs:enumeration value="NUM+SPACES" />
+								<xs:enumeration value="NUM+SPACES+ALPHA" />
+								<xs:enumeration value="NUM+SPACES+ALPHA+SPECIAL" />
+								<xs:enumeration value="NUM+SPACES+SPECIAL" />
+								<xs:enumeration value="NUM+SPACES+SPECIAL+ALPHA" />
+								<xs:enumeration value="SPECIAL" />
+								<xs:enumeration value="SPECIAL+NUM" />
+								<xs:enumeration value="SPECIAL+NUM+ALPHA" />
+								<xs:enumeration value="SPECIAL+NUM+ALPHA+SPACES" />
+								<xs:enumeration value="SPECIAL+NUM+SPACES" />
+								<xs:enumeration value="SPECIAL+NUM+SPACES+ALPHA" />
+								<xs:enumeration value="SPECIAL+ALPHA" />
+								<xs:enumeration value="SPECIAL+ALPHA+NUM" />
+								<xs:enumeration value="SPECIAL+ALPHA+NUM+SPACES" />
+								<xs:enumeration value="SPECIAL+ALPHA+SPACES" />
+								<xs:enumeration value="SPECIAL+ALPHA+SPACES+NUM" />
+								<xs:enumeration value="SPECIAL+SPACES" />
+								<xs:enumeration value="SPECIAL+SPACES+NUM" />
+								<xs:enumeration value="SPECIAL+SPACES+NUM+ALPHA" />
+								<xs:enumeration value="SPECIAL+SPACES+ALPHA" />
+								<xs:enumeration value="SPECIAL+SPACES+ALPHA+NUM" />
+								<xs:enumeration value="SPACES" />
+								<xs:enumeration value="SPACES+NUM" />
+								<xs:enumeration value="SPACES+NUM+SPECIAL" />
+								<xs:enumeration value="SPACES+NUM+SPECIAL+ALPHA" />
+								<xs:enumeration value="SPACES+NUM+ALPHA" />
+								<xs:enumeration value="SPACES+NUM+ALPHA+SPECIAL" />
+								<xs:enumeration value="SPACES+SPECIAL" />
+								<xs:enumeration value="SPACES+SPECIAL+NUM" />
+								<xs:enumeration value="SPACES+SPECIAL+NUM+ALPHA" />
+								<xs:enumeration value="SPACES+SPECIAL+ALPHA" />
+								<xs:enumeration value="SPACES+SPECIAL+ALPHA+NUM" />
+								<xs:enumeration value="SPACES+ALPHA" />
+								<xs:enumeration value="SPACES+ALPHA+NUM" />
+								<xs:enumeration value="SPACES+ALPHA+NUM+SPECIAL" />
+								<xs:enumeration value="SPACES+ALPHA+SPECIAL" />
+								<xs:enumeration value="SPACES+ALPHA+SPECIAL+NUM" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+
+					<xs:attribute name="lgMin" type="xs:integer" use="optional"
+						default="0">
+						<xs:annotation>
+							<xs:documentation>
+					    		<![CDATA[Specify min length of field value<BR>
+					    		Insignificant when type is  "DATE" or "REGEXP"<BR>
+					    		When type is "BINARY", length check is made on the hexa representation of field's value as a byte array. So, you should specify a byte length x 2.<BR>
+					    		]]>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+
+					<xs:attribute name="lg" type="xs:integer" use="optional">
+						<xs:annotation>
+							<xs:documentation>
+					    		<![CDATA[Specify max length of field value<BR>
+					    		When attribute "lgVariable" is set to "false", specify expected fixed length of field's value.<BR>
+					    		Insignificant when type is  "DATE" or "REGEXP"<BR>
+					    		When type is "BINARY", length check is made on the hexa representation of field's value as a byte array. So, you should specify a byte length x 2.<BR>
+					    		]]>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+
+					<xs:attribute name="lgVariable" type="xs:boolean" use="optional"
+						default="true">
+						<xs:annotation>
+							<xs:documentation>
+					    		<![CDATA[Indicates if field value's length is variable ("true") or fixed("false")<BR>
+					    		]]>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+
+					<xs:attribute name="pattern" type="xs:string" use="optional">
+						<xs:annotation>
+							<xs:documentation>
+					    		<![CDATA[Required when type is "DATE" or "REGEXP"<BR>
+					    		* when type is "DATE" : specify a date format (see java.text.SimpleDateFormat),<BR>
+					    		* when type is "REGEXP" : specify a regular expression (see java.util.regex.Pattern)<BR>
+					    		]]>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+
+				</xs:complexType>
+			</xs:element>
+
+		</xs:sequence>
+	</xs:group>
+
 	<xs:group name="allActionsGroup">
 		<xs:sequence>
-			<xs:group ref="simpleActionsGroup" minOccurs="0" maxOccurs="unbounded"/>
-			<xs:group ref="conditionalActionsGroup" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:group ref="simpleActionsGroup" minOccurs="0" maxOccurs="unbounded" />
+			<xs:group ref="conditionalActionsGroup" minOccurs="0"
+				maxOccurs="unbounded" />
+			<xs:group ref="commonCompositeActionsGroup" minOccurs="0"
+				maxOccurs="unbounded" />
+			<xs:group ref="validationContextDependantActionsGroup"
+				minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
-	</xs:group>	
+	</xs:group>
 	<!-- ================== -->
-	<!-- END   Actions defs -->
+	<!-- END Actions defs -->
 	<!-- ================== -->
 
 	<!-- ====================== -->
@@ -716,7 +1080,7 @@
 	<!-- ====================== -->
 	<xs:element name="iso-action">
 		<xs:complexType>
-			<xs:sequence>				
+			<xs:sequence>
 				<xs:group ref="allActionsGroup" minOccurs="0" maxOccurs="unbounded" />
 			</xs:sequence>
 
@@ -725,7 +1089,7 @@
 		</xs:complexType>
 	</xs:element>
 	<!-- ====================== -->
-	<!-- END   root element def -->
+	<!-- END root element def -->
 	<!-- ====================== -->
 
 </xs:schema> 
